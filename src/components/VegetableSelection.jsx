@@ -30,7 +30,7 @@ const VegetableSelection = () => {
   useEffect(() => {
     const fetchOfferDetails = async () => {
       try {
-        const response = await axios.get(`/api/offers/${selectedOffer._id}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_SERVER_URL}/api/offers/${selectedOffer._id}`);
         const data = response.data.data.vegetables || [];
 
         const mapped = data.map((v) => ({
