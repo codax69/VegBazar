@@ -293,21 +293,24 @@ const OrderConfirmation = () => {
   return (
     <div className="w-full max-w-md md:max-w-2xl lg:max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-lg">
   {/* Back Button & Heading */}
-  <div className="relative mb-6">
-  {/* Back Button - Left aligned */}
-  <button
-    onClick={() => navigate("/select-vegetables")}
-    className="absolute khula left-0 top-1/2 -translate-y-1/2 flex items-center text-[#0e540b] hover:text-green-700 text-sm sm:text-base font-medium"
-  >
-    <ArrowLeft size={18} className="mr-2" />
-    Back
-  </button>
+  <div className="mb-6 flex flex-col sm:flex-row items-center sm:justify-center relative">
+    
+    {/* Back Button */}
+    <button
+      onClick={() => navigate("/select-vegetables")}
+      className="khula text-[#0e540b] hover:text-green-700 text-sm sm:text-base font-medium mb-4 sm:mb-0 sm:absolute sm:left-0 sm:top-1/2 sm:-translate-y-1/2 flex items-center"
+    >
+      <ArrowLeft size={18} className="mr-2" />
+      Back
+    </button>
 
-  {/* Centered Heading */}
-  <h2 className="trirong text-center text-xl sm:text-2xl md:text-3xl font-bold text-[#0e540b]">
-    Confirm Your Order
-  </h2>
+    {/* Heading */}
+    <h2 className="trirong text-center text-xl sm:text-2xl md:text-3xl font-bold text-[#0e540b]">
+      Confirm Your Order
+    </h2>
+  </div>
 </div>
+
 
   {/* Order Info Box */}
   <div className="bg-green-50 p-5 sm:p-6 rounded-xl border border-green-200 mb-8">
