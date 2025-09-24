@@ -80,7 +80,7 @@ const OtpVerification = ({ onSuccess }) => {
     setError("");
     
     try {
-      const response = await axios.post("/api/otp/verify", {
+      const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/otp/verify`, {
         email: formData.email,
         otp: otpString,
       });
@@ -108,7 +108,7 @@ const OtpVerification = ({ onSuccess }) => {
     setError("");
     
     try {
-      const response = await axios.post("/api/otp/resend", {
+      const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/otp/resend`, {
         email: formData.email,
       });
       
