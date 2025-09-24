@@ -163,33 +163,33 @@ const OrderConfirmation = () => {
     orderId: generateOrderId(),
   };
 
-  const handleSubmitOrder = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const result = await apiCall(orderData);
-      const response = await axios.post("/api/orders/add", orderData);
-      const okSheets =
-        !!result && (result.success === true || result.status === "ok");
-      const okApi = response && response.status >= 200 && response.status < 300;
-      if (okSheets && okApi) {
-        setIsOrderPlaced(true);
-      } else {
-        setSubmitError("Failed to save order. Please try again.");
-      }
-    } catch (err) {
-      console.error(
-        "Order submission error:",
-        err?.response?.data || err?.message
-      );
-      setSubmitError(
-        err?.response?.data?.message ?? "An error occurred. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
+ const handleSubmitOrder = async () => {
+  if (isSubmitting) return;
+  setIsSubmitting(true);
+  setSubmitError(null);
+  try {
+    const result = await apiCall(orderData);
+    const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/orders/add`, orderData);
+    const okSheets =
+      !!result && (result.success === true || result.status === "ok");
+    const okApi = response && response.status >= 200 && response.status < 300;
+    if (okSheets && okApi) {
+      setIsOrderPlaced(true);
+    } else {
+      setSubmitError("Failed to save order. Please try again.");
     }
-  };
+  } catch (err) {
+    console.error(
+      "Order submission error:",
+      err?.response?.data || err?.message
+    );
+    setSubmitError(
+      err?.response?.data?.message ?? "An error occurred. Please try again."
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   // Auto submit once on mount if we have required data
 
