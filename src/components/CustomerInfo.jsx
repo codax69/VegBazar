@@ -13,7 +13,6 @@ const CustomerInfo = () => {
     formState: { errors },
     watch,
     setValue,
-    reset
   } = useForm({
     defaultValues: {
       name: formData.name || "",
@@ -27,14 +26,14 @@ const CustomerInfo = () => {
 
   const watchedCity = watch("city");
 
-  const CityApiCall = async () => {
-    try {
-      const response = await axios.get("/api/cities");
-      setCities(response.data);
-    } catch (error) {
-      console.error("Error fetching cities:", error);
-    }
-  };
+const CityApiCall = async () => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_API_SERVER_URL}/api/cities`);
+    setCities(response.data);
+  } catch (error) {
+    console.error("Error fetching cities:", error);
+  }
+};
 
   useEffect(() => {
     CityApiCall();
