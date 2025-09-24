@@ -23,7 +23,7 @@ const VegetableSellingApp = () => {
   // Fetch offers
   const fetchOffers = async () => {
     try {
-      const response = await fetch("/api/offers");
+      const response = await fetch(`${import.meta.env.VITE_API_SERVER_URL}/api/offers`);
       const data = await response.json();
       setOffers(data.data);
     } catch (error) {
@@ -34,7 +34,7 @@ const VegetableSellingApp = () => {
   // Fetch vegetables
   const fetchVegetables = async () => {
     try {
-      const response = await fetch("/api/vegetables");
+      const response = await fetch(`${import.meta.env.VITE_API_SERVER_URL}/api/vegetables`);
       const data = await response.json();
       setAllVegetables(
         data.data.map((v) => ({
