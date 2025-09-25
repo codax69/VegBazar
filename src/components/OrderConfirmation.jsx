@@ -154,6 +154,7 @@ const OrderConfirmation = () => {
   const handleNewOrder = () => {
     resetOrder();
   };
+  
   const orderData = {
     customerInfo: formData,
     selectedOffer,
@@ -163,35 +164,33 @@ const OrderConfirmation = () => {
     orderId: generateOrderId(),
   };
 
- const handleSubmitOrder = async () => {
-  if (isSubmitting) return;
-  setIsSubmitting(true);
-  setSubmitError(null);
-  try {
-    const result = await apiCall(orderData);
-    const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/orders/add`, orderData);
-    const okSheets =
-      !!result && (result.success === true || result.status === "ok");
-    const okApi = response && response.status >= 200 && response.status < 300;
-    if (okSheets && okApi) {
-      setIsOrderPlaced(true);
-    } else {
-      setSubmitError("Failed to save order. Please try again.");
+  const handleSubmitOrder = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      const result = await apiCall(orderData);
+      const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/orders/add`, orderData);
+      const okSheets =
+        !!result && (result.success === true || result.status === "ok");
+      const okApi = response && response.status >= 200 && response.status < 300;
+      if (okSheets && okApi) {
+        setIsOrderPlaced(true);
+      } else {
+        setSubmitError("Failed to save order. Please try again.");
+      }
+    } catch (err) {
+      console.error(
+        "Order submission error:",
+        err?.response?.data || err?.message
+      );
+      setSubmitError(
+        err?.response?.data?.message ?? "An error occurred. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (err) {
-    console.error(
-      "Order submission error:",
-      err?.response?.data || err?.message
-    );
-    setSubmitError(
-      err?.response?.data?.message ?? "An error occurred. Please try again."
-    );
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-  // Auto submit once on mount if we have required data
+  };
 
   if (isSubmitting) {
     return (
@@ -292,82 +291,82 @@ const OrderConfirmation = () => {
   // Fallback UI: show summary + confirm button
   return (
     <div className="w-full max-w-md md:max-w-2xl lg:max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-lg">
-  {/* Back Button & Heading */}
-  <div className="mb-6 flex flex-col sm:flex-row items-center sm:justify-center relative">
-    
-    {/* Back Button */}
-    <button
-      onClick={() => navigate("/select-vegetables")}
-      className="khula text-[#0e540b] hover:text-green-700 text-sm sm:text-base font-medium mb-4 sm:mb-0 sm:absolute sm:left-0 sm:top-1/2 sm:-translate-y-1/2 flex items-center"
-    >
-      <ArrowLeft size={18} className="mr-2" />
-      Back
-    </button>
+      {/* Back Button & Heading */}
+      <div className="mb-6 flex flex-col sm:flex-row items-center sm:justify-center relative">
+        
+        {/* Back Button */}
+        <button
+          onClick={() => navigate("/select-vegetables")}
+          className="khula text-[#0e540b] hover:text-green-700 text-sm sm:text-base font-medium mb-4 sm:mb-0 sm:absolute sm:left-0 sm:top-1/2 sm:-translate-y-1/2 flex items-center"
+        >
+          <ArrowLeft size={18} className="mr-2" />
+          Back
+        </button>
 
-    {/* Heading */}
-    <h2 className="trirong text-center text-xl sm:text-2xl md:text-3xl font-bold text-[#0e540b]">
-      Confirm Your Order
-    </h2>
-  </div>
-</div>
+        {/* Heading */}
+        <h2 className="trirong text-center text-xl sm:text-2xl md:text-3xl font-bold text-[#0e540b]">
+          Confirm Your Order
+        </h2>
+      </div>
 
-
-  <div className="bg-green-50 p-5 sm:p-6 rounded-xl border border-green-200 mb-8">
-    <div className="space-y-2 text-sm sm:text-base text-gray-800">
-      <p>
-        <strong className="text-gray-900">Order ID:</strong>{" "}
-        <span className="text-gray-700">{orderData.orderId}</span>
-      </p>
-      <p>
-        <strong className="text-gray-900">Name:</strong>{" "}
-        <span className="text-gray-700">{formData.name}</span>
-      </p>
-      <p>
-        <strong className="text-gray-900">Mobile:</strong>{" "}
-        <span className="text-gray-700">{formData.mobile}</span>
-      </p>
-      <p>
-        <strong className="text-gray-900">Email:</strong>{" "}
-        <span className="text-gray-700">{formData.email}</span>
-      </p>
-      <p>
-        <strong className="text-gray-900">Package:</strong>{" "}
-        <span className="text-gray-700">{selectedOffer?.title}</span>
-      </p>
-      <p>
-        <strong className="text-gray-900">Amount:</strong>{" "}
-        <span className="text-[#0e540b] font-semibold">
-          ₹{selectedOffer?.price}
-        </span>
-      </p>
-
-      {/* Vegetables */}
-      <div className="pt-3">
-        <strong className="text-gray-900">Vegetables:</strong>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {selectedVegetables.map((v, i) => (
-            <span
-              key={i}
-              className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium shadow-sm"
-            >
-              {v}
+      {/* Order Info Box */}
+      <div className="bg-green-50 p-5 sm:p-6 rounded-xl border border-green-200 mb-8">
+        <div className="space-y-2 text-sm sm:text-base text-gray-800">
+          <p>
+            <strong className="text-gray-900">Order ID:</strong>{" "}
+            <span className="text-gray-700">{orderData.orderId}</span>
+          </p>
+          <p>
+            <strong className="text-gray-900">Name:</strong>{" "}
+            <span className="text-gray-700">{formData.name}</span>
+          </p>
+          <p>
+            <strong className="text-gray-900">Mobile:</strong>{" "}
+            <span className="text-gray-700">{formData.mobile}</span>
+          </p>
+          <p>
+            <strong className="text-gray-900">Email:</strong>{" "}
+            <span className="text-gray-700">{formData.email}</span>
+          </p>
+          <p>
+            <strong className="text-gray-900">Package:</strong>{" "}
+            <span className="text-gray-700">{selectedOffer?.title}</span>
+          </p>
+          <p>
+            <strong className="text-gray-900">Amount:</strong>{" "}
+            <span className="text-[#0e540b] font-semibold">
+              ₹{selectedOffer?.price}
             </span>
-          ))}
+          </p>
+
+          {/* Vegetables */}
+          <div className="pt-3">
+            <strong className="text-gray-900">Vegetables:</strong>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {selectedVegetables.map((v, i) => (
+                <span
+                  key={i}
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium shadow-sm"
+                >
+                  {v}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Confirm Button */}
+      <div className="text-center">
+        <button
+          onClick={handleSubmitOrder}
+          className="w-full sm:w-auto bg-[#0e540b] text-white font-semibold py-3 px-8 rounded-lg hover:bg-green-700 transition duration-200 shadow-md"
+        >
+          Confirm & Place Order
+        </button>
+      </div>
     </div>
-  </div>
-
-  {/* Confirm Button */}
-  <div className="text-center">
-    <button
-      onClick={handleSubmitOrder}
-      className="w-full sm:w-auto bg-[#0e540b] text-white font-semibold py-3 px-8 rounded-lg hover:bg-green-700 transition duration-200 shadow-md"
-    >
-      Confirm & Place Order
-    </button>
-  </div>
-
   );
 };
+
 export default OrderConfirmation;
