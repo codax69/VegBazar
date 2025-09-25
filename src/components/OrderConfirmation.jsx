@@ -312,7 +312,6 @@ const OrderConfirmation = () => {
 </div>
 
 
-  {/* Order Info Box */}
   <div className="bg-green-50 p-5 sm:p-6 rounded-xl border border-green-200 mb-8">
     <div className="space-y-2 text-sm sm:text-base text-gray-800">
       <p>
