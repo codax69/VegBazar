@@ -368,7 +368,6 @@ const OrderConfirmation = () => {
       Confirm & Place Order
     </button>
   </div>
-</div>
 
   );
 };
