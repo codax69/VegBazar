@@ -291,7 +291,7 @@ const OrderConfirmation = () => {
                     <CreditCard className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Total Amount</p>
-                      <p className="font-bold text-[#0e540b] text-lg sm:text-xl">₹{selectedOffer?.price}</p>
+                      <p className="font-bold text-[#0e540b] text-lg sm:text-xl">₹{selectedOffer?.price + 20}</p>
                     </div>
                   </div>
                 </div>
