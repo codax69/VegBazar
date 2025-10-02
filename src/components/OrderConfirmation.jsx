@@ -1,147 +1,31 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { CheckCircle,ArrowLeft } from "lucide-react";
+import { CheckCircle, ArrowLeft, Package, User, Phone, Mail, MapPin, CreditCard, ShoppingBag, AlertCircle, Loader2 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
-// import OtpVerification from "../components/OtpVerification";
 import { apiCall } from "../utils/apiCall";
 
-// const OrderConfirmation = () => {
-//   const { formData, selectedOffer, selectedVegetables, resetOrder } =
-//     useOrderContext();
-//   // const [showOtp, setShowOtp] = useState(false);
-//   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
-//   const [loading, setLoading] = useState(false);
-
-//   // Generate unique order ID
-//   const generateOrderId = () => {
-//     return (
-//       "ORD" +
-//       new Date().toISOString().replace(/[-:.TZ]/g, "") +
-//       Math.floor(Math.random() * 100000)
-//     );
-//   };
-
-//   // Step 1: Send OTP using MSG91 backend API
-//   // const handleSendOtp = async () => {
-//   //   if (!formData.mobile) {
-//   //     alert("Mobile number is missing!");
-//   //     return;
-//   //   }
-//   //   try {
-//   //     setLoading(true);
-//   //     await axios.post("/api/otp/send", { email: formData.email });
-//   //     setShowOtp(true);
-//   //   } catch (err) {
-//   //     console.error("Failed to send OTP:", err);
-//   //     alert("Failed to send OTP. Please try again.");
-//   //   } finally {
-//   //     setLoading(false);
-//   //   }
-//   // };
-
-//   // Step 2: Place order after OTP verification
-//   const handlePlaceOrder = async () => {
-//     const orderData = {
-//       orderId: generateOrderId(),
-//       ...formData,
-//       offerId: selectedOffer?._id || null,
-//       selectedVegetables,
-//       status: "pending",
-//       createdAt: new Date(),
-//     };
-
-//     try {
-//       const res = await apiCall("orders", "POST", orderData);
-//       if (res.success) {
-//         setIsOrderPlaced(true);
-//       } else {
-//         alert("Something went wrong while placing order.");
-//       }
-//     } catch (err) {
-//       console.error("Order failed:", err);
-//       alert("Failed to place order. Please try again.");
-//     }
-//   };
-  
-
-//   // OTP verification screen
-//   // if (showOtp) {
-//   //   return <OtpVerification onSuccess={handlePlaceOrder} />;
-//   // }
-
-//   return (
-//     <div className="w-full max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg text-center">
-//       {!isOrderPlaced ? (
-//         <>
-//           <h2 className="text-xl font-bold mb-4 text-green-700">
-//             Confirm Your Order
-//           </h2>
-
-//           {/* Show summary */}
-//           <p className="mb-2">
-//             <strong>Name:</strong> {formData.name}
-//           </p>
-//           <p className="mb-2">
-//             <strong>Address:</strong> {formData.address}
-//           </p>
-//           <p className="mb-2">
-//             <strong>Email:</strong> {formData.email}
-//           </p>
-//           <p className="mb-4">
-//             <strong>Offer:</strong> {selectedOffer?.title}
-//           </p>
-
-//           <button
-//             // onClick={handleSendOtp}
-//             onClick={handlePlaceOrder}
-//             disabled={loading}
-//             className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-//           >
-//             {loading ? "Sending OTP..." : "Place Order (Verify OTP)"}
-//           </button>
-//         </>
-//       ) : (
-//         <div className="text-center">
-//           <CheckCircle size={48} className="text-green-600 mx-auto mb-4" />
-//           <h3 className="text-lg font-semibold">
-//             Order Placed Successfully!
-//           </h3>
-//           <button
-//             onClick={resetOrder}
-//             className="mt-4 bg-green-600 text-white py-2 px-4 rounded-lg"
-//           >
-//             New Order
-//           </button>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default OrderConfirmation;
-
-
 const OrderConfirmation = () => {
-  const { formData, selectedOffer, selectedVegetables, resetOrder, navigate } =
+  const { formData, selectedOffer, selectedVegetables, resetOrder, navigate, setIsOrderPlaced, isOrderPlaced, paymentMethod } =
     useOrderContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
 
-  // Guard
   useEffect(() => {
     if (!selectedOffer || !selectedVegetables.length) {
       navigate("/");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedOffer, selectedVegetables]);
+  }, [selectedOffer, selectedVegetables, navigate]);
   
+  const handleNewOrder = () => {
+    resetOrder();
+  };
+
   function generateOrderId() {
     const now = new Date();
     const datePart = now
       .toISOString()
-      .replace(/[-:.TZ]/g, "") // 20250901T104321Z → 20250901104321
-      .slice(0, 14); // YYYYMMDDHHMMSS
+      .replace(/[-:.TZ]/g, "")
+      .slice(0, 14);
 
     const millis = now.getMilliseconds().toString().padStart(3, "0");
     const random = Math.floor(Math.random() * 1000)
@@ -151,10 +35,6 @@ const OrderConfirmation = () => {
     return `ORD${datePart}${millis}${random}`;
   }
   
-  const handleNewOrder = () => {
-    resetOrder();
-  };
-  
   const orderData = {
     customerInfo: formData,
     selectedOffer,
@@ -162,6 +42,7 @@ const OrderConfirmation = () => {
     orderDate: new Date().toISOString(),
     totalAmount: selectedOffer?.price ?? 0,
     orderId: generateOrderId(),
+    paymentMethod,
   };
 
   const handleSubmitOrder = async () => {
@@ -170,7 +51,7 @@ const OrderConfirmation = () => {
     setSubmitError(null);
     try {
       const result = await apiCall(orderData);
-      const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/orders/add`, orderData);
+      const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`, orderData);
       const okSheets =
         !!result && (result.success === true || result.status === "ok");
       const okApi = response && response.status >= 200 && response.status < 300;
@@ -192,178 +73,281 @@ const OrderConfirmation = () => {
     }
   };
 
+  // Loading State
   if (isSubmitting) {
     return (
-      <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-        <div className="animate-spin h-12 w-12 mx-auto mb-4 border-4 border-[#0e540b] border-t-transparent rounded-full"></div>
-        <p className="khula text-gray-600">Processing your order...</p>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg text-center">
+          <div className="flex justify-center mb-6">
+            <Loader2 className="h-16 w-16 text-[#0e540b] animate-spin" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">Processing Your Order</h3>
+          <p className="text-gray-600">Please wait while we confirm your order...</p>
+        </div>
       </div>
     );
   }
 
+  // Error State
   if (submitError) {
     return (
-      <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-        <div className="text-red-500 mb-4">❌</div>
-        <h2 className="text-xl font-bold text-red-600 mb-4 khula ">
-          Order Submission Failed
-        </h2>
-        <p className="text-gray-600 mb-4">{submitError}</p>
-        <button
-          onClick={handleSubmitOrder}
-          className="bg-[#0e540b] text-white py-3 px-6 rounded-md hover:bg-[#0e540b] transition duration-200 khula"
-        >
-          Try Again
-        </button>
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg text-center">
+          <div className="flex justify-center mb-6">
+            <AlertCircle className="h-16 w-16 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Order Submission Failed
+          </h2>
+          <p className="text-gray-600 mb-6">{submitError}</p>
+          <button
+            onClick={handleSubmitOrder}
+            className="w-full bg-[#0e540b] text-white py-3 px-6 rounded-lg hover:bg-green-700 transition duration-200 font-medium"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
 
+  // Success State
   if (isOrderPlaced) {
     return (
-      <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-        <div className="text-[#0e540b] mb-4">
-          <CheckCircle size={64} className="mx-auto animate-pulse" />
-        </div>
-        <h2 className="text-2xl font-bold text-[#0e540b] mb-4 amiko">
-          🎉 Order Placed Successfully!
-        </h2>
-
-        <div className="text-left bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg mb-6 border border-green-200">
-          <h3 className="font-bold mb-3 text-green-700 trirong">📋 Order Summary:</h3>
-          <div className="space-y-2 text-sm">
-            <p>
-              <strong className="khula">Order ID:</strong> {orderData.orderId}
-            </p>
-            <p>
-              <strong className="khula">Name:</strong> {formData.name}
-            </p>
-            <p>
-              <strong className="khula">Mobile:</strong> {formData.mobile}
-            </p>
-            <p>
-              <strong className="khula">Email:</strong> {formData.email}
-            </p>
-            <p>
-              <strong className="khula">Package:</strong> {selectedOffer.title}
-            </p>
-            <p>
-              <strong className="khula">Amount:</strong>{" "}
-              <span className="amiko text-[#0e540b] font-bold">
-                ₹{selectedOffer.price}
-              </span>
-            </p>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="h-16 w-16 sm:h-20 sm:w-20 text-[#0e540b] animate-pulse" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#0e540b] mb-2">
+              Order Placed Successfully!
+            </h2>
+            <p className="text-gray-600">Thank you for your order</p>
           </div>
 
-          <div className="mt-4">
-            <strong className="text-green-700 khula">🥬 Vegetables Selected:</strong>
-            <div className="flex flex-wrap gap-1 mt-2">
-              {selectedVegetables.map((veg, index) => (
-                <span
-                  key={index}
-                  className="amiko bg-green-100 text-green-800 px-2 py-1 rounded text-xs"
-                >
-                  {veg}
-                </span>
-              ))}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl mb-6 border border-green-200">
+            <h3 className="font-bold text-lg mb-4 text-[#0e540b] flex items-center gap-2">
+              <Package className="w-5 h-5" />
+              Order Summary
+            </h3>
+            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+              <div className="flex items-start gap-2">
+                <Package className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-gray-500">Order ID</p>
+                  <p className="font-semibold text-gray-800">{orderData.orderId}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <User className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-gray-500">Customer Name</p>
+                  <p className="font-semibold text-gray-800">{formData.name}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Phone className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-gray-500">Mobile</p>
+                  <p className="font-semibold text-gray-800">{formData.mobile}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Mail className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-gray-500">Email</p>
+                  <p className="font-semibold text-gray-800 truncate">{formData.email}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <ShoppingBag className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-gray-500">Package</p>
+                  <p className="font-semibold text-gray-800">{selectedOffer.title}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <CreditCard className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-gray-500">Total Amount</p>
+                  <p className="font-bold text-[#0e540b] text-lg">₹{selectedOffer.price}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-green-200">
+              <p className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-[#0e540b]" />
+                Selected Vegetables ({selectedVegetables.length})
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {selectedVegetables.map((veg, index) => (
+                  <span
+                    key={index}
+                    className="bg-green-100 text-green-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium border border-green-200"
+                  >
+                    {veg}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-yellow-50 p-4 rounded-lg mb-6 border border-yellow-200">
-          <p className="text-gray-700 text-sm khula">
-            📞 Your order has been received and will be processed shortly. You
-            will receive a confirmation call on{" "}
-            <strong>{formData.mobile}</strong> within 30 minutes.
-          </p>
-        </div>
+          <div className="bg-yellow-50 p-4 rounded-xl mb-6 border border-yellow-200">
+            <div className="flex gap-3">
+              <Phone className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-800 mb-1">Next Steps</p>
+                <p className="text-gray-700 text-sm">
+                  Your order has been received and will be processed shortly. You will receive a confirmation call on <strong>{formData.mobile}</strong> within 30 minutes.
+                </p>
+              </div>
+            </div>
+          </div>
 
-        <button
-          onClick={handleNewOrder}
-          className="amiko bg-[#0e540b] text-white py-3 px-6 rounded-md hover:bg-[#0e540b] transition duration-200 transform hover:scale-105 font-medium"
-        >
-          🛒 Place Another Order
-        </button>
+          <button
+            onClick={handleNewOrder}
+            className="w-full bg-[#0e540b] text-white py-3 px-6 rounded-xl hover:bg-green-700 transition duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+          >
+            <ShoppingBag className="w-5 h-5" />
+            Place Another Order
+          </button>
+        </div>
       </div>
     );
   }
 
-  // Fallback UI: show summary + confirm button
+  // Confirmation Screen
   return (
-    <div className="w-full max-w-md md:max-w-2xl lg:max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-lg">
-      {/* Back Button & Heading */}
-      <div className="mb-6 flex flex-col sm:flex-row items-center sm:justify-center relative">
-        
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-6 sm:py-8 px-4">
+      <div className="max-w-3xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate("/select-vegetables")}
-          className="khula text-[#0e540b] hover:text-green-700 text-sm sm:text-base font-medium mb-4 sm:mb-0 sm:absolute sm:left-0 sm:top-1/2 sm:-translate-y-1/2 flex items-center"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 mb-6 text-gray-700 hover:text-[#0e540b] transition-colors group"
         >
-          <ArrowLeft size={18} className="mr-2" />
-          Back
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <span className="font-medium">Back</span>
         </button>
 
-        {/* Heading */}
-        <h2 className="trirong text-center text-xl sm:text-2xl md:text-3xl font-bold text-[#0e540b]">
-          Confirm Your Order
-        </h2>
-      </div>
-
-      {/* Order Info Box */}
-      <div className="bg-green-50 p-5 sm:p-6 rounded-xl border border-green-200 mb-8">
-        <div className="space-y-2 text-sm sm:text-base text-gray-800">
-          <p>
-            <strong className="text-gray-900">Order ID:</strong>{" "}
-            <span className="text-gray-700">{orderData.orderId}</span>
-          </p>
-          <p>
-            <strong className="text-gray-900">Name:</strong>{" "}
-            <span className="text-gray-700">{formData.name}</span>
-          </p>
-          <p>
-            <strong className="text-gray-900">Mobile:</strong>{" "}
-            <span className="text-gray-700">{formData.mobile}</span>
-          </p>
-          <p>
-            <strong className="text-gray-900">Email:</strong>{" "}
-            <span className="text-gray-700">{formData.email}</span>
-          </p>
-          <p>
-            <strong className="text-gray-900">Package:</strong>{" "}
-            <span className="text-gray-700">{selectedOffer?.title}</span>
-          </p>
-          <p>
-            <strong className="text-gray-900">Amount:</strong>{" "}
-            <span className="text-[#0e540b] font-semibold">
-              ₹{selectedOffer?.price}
-            </span>
-          </p>
-
-          {/* Vegetables */}
-          <div className="pt-3">
-            <strong className="text-gray-900">Vegetables:</strong>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {selectedVegetables.map((v, i) => (
-                <span
-                  key={i}
-                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium shadow-sm"
-                >
-                  {v}
-                </span>
-              ))}
+        {/* Main Card */}
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-[#0e540b] to-green-700 p-6 sm:p-8">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Package className="w-8 h-8 text-white" />
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">
+                Confirm Your Order
+              </h2>
             </div>
+            <p className="text-center text-green-100 text-sm">Review your order details before confirmation</p>
+          </div>
+
+          {/* Order Details */}
+          <div className="p-6 sm:p-8">
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 mb-6">
+              <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Package className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Order ID</p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{orderData.orderId}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <User className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Full Name</p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{formData.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Phone className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Mobile Number</p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{formData.mobile}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Mail className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Email Address</p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base truncate">{formData.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <ShoppingBag className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Package Selected</p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{selectedOffer?.title}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CreditCard className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Total Amount</p>
+                      <p className="font-bold text-[#0e540b] text-lg sm:text-xl">₹{selectedOffer?.price}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Vegetables Section */}
+              <div className="mt-6 pt-6 border-t border-green-200">
+                <p className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 text-[#0e540b]" />
+                  Selected Vegetables ({selectedVegetables.length} items)
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedVegetables.map((v, i) => (
+                    <span
+                      key={i}
+                      className="bg-green-100 text-green-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium shadow-sm border border-green-200"
+                    >
+                      {v}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Address Section */}
+            {formData.address && (
+              <div className="bg-blue-50 p-4 rounded-xl mb-6 border border-blue-200">
+                <div className="flex gap-3">
+                  <MapPin className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-gray-800 mb-1">Delivery Address</p>
+                    <p className="text-gray-700 text-sm">{formData.address}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Confirm Button */}
+            <button
+              onClick={handleSubmitOrder}
+              disabled={isSubmitting}
+              className="w-full bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold py-4 px-6 rounded-xl hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+              Confirm & Place Order
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Confirm Button */}
-      <div className="text-center">
-        <button
-          onClick={handleSubmitOrder}
-          className="w-full sm:w-auto bg-[#0e540b] text-white font-semibold py-3 px-8 rounded-lg hover:bg-green-700 transition duration-200 shadow-md"
-        >
-          Confirm & Place Order
-        </button>
+        {/* Security Notice */}
+        <div className="mt-6 text-center text-xs sm:text-sm text-gray-600">
+          <p className="flex items-center justify-center gap-2">
+            <CheckCircle className="w-4 h-4 text-[#0e540b]" />
+            Your order information is secure and encrypted
+          </p>
+        </div>
       </div>
     </div>
   );

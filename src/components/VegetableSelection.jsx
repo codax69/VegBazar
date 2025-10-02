@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
+import RazorpayPayment from "./RazorpayPayment";
 
 const VegetableSelection = () => {
-  const { selectedOffer, selectedVegetables, setSelectedVegetables, navigate } = useOrderContext();
+  const { selectedOffer, selectedVegetables, setSelectedVegetables, navigate } =
+    useOrderContext();
   const [vegetables, setVegetables] = useState([]);
 
   if (!selectedOffer) {
@@ -23,14 +25,15 @@ const VegetableSelection = () => {
     );
   };
 
-  const handlePlaceOrder = () => {
-    navigate("/order-confirmation");
-  };
-
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     const fetchOfferDetails = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_SERVER_URL}/api/offers/${selectedOffer._id}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_SERVER_URL}/api/offers/${
+            selectedOffer._id
+          }`
+        );
         const data = response.data.data.vegetables || [];
 
         const mapped = data.map((v) => ({
@@ -66,11 +69,14 @@ const VegetableSelection = () => {
             Select Your Vegetables
           </h2>
           <p className="text-base sm:text-lg text-gray-700 mt-2">
-            <span className="khula font-bold text-[#0e540b]">{selectedOffer.title}</span> - ₹{selectedOffer.price}
+            <span className="khula font-bold text-[#0e540b]">
+              {selectedOffer.title}
+            </span>{" "}
+            - ₹{selectedOffer.price}
           </p>
           <p className="khula text-xs sm:text-sm text-gray-600">
-            Select {selectedOffer.vegetableLimit} vegetables ({selectedVegetables.length}/
-            {selectedOffer.vegetableLimit} selected)
+            Select {selectedOffer.vegetableLimit} vegetables (
+            {selectedVegetables.length}/{selectedOffer.vegetableLimit} selected)
           </p>
         </div>
 
@@ -121,22 +127,21 @@ const VegetableSelection = () => {
         </div>
       )}
 
-      {/* Place Order Button */}
+      {/* Payment Button */}
       <div className="text-center">
-        <button
-          onClick={handlePlaceOrder}
-          disabled={selectedVegetables.length !== selectedOffer.vegetableLimit}
-          className={`amiko w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-bold text-base sm:text-lg transition duration-200 ${
-            selectedVegetables.length === selectedOffer.vegetableLimit
-              ? "bg-[#0e540b] text-white hover:bg-[#0e540b] transform hover:scale-105"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-        >
-          Place Order - ₹{selectedOffer.price}
-        </button>
-        {selectedVegetables.length !== selectedOffer.vegetableLimit && (
+        {selectedVegetables.length === selectedOffer.vegetableLimit ? (
+          <button
+            onClick={() => navigate("/billing")}
+            className="amiko w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-bold 
+  text-base sm:text-lg transition duration-300 text-white transform hover:scale-105
+  bg-[#0e540b] hover:bg-gradient-to-r hover:from-[#0e540b] hover:to-[#063a06]"
+          >
+            Continue to Payment
+          </button>
+        ) : (
           <p className="khula text-xs sm:text-sm text-red-500 mt-2">
-            Please select exactly {selectedOffer.vegetableLimit} vegetables to proceed
+            Please select exactly {selectedOffer.vegetableLimit} vegetables to
+            proceed
           </p>
         )}
       </div>

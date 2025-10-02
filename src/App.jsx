@@ -6,6 +6,8 @@ import VegetableSelection from "./components/VegetableSelection";
 import OrderConfirmation from "./components/OrderConfirmation";
 import ProgressIndicator from "./components/ProgressIndicator";
 import Help from "./components/Help";
+import BillingPage from "./components/BillingPage";
+import BackButtonHandler from "./components/BackButtonHandler";
 
 const VegetableSellingApp = () => {
   const [currentRoute, setCurrentRoute] = useState("/");
@@ -19,7 +21,8 @@ const VegetableSellingApp = () => {
   const [offers, setOffers] = useState([]);
   const [allVegetables, setAllVegetables] = useState([]);
   const [selectedVegetables, setSelectedVegetables] = useState([]);
-
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('');
   // Fetch offers
   const fetchOffers = async () => {
     try {
@@ -73,10 +76,15 @@ const VegetableSellingApp = () => {
     allVegetables,
     navigate,
     resetOrder,
+    isOrderPlaced,
+    setIsOrderPlaced,
+    paymentMethod,
+    setPaymentMethod
   };
 
   return (
     <OrderContext.Provider value={contextValue}>
+      <BackButtonHandler/>
       <div className="min-h-screen bg-gradient-to-b from-green-50 via-blue-50 to-green-100">
         <div className="container mx-auto px-4 py-4 sm:py-8">
           <h1 className="trirong text-2xl sm:text-3xl md:text-4xl font-extrabold text-center mb-4 sm:mb-8 text-[#0e540b]">
@@ -90,8 +98,9 @@ const VegetableSellingApp = () => {
           {currentRoute === "/offers" && <VegetableOffers />}
           {currentRoute === "/select-vegetables" && <VegetableSelection />}
           {currentRoute === "/order-confirmation" && <OrderConfirmation />}
+          {currentRoute === "/billing" && <BillingPage />}
         </div>
-
+        
         <Help />
       </div>
     </OrderContext.Provider>
