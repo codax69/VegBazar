@@ -99,6 +99,8 @@ const VegetableSelection = () => {
               className="w-16 h-16 sm:w-20 sm:h-20 object-cover mx-auto rounded-2xl mb-2"
               src={vegetable.image}
               alt={vegetable.name}
+              loading="lazy"
+              decoding="async"
             />
             <p className="font-medium text-xs sm:text-sm">{vegetable.name}</p>
             {selectedVegetables.includes(vegetable.name) && (

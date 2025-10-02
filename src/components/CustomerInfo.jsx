@@ -245,7 +245,7 @@ const CustomerInfo = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[#0e540b] text-white font-semibold py-4 px-6 rounded-lg hover:bg-[#063a06] transition-all duration-300 shadow-md flex items-center justify-center gap-3 mt-6 text-base"
+              className="w-full bg-[#0e540b] text-white font-semibold py-4 px-6 rounded-lg hover:bg-[#0e540b] transition-all duration-300 shadow-md flex items-center justify-center gap-3 mt-6 text-base"
             >
               Continue to Offers
               <ArrowRight className="w-5 h-5" />

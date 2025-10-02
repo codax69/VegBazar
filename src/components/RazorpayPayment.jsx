@@ -113,7 +113,7 @@ const RazorpayPayment = () => {
           color: '#0e540b'
         }
       };
-      console.log(options.amount)
+      
       // Add error callback
       options.modal = {
         ondismiss: function() {
