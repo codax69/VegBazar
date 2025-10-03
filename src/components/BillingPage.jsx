@@ -1,7 +1,18 @@
 import React from "react";
 import { useOrderContext } from "../Context/OrderContext";
 import RazorpayPayment from "./RazorpayPayment";
-import { Package, Leaf, CreditCard, Banknote, Lock, CheckCircle, Truck, Shield, AlertCircle, ArrowLeft } from "lucide-react";
+import {
+  Package,
+  Leaf,
+  CreditCard,
+  Banknote,
+  Lock,
+  CheckCircle,
+  Truck,
+  Shield,
+  AlertCircle,
+  ArrowLeft,
+} from "lucide-react";
 
 const BillingPage = () => {
   const {
@@ -41,7 +52,9 @@ const BillingPage = () => {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0e540b] mb-2">
             Checkout
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">Review your order and complete payment</p>
+          <p className="text-sm sm:text-base text-gray-600">
+            Review your order and complete payment
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
@@ -58,12 +71,16 @@ const BillingPage = () => {
                   {selectedOffer.title}
                 </span>
               </div>
-              
+
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-gray-600 text-xs sm:text-sm">Plan Value</p>
-                    <p className="text-xl sm:text-2xl font-bold text-[#0e540b]">₹{selectedOffer.price}</p>
+                    <p className="text-gray-600 text-xs sm:text-sm">
+                      Plan Value
+                    </p>
+                    <p className="text-xl sm:text-2xl font-bold text-[#0e540b]">
+                      ₹{selectedOffer.price}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-gray-600 text-xs sm:text-sm">Duration</p>
@@ -113,16 +130,24 @@ const BillingPage = () => {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center ${
-                        paymentMethod === "ONLINE" ? "border-[#0e540b]" : "border-gray-300"
-                      }`}>
+                      <div
+                        className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center ${
+                          paymentMethod === "ONLINE"
+                            ? "border-[#0e540b]"
+                            : "border-gray-300"
+                        }`}
+                      >
                         {paymentMethod === "ONLINE" && (
                           <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#0e540b]"></div>
                         )}
                       </div>
                       <div className="text-left">
-                        <p className="font-semibold text-gray-800 text-sm sm:text-base">Online Payment</p>
-                        <p className="text-xs text-gray-500">UPI, Cards, Net Banking</p>
+                        <p className="font-semibold text-gray-800 text-sm sm:text-base">
+                          Online Payment
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          UPI, Cards, Net Banking
+                        </p>
                       </div>
                     </div>
                     <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-[#0e540b]" />
@@ -139,16 +164,24 @@ const BillingPage = () => {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center ${
-                        paymentMethod === "COD" ? "border-[#0e540b]" : "border-gray-300"
-                      }`}>
+                      <div
+                        className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center ${
+                          paymentMethod === "COD"
+                            ? "border-[#0e540b]"
+                            : "border-gray-300"
+                        }`}
+                      >
                         {paymentMethod === "COD" && (
                           <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#0e540b]"></div>
                         )}
                       </div>
                       <div className="text-left">
-                        <p className="font-semibold text-gray-800 text-sm sm:text-base">Cash on Delivery</p>
-                        <p className="text-xs text-gray-500">Pay when you receive</p>
+                        <p className="font-semibold text-gray-800 text-sm sm:text-base">
+                          Cash on Delivery
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Pay when you receive
+                        </p>
                       </div>
                     </div>
                     <Banknote className="w-5 h-5 sm:w-6 sm:h-6 text-[#0e540b]" />
@@ -174,22 +207,34 @@ const BillingPage = () => {
                 <Shield className="w-5 h-5 text-[#0e540b]" />
                 Bill Summary
               </h2>
-              
+
               <div className="space-y-2 sm:space-y-3 mb-4">
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-sm sm:text-base text-gray-600">Plan Price</span>
-                  <span className="font-semibold text-sm sm:text-base text-gray-800">₹{selectedOffer.price}</span>
+                  <span className="text-sm sm:text-base text-gray-600">
+                    Plan Price
+                  </span>
+                  <span className="font-semibold text-sm sm:text-base text-gray-800">
+                    ₹{selectedOffer.price}
+                  </span>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-sm sm:text-base text-gray-600">Delivery Charge</span>
-                  <span className="font-semibold text-sm sm:text-base text-gray-800">₹{deliveryCharge}</span>
+                  <span className="text-sm sm:text-base text-gray-600">
+                    Delivery Charge
+                  </span>
+                  <span className="font-semibold text-sm sm:text-base text-gray-800">
+                    ₹{deliveryCharge}
+                  </span>
                 </div>
 
                 <div className="border-t-2 border-dashed border-gray-200 pt-3 mt-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-base sm:text-lg font-bold text-gray-800">Total Amount</span>
-                    <span className="text-xl sm:text-2xl font-bold text-[#0e540b]">₹{totalAmount}</span>
+                    <span className="text-base sm:text-lg font-bold text-gray-800">
+                      Total Amount
+                    </span>
+                    <span className="text-xl sm:text-2xl font-bold text-[#0e540b]">
+                      ₹{totalAmount}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -204,9 +249,7 @@ const BillingPage = () => {
 
               {/* Action Button */}
               <div className="space-y-3">
-                {paymentMethod === "ONLINE" && (
-                  <RazorpayPayment />
-                )}
+                {paymentMethod === "ONLINE" && <RazorpayPayment />}
                 {paymentMethod === "COD" && (
                   <button
                     onClick={handleCOD}
@@ -241,21 +284,25 @@ const BillingPage = () => {
               <div className="flex justify-center">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <p className="text-sm font-semibold text-gray-800">100% Fresh</p>
+              <p className="text-sm font-semibold text-gray-800">Fresh</p>
               <p className="text-xs text-gray-500">Quality Guaranteed</p>
             </div>
             <div className="space-y-2">
               <div className="flex justify-center">
                 <Truck className="w-8 h-8 text-green-600" />
               </div>
-              <p className="text-sm font-semibold text-gray-800">Fast Delivery</p>
-              <p className="text-xs text-gray-500">On Time, Every Time</p>
+              <p className="text-sm font-semibold text-gray-800">
+                Same Day Delivery
+              </p>
+              <p className="text-xs text-gray-500">4 to 5 PM delivery</p>
             </div>
             <div className="space-y-2">
               <div className="flex justify-center">
                 <Shield className="w-8 h-8 text-green-600" />
               </div>
-              <p className="text-sm font-semibold text-gray-800">Safe Payment</p>
+              <p className="text-sm font-semibold text-gray-800">
+                Safe Payment
+              </p>
               <p className="text-xs text-gray-500">Secure & Encrypted</p>
             </div>
           </div>
