@@ -1,21 +1,48 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { CheckCircle, ArrowLeft, Package, User, Phone, Mail, MapPin, CreditCard, ShoppingBag, AlertCircle, Loader2 } from "lucide-react";
+import {
+  CheckCircle,
+  ArrowLeft,
+  Package,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  CreditCard,
+  ShoppingBag,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import { apiCall } from "../utils/apiCall";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const OrderConfirmation = () => {
-  const { formData, selectedOffer, selectedVegetables, resetOrder, navigate, setIsOrderPlaced, isOrderPlaced, paymentMethod } =
-    useOrderContext();
+  const {
+    formData,
+    selectedOffer,
+    selectedVegetables,
+    resetOrder,
+    navigate,
+    setIsOrderPlaced,
+    isOrderPlaced,
+    paymentMethod,
+  } = useOrderContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [captchaValue, setCaptchaValue] = useState(null);
+
+  const handleCaptchaChange = (value) => {
+    console.log("Captcha value:", value);
+    setCaptchaValue(value);
+  };
 
   useEffect(() => {
     if (!selectedOffer || !selectedVegetables.length) {
       navigate("/");
     }
   }, [selectedOffer, selectedVegetables, navigate]);
-  
+
   const handleNewOrder = () => {
     resetOrder();
   };
@@ -34,7 +61,7 @@ const OrderConfirmation = () => {
 
     return `ORD${datePart}${millis}${random}`;
   }
-  
+
   const orderData = {
     customerInfo: formData,
     selectedOffer,
@@ -45,16 +72,44 @@ const OrderConfirmation = () => {
     paymentMethod,
   };
 
-  const handleSubmitOrder = async () => {
+  const handleSubmitOrder = async (e) => {
+    e.preventDefault();
+    
+    // Check captcha first
+    if (!captchaValue) {
+      setSubmitError("Please complete the captcha verification");
+      return;
+    }
+
     if (isSubmitting) return;
+    
     setIsSubmitting(true);
     setSubmitError(null);
+    
     try {
+      // Verify recaptcha with backend
+      const recaptchaResponse = await axios.post(
+        `${import.meta.env.VITE_API_SERVER_URL}/api/auth/recaptcha`,
+        { captchaToken: captchaValue }
+      );
+
+      if (!recaptchaResponse.data.success) {
+        throw new Error("Captcha verification failed");
+      }
+
+      // Submit to Google Sheets
       const result = await apiCall(orderData);
-      const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`, orderData);
+
+      // Submit to API
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
+        orderData
+      );
+
       const okSheets =
         !!result && (result.success === true || result.status === "ok");
       const okApi = response && response.status >= 200 && response.status < 300;
+
       if (okSheets && okApi) {
         setIsOrderPlaced(true);
       } else {
@@ -81,8 +136,12 @@ const OrderConfirmation = () => {
           <div className="flex justify-center mb-6">
             <Loader2 className="h-16 w-16 text-[#0e540b] animate-spin" />
           </div>
-          <h3 className="text-xl font-bold text-gray-800 mb-2">Processing Your Order</h3>
-          <p className="text-gray-600">Please wait while we confirm your order...</p>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">
+            Processing Your Order
+          </h3>
+          <p className="text-gray-600">
+            Please wait while we confirm your order...
+          </p>
         </div>
       </div>
     );
@@ -101,7 +160,10 @@ const OrderConfirmation = () => {
           </h2>
           <p className="text-gray-600 mb-6">{submitError}</p>
           <button
-            onClick={handleSubmitOrder}
+            onClick={() => {
+              setSubmitError(null);
+              setCaptchaValue(null);
+            }}
             className="w-full bg-[#0e540b] text-white py-3 px-6 rounded-lg hover:bg-green-700 transition duration-200 font-medium"
           >
             Try Again
@@ -136,7 +198,9 @@ const OrderConfirmation = () => {
                 <Package className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-gray-500">Order ID</p>
-                  <p className="font-semibold text-gray-800">{orderData.orderId}</p>
+                  <p className="font-semibold text-gray-800">
+                    {orderData.orderId}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
@@ -150,28 +214,36 @@ const OrderConfirmation = () => {
                 <Phone className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-gray-500">Mobile</p>
-                  <p className="font-semibold text-gray-800">{formData.mobile}</p>
+                  <p className="font-semibold text-gray-800">
+                    {formData.mobile}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Mail className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-gray-500">Email</p>
-                  <p className="font-semibold text-gray-800 truncate">{formData.email}</p>
+                  <p className="font-semibold text-gray-800 truncate">
+                    {formData.email}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <ShoppingBag className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-gray-500">Package</p>
-                  <p className="font-semibold text-gray-800">{selectedOffer.title}</p>
+                  <p className="font-semibold text-gray-800">
+                    {selectedOffer.title}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <CreditCard className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-gray-500">Total Amount</p>
-                  <p className="font-bold text-[#0e540b] text-lg">₹{selectedOffer.price}</p>
+                  <p className="font-bold text-[#0e540b] text-lg">
+                    ₹{selectedOffer.price}
+                  </p>
                 </div>
               </div>
             </div>
@@ -200,7 +272,9 @@ const OrderConfirmation = () => {
               <div>
                 <p className="font-semibold text-gray-800 mb-1">Next Steps</p>
                 <p className="text-gray-700 text-sm">
-                  Your order has been received and will be processed shortly. You will receive a confirmation call on <strong>{formData.mobile}</strong> within 30 minutes.
+                  Your order has been received and will be processed shortly.
+                  You will receive a confirmation call on{" "}
+                  <strong>{formData.mobile}</strong> within 30 minutes.
                 </p>
               </div>
             </div>
@@ -218,13 +292,12 @@ const OrderConfirmation = () => {
     );
   }
 
-  // Confirmation Screen
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-6 sm:py-8 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/billing")}
           className="flex items-center gap-2 mb-6 text-gray-700 hover:text-[#0e540b] transition-colors group"
         >
           <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -241,7 +314,9 @@ const OrderConfirmation = () => {
                 Confirm Your Order
               </h2>
             </div>
-            <p className="text-center text-green-100 text-sm">Review your order details before confirmation</p>
+            <p className="text-center text-green-100 text-sm">
+              Review your order details before confirmation
+            </p>
           </div>
 
           {/* Order Details */}
@@ -252,22 +327,34 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-3">
                     <Package className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Order ID</p>
-                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{orderData.orderId}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">
+                        Order ID
+                      </p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base">
+                        {orderData.orderId}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <User className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Full Name</p>
-                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{formData.name}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">
+                        Full Name
+                      </p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base">
+                        {formData.name}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Phone className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Mobile Number</p>
-                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{formData.mobile}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">
+                        Mobile Number
+                      </p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base">
+                        {formData.mobile}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -276,22 +363,34 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-3">
                     <Mail className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Email Address</p>
-                      <p className="font-semibold text-gray-800 text-sm sm:text-base truncate">{formData.email}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">
+                        Email Address
+                      </p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base truncate">
+                        {formData.email}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <ShoppingBag className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Package Selected</p>
-                      <p className="font-semibold text-gray-800 text-sm sm:text-base">{selectedOffer?.title}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">
+                        Package Selected
+                      </p>
+                      <p className="font-semibold text-gray-800 text-sm sm:text-base">
+                        {selectedOffer?.title}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <CreditCard className="w-5 h-5 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">Total Amount</p>
-                      <p className="font-bold text-[#0e540b] text-lg sm:text-xl">₹{selectedOffer?.price + 20}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-0.5">
+                        Total Amount
+                      </p>
+                      <p className="font-bold text-[#0e540b] text-lg sm:text-xl">
+                        ₹{selectedOffer?.price + 20}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -322,18 +421,28 @@ const OrderConfirmation = () => {
                 <div className="flex gap-3">
                   <MapPin className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold text-gray-800 mb-1">Delivery Address</p>
+                    <p className="font-semibold text-gray-800 mb-1">
+                      Delivery Address
+                    </p>
                     <p className="text-gray-700 text-sm">{formData.address}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Confirm Button */}
+            {/* ReCAPTCHA */}
+            <div className="flex justify-center mb-6">
+              <ReCAPTCHA
+                sitekey={import.meta.env.RECAPTCHA_SITE_KEY}
+                onChange={handleCaptchaChange}
+              />
+            </div>
+
+            {/* Submit Button */}
             <button
               onClick={handleSubmitOrder}
-              disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold py-4 px-6 rounded-xl hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting || !captchaValue}
+              className="w-full bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold py-4 px-6 rounded-xl hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
               Confirm & Place Order

@@ -135,8 +135,7 @@ const RazorpayPayment = () => {
     <div className="text-center">
       <button
         onClick={createOrder}
-        className="amiko w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-bold text-base sm:text-lg 
-        transition duration-200 bg-[#0e540b] text-white hover:bg-[#0e540b] transform hover:scale-105"
+        className="w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
       >
         Pay Now - ₹{selectedOffer.price + 20}
       </button>
