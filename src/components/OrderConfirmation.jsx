@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import {
   CheckCircle,
   ArrowLeft,
@@ -12,10 +13,10 @@ import {
   ShoppingBag,
   AlertCircle,
   Loader2,
+  Shield,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import { apiCall } from "../utils/apiCall";
-import ReCAPTCHA from "react-google-recaptcha";
 
 const OrderConfirmation = () => {
   const {
@@ -31,18 +32,7 @@ const OrderConfirmation = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [captchaValue, setCaptchaValue] = useState(null);
-  const recaptchaRef = useRef(null);
-
-  const handleCaptchaChange = (value) => {
-    console.log("Captcha value:", value);
-    setCaptchaValue(value);
-  };
-
-  const handleCaptchaExpired = () => {
-    console.log("Captcha expired");
-    setCaptchaValue(null);
-  };
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   useEffect(() => {
     if (!selectedOffer || !selectedVegetables.length) {
@@ -79,12 +69,11 @@ const OrderConfirmation = () => {
     paymentMethod,
   };
 
-  const handleSubmitOrder = async (e) => {
+  const handleSubmitOrder = useCallback(async (e) => {
     e.preventDefault();
-    
-    // Check captcha first
-    if (!captchaValue) {
-      setSubmitError("Please complete the captcha verification");
+
+    if (!executeRecaptcha) {
+      setSubmitError("reCAPTCHA not loaded yet. Please try again.");
       return;
     }
 
@@ -94,10 +83,17 @@ const OrderConfirmation = () => {
     setSubmitError(null);
     
     try {
+      // Get reCAPTCHA v3 token
+      const captchaToken = await executeRecaptcha('submit_order');
+      
+      if (!captchaToken) {
+        throw new Error("Failed to get reCAPTCHA token");
+      }
+
       // Verify recaptcha with backend
       const recaptchaResponse = await axios.post(
         `${import.meta.env.VITE_API_SERVER_URL}/api/auth/recaptcha`,
-        { captchaToken: captchaValue }
+        { captchaToken }
       );
 
       if (!recaptchaResponse.data.success) {
@@ -133,7 +129,7 @@ const OrderConfirmation = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [executeRecaptcha, isSubmitting, orderData]);
 
   // Loading State
   if (isSubmitting) {
@@ -167,11 +163,7 @@ const OrderConfirmation = () => {
           </h2>
           <p className="text-gray-600 mb-6">{submitError}</p>
           <button
-            onClick={() => {
-              setSubmitError(null);
-              setCaptchaValue(null);
-              recaptchaRef.current?.reset();
-            }}
+            onClick={() => setSubmitError(null)}
             className="w-full bg-[#0e540b] text-white py-3 px-6 rounded-lg hover:bg-green-700 transition duration-200 font-medium"
           >
             Try Again
@@ -438,20 +430,37 @@ const OrderConfirmation = () => {
               </div>
             )}
 
-            {/* ReCAPTCHA - FIXED */}
-            <div className="flex justify-center mb-6">
-              <ReCAPTCHA
-                ref={recaptchaRef}
-                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                onChange={handleCaptchaChange}
-                onExpired={handleCaptchaExpired}
-              />
+            {/* reCAPTCHA v3 Badge Info */}
+            <div className="bg-gray-50 p-3 rounded-lg mb-6 border border-gray-200">
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <Shield className="w-4 h-4 text-green-600" />
+                <span>
+                  Protected by reCAPTCHA v3. 
+                  <a 
+                    href="https://policies.google.com/privacy" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline ml-1"
+                  >
+                    Privacy
+                  </a>
+                  {' '}-{' '}
+                  <a 
+                    href="https://policies.google.com/terms" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    Terms
+                  </a>
+                </span>
+              </div>
             </div>
 
             {/* Submit Button */}
             <button
               onClick={handleSubmitOrder}
-              disabled={isSubmitting || !captchaValue}
+              disabled={isSubmitting || !executeRecaptcha}
               className="w-full bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold py-4 px-6 rounded-xl hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />

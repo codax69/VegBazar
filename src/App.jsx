@@ -8,6 +8,7 @@ import ProgressIndicator from "./components/ProgressIndicator";
 import Help from "./components/Help";
 import BillingPage from "./components/BillingPage";
 import BackButtonHandler from "./components/BackButtonHandler";
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 const VegetableSellingApp = () => {
   const [currentRoute, setCurrentRoute] = useState("/");
@@ -83,6 +84,14 @@ const VegetableSellingApp = () => {
   };
 
   return (
+    <GoogleReCaptchaProvider
+      reCaptchaKey={import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY}
+      scriptProps={{
+        async: false,
+        defer: false,
+        appendTo: 'head',
+      }}
+    >
     <OrderContext.Provider value={contextValue}>
       <BackButtonHandler/>
       <div className="min-h-screen bg-gradient-to-b from-green-50 via-blue-50 to-green-100">
@@ -104,6 +113,7 @@ const VegetableSellingApp = () => {
         <Help />
       </div>
     </OrderContext.Provider>
+    </GoogleReCaptchaProvider>
   );
 };
 
