@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import {
   CheckCircle,
@@ -28,13 +28,20 @@ const OrderConfirmation = () => {
     isOrderPlaced,
     paymentMethod,
   } = useOrderContext();
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [captchaValue, setCaptchaValue] = useState(null);
+  const recaptchaRef = useRef(null);
 
   const handleCaptchaChange = (value) => {
     console.log("Captcha value:", value);
     setCaptchaValue(value);
+  };
+
+  const handleCaptchaExpired = () => {
+    console.log("Captcha expired");
+    setCaptchaValue(null);
   };
 
   useEffect(() => {
@@ -163,6 +170,7 @@ const OrderConfirmation = () => {
             onClick={() => {
               setSubmitError(null);
               setCaptchaValue(null);
+              recaptchaRef.current?.reset();
             }}
             className="w-full bg-[#0e540b] text-white py-3 px-6 rounded-lg hover:bg-green-700 transition duration-200 font-medium"
           >
@@ -430,11 +438,13 @@ const OrderConfirmation = () => {
               </div>
             )}
 
-            {/* ReCAPTCHA */}
+            {/* ReCAPTCHA - FIXED */}
             <div className="flex justify-center mb-6">
               <ReCAPTCHA
-                sitekey={`${import.meta.env.VITE_RECAPTCHA_SITE_KEY}`} 
+                ref={recaptchaRef}
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
                 onChange={handleCaptchaChange}
+                onExpired={handleCaptchaExpired}
               />
             </div>
 
