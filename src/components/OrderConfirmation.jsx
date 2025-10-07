@@ -442,7 +442,7 @@ const OrderConfirmation = () => {
             <div className="flex justify-center mb-6">
               <ReCAPTCHA
                 ref={recaptchaRef}
-                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                sitekey={import.meta.env.RECAPTCHA_SITE_KEY}
                 onChange={handleCaptchaChange}
                 onExpired={handleCaptchaExpired}
               />
