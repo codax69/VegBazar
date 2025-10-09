@@ -95,7 +95,7 @@ const OrderConfirmation = () => {
 
       // Verify recaptcha with backend
       const recaptchaResponse = await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/auth/recaptcha`,
+        `${import.meta.env.VITE_API_SERVER_URL}/api/auth//verify-captcha`,
         { 
           token: captchaToken,
           action: 'submit_order'
