@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import {
   CheckCircle,
   ArrowLeft,
@@ -11,12 +11,13 @@ import {
   MapPin,
   CreditCard,
   ShoppingBag,
-  AlertCircle,
-  Loader2,
   Shield,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import { apiCall } from "../utils/apiCall";
+import OrderSuccess from "./OrderSuccess";
+import OrderFailed from "./OrderFailed";
+import OrderLoading from "./OrderLoading";
 
 const OrderConfirmation = () => {
   const {
@@ -29,7 +30,7 @@ const OrderConfirmation = () => {
     isOrderPlaced,
     paymentMethod,
   } = useOrderContext();
-
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const { executeRecaptcha } = useGoogleReCaptcha();
@@ -69,30 +70,31 @@ const OrderConfirmation = () => {
     paymentMethod,
   };
 
-  const handleSubmitOrder = useCallback(
-    async (e) => {
-      e.preventDefault();
+  const handleSubmitOrder = useCallback(async (e) => {
+    e.preventDefault();
 
-      if (!executeRecaptcha) {
-        setSubmitError("reCAPTCHA not loaded yet. Please try again.");
-        return;
+    if (!executeRecaptcha) {
+      setSubmitError("reCAPTCHA not ready yet. Please wait a moment and try again.");
+      return;
+    }
+
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      // Get reCAPTCHA v3 token
+      const captchaToken = await executeRecaptcha('submit_order');
+      
+      if (!captchaToken) {
+        throw new Error("Failed to generate reCAPTCHA token. Please refresh the page.");
       }
 
-      if (isSubmitting) return;
+      console.log("Captcha token generated successfully");
 
-      setIsSubmitting(true);
-      setSubmitError(null);
-
-      try {
-        // Get reCAPTCHA v3 token
-        const captchaToken = await executeRecaptcha("submit_order");
-
-        if (!captchaToken) {
-          throw new Error("Failed to get reCAPTCHA token");
-        }
-
-        // Verify recaptcha with backend
-         const recaptchaResponse = await axios.post(
+      // Verify recaptcha with backend
+      const recaptchaResponse = await axios.post(
         `${import.meta.env.VITE_API_SERVER_URL}/api/auth/recaptcha`,
         { 
           token: captchaToken,
@@ -100,205 +102,81 @@ const OrderConfirmation = () => {
         }
       );
 
-        if (!recaptchaResponse.data.success) {
-          throw new Error("Captcha verification failed");
-        }
-
-        // Submit to Google Sheets
-        const result = await apiCall(orderData);
-
-        // Submit to API
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
-          orderData
-        );
-
-        const okSheets =
-          !!result && (result.success === true || result.status === "ok");
-        const okApi =
-          response && response.status >= 200 && response.status < 300;
-
-        if (okSheets && okApi) {
-          setIsOrderPlaced(true);
-        } else {
-          setSubmitError("Failed to save order. Please try again.");
-        }
-      } catch (err) {
-        console.error(
-          "Order submission error:",
-          err?.response?.data || err?.message
-        );
-        setSubmitError(
-          err?.response?.data?.message ?? "An error occurred. Please try again."
-        );
-      } finally {
-        setIsSubmitting(false);
+      if (!recaptchaResponse.data.success) {
+        throw new Error(recaptchaResponse.data.message || "Captcha verification failed. Please try again.");
       }
-    },
-    [executeRecaptcha, isSubmitting, orderData]
-  );
+
+      console.log("Captcha verified successfully", recaptchaResponse.data);
+
+      // Submit to Google Sheets
+      const result = await apiCall(orderData);
+
+      // Submit to API
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
+        orderData
+      );
+
+      const okSheets =
+        !!result && (result.success === true || result.status === "ok");
+      const okApi = response && response.status >= 200 && response.status < 300;
+
+      if (okSheets && okApi) {
+        setIsOrderPlaced(true);
+      } else {
+        setSubmitError("Failed to save order. Please try again.");
+      }
+    } catch (err) {
+      console.error(
+        "Order submission error:",
+        err?.response?.data || err?.message
+      );
+      
+      // Better error handling
+      let errorMessage = "An error occurred. Please try again.";
+      
+      if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      
+      setSubmitError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced]);
 
   // Loading State
   if (isSubmitting) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg text-center">
-          <div className="flex justify-center mb-6">
-            <Loader2 className="h-16 w-16 text-[#0e540b] animate-spin" />
-          </div>
-          <h3 className="text-xl font-bold text-gray-800 mb-2">
-            Processing Your Order
-          </h3>
-          <p className="text-gray-600">
-            Please wait while we confirm your order...
-          </p>
-        </div>
-      </div>
-    );
+    return <OrderLoading />;
   }
 
   // Error State
   if (submitError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg text-center">
-          <div className="flex justify-center mb-6">
-            <AlertCircle className="h-16 w-16 text-red-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-red-600 mb-4">
-            Order Submission Failed
-          </h2>
-          <p className="text-gray-600 mb-6">{submitError}</p>
-          <button
-            onClick={() => setSubmitError(null)}
-            className="w-full bg-[#0e540b] text-white py-3 px-6 rounded-lg hover:bg-green-700 transition duration-200 font-medium"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
+      <OrderFailed 
+        errorMessage={submitError} 
+        onRetry={() => setSubmitError(null)}
+        onGoBack={() => navigate("/billing")}
+      />
     );
   }
 
   // Success State
   if (isOrderPlaced) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
-        <div className="max-w-2xl w-full bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
-          <div className="text-center mb-6">
-            <div className="flex justify-center mb-4">
-              <CheckCircle className="h-16 w-16 sm:h-20 sm:w-20 text-[#0e540b] animate-pulse" />
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#0e540b] mb-2">
-              Order Placed Successfully!
-            </h2>
-            <p className="text-gray-600">Thank you for your order</p>
-          </div>
-
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl mb-6 border border-green-200">
-            <h3 className="font-bold text-lg mb-4 text-[#0e540b] flex items-center gap-2">
-              <Package className="w-5 h-5" />
-              Order Summary
-            </h3>
-            <div className="grid sm:grid-cols-2 gap-4 text-sm">
-              <div className="flex items-start gap-2">
-                <Package className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-gray-500">Order ID</p>
-                  <p className="font-semibold text-gray-800">
-                    {orderData.orderId}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <User className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-gray-500">Customer Name</p>
-                  <p className="font-semibold text-gray-800">{formData.name}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <Phone className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-gray-500">Mobile</p>
-                  <p className="font-semibold text-gray-800">
-                    {formData.mobile}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <Mail className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-gray-500">Email</p>
-                  <p className="font-semibold text-gray-800 truncate">
-                    {formData.email}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <ShoppingBag className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-gray-500">Package</p>
-                  <p className="font-semibold text-gray-800">
-                    {selectedOffer.title}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <CreditCard className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-gray-500">Total Amount</p>
-                  <p className="font-bold text-[#0e540b] text-lg">
-                    ₹{selectedOffer.price}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-green-200">
-              <p className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-[#0e540b]" />
-                Selected Vegetables ({selectedVegetables.length})
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {selectedVegetables.map((veg, index) => (
-                  <span
-                    key={index}
-                    className="bg-green-100 text-green-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium border border-green-200"
-                  >
-                    {veg}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-yellow-50 p-4 rounded-xl mb-6 border border-yellow-200">
-            <div className="flex gap-3">
-              <Phone className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-gray-800 mb-1">Next Steps</p>
-                <p className="text-gray-700 text-sm">
-                  Your order has been received and will be processed shortly.
-                  You will receive a confirmation call on{" "}
-                  <strong>{formData.mobile}</strong> within 30 minutes.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={handleNewOrder}
-            className="w-full bg-[#0e540b] text-white py-3 px-6 rounded-xl hover:bg-green-700 transition duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
-          >
-            <ShoppingBag className="w-5 h-5" />
-            Place Another Order
-          </button>
-        </div>
-      </div>
+      <OrderSuccess
+        orderData={orderData}
+        formData={formData}
+        selectedOffer={selectedOffer}
+        selectedVegetables={selectedVegetables}
+        onNewOrder={handleNewOrder}
+      />
     );
   }
 
+  // Main Confirmation Form
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-6 sm:py-8 px-4">
       <div className="max-w-3xl mx-auto">
@@ -396,7 +274,7 @@ const OrderConfirmation = () => {
                         Total Amount
                       </p>
                       <p className="font-bold text-[#0e540b] text-lg sm:text-xl">
-                        ₹{selectedOffer?.price + 20}
+                        ₹{selectedOffer?.price}
                       </p>
                     </div>
                   </div>
@@ -442,19 +320,19 @@ const OrderConfirmation = () => {
               <div className="flex items-center gap-2 text-xs text-gray-600">
                 <Shield className="w-4 h-4 text-green-600" />
                 <span>
-                  Protected by reCAPTCHA v3.
-                  <a
-                    href="https://policies.google.com/privacy"
-                    target="_blank"
+                  Protected by reCAPTCHA v3. 
+                  <a 
+                    href="https://policies.google.com/privacy" 
+                    target="_blank" 
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline ml-1"
                   >
                     Privacy
-                  </a>{" "}
-                  -{" "}
-                  <a
-                    href="https://policies.google.com/terms"
-                    target="_blank"
+                  </a>
+                  {' '}-{' '}
+                  <a 
+                    href="https://policies.google.com/terms" 
+                    target="_blank" 
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
