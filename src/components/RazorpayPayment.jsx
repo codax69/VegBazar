@@ -1,15 +1,19 @@
-import React from 'react';
-import axios from 'axios';
+import React from "react";
+import axios from "axios";
 import { useOrderContext } from "../Context/OrderContext";
 
-
 const RazorpayPayment = () => {
-    
-  const { selectedOffer, selectedVegetables, formData, navigate,paymentMethod } = useOrderContext();
-  
+  const {
+    selectedOffer,
+    selectedVegetables,
+    formData,
+    navigate,
+    paymentMethod,
+  } = useOrderContext();
+
   const loadScript = (src) => {
     return new Promise((resolve) => {
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.src = src;
       script.onload = () => {
         resolve(true);
@@ -35,8 +39,7 @@ const RazorpayPayment = () => {
 
     return `ORD${datePart}${millis}${random}`;
   }
-  
-  
+
   const orderData = {
     customerInfo: formData,
     selectedOffer,
@@ -47,20 +50,24 @@ const RazorpayPayment = () => {
     paymentMethod,
   };
 
-
   const createOrder = async () => {
     try {
-      const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
-       navigate("/")
+      const res = await loadScript(
+        "https://checkout.razorpay.com/v1/checkout.js"
+      );
+      navigate("/");
       if (!res) {
-        alert('Razorpay SDK failed to load');
+        alert("Razorpay SDK failed to load");
         return;
       }
 
-      const result = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`, orderData);
-      console.log(result.data.data)
+      const result = await axios.post(
+        `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
+        orderData
+      );
+      console.log(result.data.data);
       if (!result.data) {
-        alert('Server error. Are you online?');
+        alert("Server error. Are you online?");
         return;
       }
 
@@ -71,10 +78,12 @@ const RazorpayPayment = () => {
 
       const options = {
         key: import.meta.env.RAZORPAY_KEY_ID || "rzp_live_RLvTRwhfUYfTlG",
-        amount:amount, 
-        currency: currency || 'INR', // Default to INR if currency not provided
-        name: 'VegBazar',
-        description: `${selectedOffer.title} - ${selectedVegetables.join(', ')}`,
+        amount: amount,
+        currency: currency || "INR", // Default to INR if currency not provided
+        name: "VegBazar",
+        description: `${selectedOffer.title} - ${selectedVegetables.join(
+          ", "
+        )}`,
         order_id: orderId,
         handler: async function (response) {
           try {
@@ -82,52 +91,56 @@ const RazorpayPayment = () => {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
-              orderId: orderId
+              orderId: orderId,
+              customerInfo:formData,
+              selectedOffer,
+              selectedVegetables,
             };
-            
+            console.log(verifyData)
+
             const verifyResult = await axios.post(
-              `${import.meta.env.VITE_API_SERVER_URL}/api/orders/verify-payment`,
+              `${
+                import.meta.env.VITE_API_SERVER_URL
+              }/api/orders/verify-payment`,
               verifyData
             );
 
             if (verifyResult.data.success) {
-              
-              navigate('/order-confirmation');
+              navigate("/order-confirmation");
             } else {
-              throw new Error('Payment verification failed');
+              throw new Error("Payment verification failed");
             }
           } catch (err) {
-            console.error('Payment verification error:', err);
-            alert('Payment verification failed. Please contact support.');
+            console.error("Payment verification error:", err);
+            alert("Payment verification failed. Please contact support.");
           }
         },
         prefill: {
           name: formData.name,
           email: formData.email,
-          contact: formData.mobile
+          contact: formData.mobile,
         },
         notes: {
-          address: formData.address
+          address: formData.address,
         },
         theme: {
-          color: '#0e540b'
-        }
+          color: "#0e540b",
+        },
       };
-      
+
       // Add error callback
       options.modal = {
-        ondismiss: function() {
-          alert('Payment cancelled');
+        ondismiss: function () {
+          alert("Payment cancelled");
         },
         escape: false,
       };
 
       const paymentObject = new window.Razorpay(options);
       paymentObject.open();
-
     } catch (error) {
-      console.error('Payment creation error:', error);
-      alert('Unable to initiate payment. Please try again.');
+      console.error("Payment creation error:", error);
+      alert("Unable to initiate payment. Please try again.");
     }
   };
 

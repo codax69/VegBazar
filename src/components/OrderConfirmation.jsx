@@ -84,16 +84,10 @@ const OrderConfirmation = () => {
     setSubmitError(null);
     
     try {
-      // Get reCAPTCHA v3 token
       const captchaToken = await executeRecaptcha('submit_order');
-      console.log(captchaToken)
       if (!captchaToken) {
         throw new Error("Failed to generate reCAPTCHA token. Please refresh the page.");
       }
-
-      console.log("Captcha token generated successfully");
-
-      // Verify recaptcha with backend
       const recaptchaResponse = await axios.post(
         `${import.meta.env.VITE_API_SERVER_URL}/api/verify-captcha`,
         { 
@@ -128,10 +122,7 @@ const OrderConfirmation = () => {
         "Order submission error:",
         err?.response?.data || err?.message
       );
-      
-      // Better error handling
       let errorMessage = "An error occurred. Please try again.";
-      
       if (err?.response?.data?.message) {
         errorMessage = err.response.data.message;
       } else if (err?.message) {
