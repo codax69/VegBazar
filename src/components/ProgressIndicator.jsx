@@ -1,5 +1,5 @@
 import React from "react";
-import { ShoppingCart, User, Package, CheckCircle } from "lucide-react";
+import { ShoppingCart, User, Package, CheckCircle, File } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 
 const ProgressIndicator = () => {
@@ -11,6 +11,10 @@ const ProgressIndicator = () => {
       path: "/select-vegetables",
       icon: ShoppingCart,
       label: "Choose Vegetables",
+    },{
+      path: "/billing",
+      icon: File,
+      label: "Checkout",
     },
     { path: "/order-confirmation", icon: CheckCircle, label: "Order Complete" },
   ];
@@ -18,7 +22,7 @@ const ProgressIndicator = () => {
 
   return (
     <div className="w-full overflow-x-auto">
-      <div className="flex justify-center mb-4 sm:mb-8 min-w-max h-20 px-4">
+      <div className="flex justify-center sm:mb-8 min-w-max h-16 px-4">
         <div className="flex items-center space-x-2 sm:space-x-4">
           {steps.map((step, index) => {
             const stepNumber = index + 1;
@@ -29,13 +33,13 @@ const ProgressIndicator = () => {
             return (
               <div key={step.path} className="flex items-center">
                 <div
-                  className={`relative w-7 sm:w-12 h-7 sm:h-12 rounded-full flex items-center justify-center transition duration-200 ${
+                  className={`relative w-9 sm:w-12 h-9 sm:h-12 rounded-full flex items-center justify-center transition duration-200 ${
                     isActive
                       ? "bg-[#0e540b] text-white"
                       : "bg-gray-300 text-gray-600"
-                  } ${isCurrent ? "ring-4 ring-green-200 scale-110" : ""}`}
+                  } ${isCurrent ? "ring-4 ring-green-200 scale-100" : ""}`}
                 >
-                  <StepIcon size={18} />
+                  <StepIcon size={16} />
                 </div>
                 <div className="ml-2 hidden sm:block khula">
                   <p

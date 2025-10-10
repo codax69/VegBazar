@@ -85,7 +85,7 @@ const BillingPage = () => {
                   <div className="text-right">
                     <p className="text-gray-600 text-xs sm:text-sm">Duration</p>
                     <p className="font-semibold text-gray-800 text-sm sm:text-base">
-                      {selectedOffer.duration || "Monthly"}
+                      {selectedOffer.duration || "weekly"}
                     </p>
                   </div>
                 </div>

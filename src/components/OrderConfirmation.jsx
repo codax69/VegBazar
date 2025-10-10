@@ -86,7 +86,7 @@ const OrderConfirmation = () => {
     try {
       // Get reCAPTCHA v3 token
       const captchaToken = await executeRecaptcha('submit_order');
-      
+      console.log(captchaToken)
       if (!captchaToken) {
         throw new Error("Failed to generate reCAPTCHA token. Please refresh the page.");
       }
@@ -95,7 +95,7 @@ const OrderConfirmation = () => {
 
       // Verify recaptcha with backend
       const recaptchaResponse = await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/auth/verify-captcha`,
+        `${import.meta.env.VITE_API_SERVER_URL}/api/verify-captcha`,
         { 
           token: captchaToken,
           action: 'submit_order'
@@ -105,9 +105,6 @@ const OrderConfirmation = () => {
       if (!recaptchaResponse.data.success) {
         throw new Error(recaptchaResponse.data.message || "Captcha verification failed. Please try again.");
       }
-
-      console.log("Captcha verified successfully", recaptchaResponse.data);
-
       // Submit to Google Sheets
       const result = await apiCall(orderData);
 

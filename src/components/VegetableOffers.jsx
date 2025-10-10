@@ -16,7 +16,7 @@ const VegetableOffers = () => {
         {/* Header Section */}
         <div className="mb-8 sm:mb-12">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="flex items-center gap-2 text-gray-700 hover:text-[#0e540b] transition-colors group mb-6"
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
