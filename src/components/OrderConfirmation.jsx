@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import {
   CheckCircle,
   ArrowLeft,
@@ -30,7 +30,7 @@ const OrderConfirmation = () => {
     isOrderPlaced,
     paymentMethod,
   } = useOrderContext();
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const { executeRecaptcha } = useGoogleReCaptcha();
@@ -70,70 +70,82 @@ const OrderConfirmation = () => {
     paymentMethod,
   };
 
-  const handleSubmitOrder = useCallback(async (e) => {
-    e.preventDefault();
+  const handleSubmitOrder = useCallback(
+    async (e) => {
+      window.scrollTo(0, 0);
+      e.preventDefault();
 
-    if (!executeRecaptcha) {
-      setSubmitError("reCAPTCHA not ready yet. Please wait a moment and try again.");
-      return;
-    }
-
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
-    setSubmitError(null);
-    
-    try {
-      const captchaToken = await executeRecaptcha('submit_order');
-      if (!captchaToken) {
-        throw new Error("Failed to generate reCAPTCHA token. Please refresh the page.");
+      if (!executeRecaptcha) {
+        setSubmitError(
+          "reCAPTCHA not ready yet. Please wait a moment and try again."
+        );
+        return;
       }
-      const recaptchaResponse = await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/verify-captcha`,
-        { 
-          token: captchaToken,
-          action: 'submit_order'
+
+      if (isSubmitting) return;
+
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      try {
+        const captchaToken = await executeRecaptcha("submit_order");
+        if (!captchaToken) {
+          throw new Error(
+            "Failed to generate reCAPTCHA token. Please refresh the page."
+          );
         }
-      );
+        const recaptchaResponse = await axios.post(
+          `${import.meta.env.VITE_API_SERVER_URL}/api/verify-captcha`,
+          {
+            token: captchaToken,
+            action: "submit_order",
+          }
+        );
 
-      if (!recaptchaResponse.data.success) {
-        throw new Error(recaptchaResponse.data.message || "Captcha verification failed. Please try again.");
+        if (!recaptchaResponse.data.success) {
+          throw new Error(
+            recaptchaResponse.data.message ||
+              "Captcha verification failed. Please try again."
+          );
+        }
+        // Submit to Google Sheets
+        const result = await apiCall(orderData);
+
+        // Submit to API
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
+          orderData
+        );
+
+        const okSheets =
+          !!result && (result.success === true || result.status === "ok");
+        const okApi =
+          response && response.status >= 200 && response.status < 300;
+
+        if (okSheets && okApi) {
+          setIsOrderPlaced(true);
+        } else {
+          setSubmitError("Failed to save order. Please try again.");
+        }
+      } catch (err) {
+        console.error(
+          "Order submission error:",
+          err?.response?.data || err?.message
+        );
+        let errorMessage = "An error occurred. Please try again.";
+        if (err?.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        } else if (err?.message) {
+          errorMessage = err.message;
+        }
+
+        setSubmitError(errorMessage);
+      } finally {
+        setIsSubmitting(false);
       }
-      // Submit to Google Sheets
-      const result = await apiCall(orderData);
-
-      // Submit to API
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
-        orderData
-      );
-
-      const okSheets =
-        !!result && (result.success === true || result.status === "ok");
-      const okApi = response && response.status >= 200 && response.status < 300;
-
-      if (okSheets && okApi) {
-        setIsOrderPlaced(true);
-      } else {
-        setSubmitError("Failed to save order. Please try again.");
-      }
-    } catch (err) {
-      console.error(
-        "Order submission error:",
-        err?.response?.data || err?.message
-      );
-      let errorMessage = "An error occurred. Please try again.";
-      if (err?.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err?.message) {
-        errorMessage = err.message;
-      }
-      
-      setSubmitError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced]);
+    },
+    [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced]
+  );
 
   // Loading State
   if (isSubmitting) {
@@ -143,8 +155,8 @@ const OrderConfirmation = () => {
   // Error State
   if (submitError) {
     return (
-      <OrderFailed 
-        errorMessage={submitError} 
+      <OrderFailed
+        errorMessage={submitError}
         onRetry={() => setSubmitError(null)}
         onGoBack={() => navigate("/billing")}
       />
@@ -170,7 +182,10 @@ const OrderConfirmation = () => {
       <div className="max-w-3xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate("/billing")}
+          onClick={() => {
+            navigate("/billing");
+            window.scrollTo(0, 0);
+          }}
           className="flex items-center gap-2 mb-6 text-gray-700 hover:text-[#0e540b] transition-colors group"
         >
           <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -262,7 +277,7 @@ const OrderConfirmation = () => {
                         Total Amount
                       </p>
                       <p className="font-bold text-[#0e540b] text-lg sm:text-xl">
-                        ₹{selectedOffer?.price}
+                        ₹{selectedOffer?.price + 20}
                       </p>
                     </div>
                   </div>
@@ -297,7 +312,7 @@ const OrderConfirmation = () => {
                     <p className="font-semibold text-gray-800 mb-1">
                       Delivery Address
                     </p>
-                    <p className="text-gray-700 text-sm">{formData.address}</p>
+                    <p className="text-gray-700 text-sm">{formData.address},{formData.area},{formData.city}</p>
                   </div>
                 </div>
               </div>
@@ -308,19 +323,19 @@ const OrderConfirmation = () => {
               <div className="flex items-center gap-2 text-xs text-gray-600">
                 <Shield className="w-4 h-4 text-green-600" />
                 <span>
-                  Protected by reCAPTCHA v3. 
-                  <a 
-                    href="https://policies.google.com/privacy" 
-                    target="_blank" 
+                  Protected by reCAPTCHA v3.
+                  <a
+                    href="https://policies.google.com/privacy"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline ml-1"
                   >
                     Privacy
-                  </a>
-                  {' '}-{' '}
-                  <a 
-                    href="https://policies.google.com/terms" 
-                    target="_blank" 
+                  </a>{" "}
+                  -{" "}
+                  <a
+                    href="https://policies.google.com/terms"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >

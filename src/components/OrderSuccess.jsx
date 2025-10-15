@@ -77,7 +77,7 @@ const OrderSuccess = ({ orderData, formData, selectedOffer, selectedVegetables, 
               <div>
                 <p className="text-gray-500">Total Amount</p>
                 <p className="font-bold text-[#0e540b] text-lg">
-                  ₹{selectedOffer.price}
+                  ₹{selectedOffer.price + 20}
                 </p>
               </div>
             </div>

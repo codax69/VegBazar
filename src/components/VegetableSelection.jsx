@@ -39,6 +39,7 @@ const VegetableSelection = () => {
         const mapped = data.map((v) => ({
           name: v.name,
           image: v.image,
+          price: v.price,
         }));
 
         setVegetables(mapped);
@@ -57,7 +58,10 @@ const VegetableSelection = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
         <button
-          onClick={() => navigate("/offers")}
+          onClick={() => {
+            window.scrollTo(0, 0);
+            navigate("/offers");
+          }}
           className="amiko flex items-center text-[#0e540b] hover:text-green-700 text-sm sm:text-base"
         >
           <ArrowLeft size={18} className="mr-2" />
@@ -103,6 +107,9 @@ const VegetableSelection = () => {
               decoding="async"
             />
             <p className="font-medium text-xs sm:text-sm">{vegetable.name}</p>
+            <p className="khula text-[#0e540b] font-bold text-xs sm:text-sm mt-1">
+              ₹{vegetable.price}
+            </p>
             {selectedVegetables.includes(vegetable.name) && (
               <CheckCircle size={16} className="mx-auto mt-2 text-[#0e540b]" />
             )}
@@ -133,7 +140,10 @@ const VegetableSelection = () => {
       <div className="text-center">
         {selectedVegetables.length === selectedOffer.vegetableLimit ? (
           <button
-            onClick={() => navigate("/billing")}
+            onClick={() => {
+              window.scrollTo(0, 0);
+              navigate("/billing");
+            }}
             className="amiko w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-bold 
   text-base sm:text-lg transition duration-300 text-white transform hover:scale-105
   bg-[#0e540b] hover:bg-gradient-to-r hover:from-[#0e540b] hover:to-[#063a06]"

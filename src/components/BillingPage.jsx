@@ -32,6 +32,7 @@ const BillingPage = () => {
   }
 
   const handleCOD = async () => {
+    window.scrollTo(0, 0);
     navigate("/order-confirmation");
   };
 
@@ -40,7 +41,10 @@ const BillingPage = () => {
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate("/select-vegetables")}
+          onClick={() => {
+            window.scrollTo(0, 0);
+            navigate("/select-vegetables");
+          }}
           className="flex items-center gap-2 mb-4 sm:mb-6 text-gray-700 hover:text-[#0e540b] transition-colors group"
         >
           <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
