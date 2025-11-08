@@ -13,6 +13,7 @@ import { RiShoppingBag4Fill } from "react-icons/ri";
 import { GiBasket } from "react-icons/gi";
 import { MdLocalShipping } from "react-icons/md";
 
+
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { navigate } = useOrderContext();
@@ -118,7 +119,7 @@ const Navbar = () => {
               }}
               className="flex items-center font-assistant gap-2 py-2 border-b border-green-700"
             >
-              <FiTag className="w-4 h-4" /> Basket
+              <GiBasket className="w-4 h-4" /> Basket
             </li>
             <li
               onClick={() => {
@@ -149,7 +150,7 @@ const Navbar = () => {
             </li>
             <li
               onClick={() => {
-                navigate("/contact");
+                navigate("/help");
                 setMobileMenuOpen(false);
               }}
               className="flex items-center font-assistant gap-2 py-2 border-b border-green-700"
