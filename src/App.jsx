@@ -114,7 +114,6 @@ const AppContent = () => {
     setVegetableOrder,
     vegetableOrder,
   };
-  console.log(selectedOffer)
   return (
     <ThemeProvider>
       <OrderContext.Provider value={contextValue}>
