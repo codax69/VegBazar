@@ -8,10 +8,10 @@ const OrderLoading = () => {
         <div className="flex justify-center mb-6">
           <Loader2 className="h-16 w-16 text-[#0e540b] animate-spin" />
         </div>
-        <h3 className="text-xl font-bold text-gray-800 mb-2">
+        <h3 className="text-xl font-poppins font-bold text-gray-800 mb-2">
           Processing Your Order
         </h3>
-        <p className="text-gray-600">
+        <p className="text-gray-600 font-assistant">
           Please wait while we confirm your order...
         </p>
       </div>

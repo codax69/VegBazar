@@ -1,145 +1,186 @@
-import React from "react";
-import { ArrowLeft, Package, Check, ShoppingCart, Leaf, Tag } from "lucide-react";
+import React, { useEffect } from "react";
+import { Package, Check, ShoppingCart, Leaf, Tag } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
+import axios from "axios";
 
 const VegetableOffers = () => {
-  const { offers, setSelectedOffer, navigate } = useOrderContext();
+  const { offers, setSelectedOffer, setVegetableOrder, navigate } =
+    useOrderContext();
 
-  const handleOfferSelect = (offer) => {
+  // Track offer click
+  const handleOfferClick = async (offer) => {
+    try {
+      // Increment click count on backend
+      await axios.post(
+        `${import.meta.env.VITE_API_SERVER_URL}/api/offers/click/${offer._id}`
+      );
+    } catch (error) {
+      console.error("Error tracking offer click:", error);
+      // Continue with navigation even if tracking fails
+    }
+  };
+  useEffect(() => {
+    setVegetableOrder([]);
+  }, []);
+
+  const handleOfferSelect = async (offer) => {
     window.scrollTo(0, 0);
     setSelectedOffer(offer);
+
+    // Track the click asynchronously
+    handleOfferClick(offer);
+
     navigate("/select-vegetables");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-6 sm:py-12 px-4">
-      <div className="w-full max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pt-8 px-3 sm:py-8 sm:px-4 md:pt-20 lg:py-20">
+      <div className="w-full max-w-6xl mx-auto">
         {/* Header Section */}
-        <div className="mb-8 sm:mb-12">
-          <button
-            onClick={() => {navigate("/"); window.scrollTo(0, 0);}}
-            className="flex items-center gap-2 text-gray-700 hover:text-[#0e540b] transition-colors group mb-6"
-          >
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back</span>
-          </button>
-
+        <div className="mb-4 sm:mb-6">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#0e540b] rounded-full mb-4">
-              <Package className="w-8 h-8 text-white" />
+            <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#0e540b] rounded-full mb-2 sm:mb-3">
+              <Package className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0e540b] mb-2">
-              Choose Your Package
+            <h2 className="text-lg font-amiko sm:text-xl md:text-2xl font-bold text-[#0e540b] mb-1">
+              Choose Your Basket
             </h2>
-            <p className="text-gray-600 text-sm sm:text-base">
+            <p className="text-gray-600 text-xs font-assistant sm:text-sm px-4">
               Select the best vegetable package that suits your needs
             </p>
           </div>
         </div>
 
-        {/* Offers Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {offers.map((offer) => (
-            <div
-              key={offer.id}
-              className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] transform hover:-translate-y-1 hover:scale-[1.02] overflow-hidden"
-              onClick={() => handleOfferSelect(offer)}
-            >
-              {/* Header with Icon */}
-              <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-6 text-center relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-[#0e540b] opacity-10 rounded-bl-full"></div>
-                <div className="relative z-10">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-md mb-3 group-hover:scale-110 transition-transform">
-                    <ShoppingCart className="w-8 h-8 text-[#0e540b]" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-1">
-                    {offer.title}
-                  </h3>
-                  <div className="flex items-center justify-center gap-1 text-gray-600 text-sm">
-                    <Leaf className="w-4 h-4" />
-                    <span>{offer.vegetables.length / 2 } vegetables</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-6">
-                {/* Price */}
-                <div className="text-center mb-4">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Tag className="w-5 h-5 text-[#0e540b]" />
-                    <span className="text-sm font-medium text-gray-600">Price</span>
-                  </div>
-                  <p className="text-4xl font-bold text-[#0e540b]">
-                    ₹{offer.price}
-                  </p>
-                </div>
-
-                {/* Description */}
-                <p className="text-gray-600 text-center mb-4 text-sm min-h-[40px]">
-                  {offer.description}
-                </p>
-
-                {/* Vegetables List */}
-                <div className="bg-green-50 rounded-xl p-4 mb-4 border border-green-100">
-                  <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#0e540b]" />
-                    What's Included:
-                  </p>
-                  <ul className="space-y-2">
-                    {offer.vegetables.slice(0, 3).map((veg, index) => (
-                      <li 
-                        key={veg._id || index}
-                        className="text-sm text-gray-700 flex items-center gap-2"
-                      >
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#0e540b]"></div>
-                        {veg.name}
-                      </li>
-                    ))}
-                    {offer.vegetables.length > 3 && (
-                      <li className="text-sm text-[#0e540b] font-medium flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#0e540b]"></div>
-                        +{offer.vegetables.length - 3} more vegetables
-                      </li>
-                    )}
-                  </ul>
-                </div>
-
-                {/* Select Button */}
-                <button
-                  aria-label={`Select ${offer.title} package`}
-                  className="w-full bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-3 px-4 rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group-hover:scale-105"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  Select Package
-                </button>
-              </div>
-
-              {/* Popular Badge */}
-              {offer.popular && (
-                <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full shadow-md animate-bounce">
-                  Popular
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Help Section */}
-        <div className="mt-12 text-center">
-          <div className="bg-white rounded-2xl shadow-md p-6 max-w-2xl mx-auto border border-green-100">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Leaf className="w-5 h-5 text-[#0e540b]" />
-              <h3 className="text-lg font-semibold text-gray-800">
-                Fresh & Organic
-              </h3>
-            </div>
-            <p className="text-gray-600 text-sm">
-              All packages include farm-fresh, organic vegetables delivered directly to your doorstep. 
-              You can customize your selection in the next step.
-            </p>
+        {/* Loading State */}
+        {!offers || offers.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-sm">Loading offers...</p>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Offers Grid - Mobile First */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+              {offers.map((offer) => (
+                <div
+                  key={offer._id}
+                  className="group relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] active:scale-95 sm:hover:-translate-y-1 sm:hover:scale-[1.02] overflow-hidden flex flex-col"
+                  onClick={() => handleOfferSelect(offer)}
+                >
+                  {/* Header with Icon */}
+                  <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-3 sm:p-4 text-center relative overflow-hidden flex-shrink-0">
+                    <div className="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 bg-[#0e540b] opacity-10 rounded-bl-full"></div>
+                    <div className="relative z-10">
+                      <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
+                        <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-[#0e540b]" />
+                      </div>
+                      <h3 className="text-base font-poppins sm:text-lg font-bold text-gray-800 mb-1">
+                        {offer.title}
+                      </h3>
+                      <div className="flex font-assistant items-center justify-center gap-1 text-gray-600 text-xs">
+                        <Leaf className="w-3 h-3" />
+                        <span>
+                          {offer.vegetables?.length / 2 || 0} vegetables
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-3 sm:p-4 flex-1 flex flex-col">
+                    {/* Price */}
+                    <div className="text-center mb-3 flex-shrink-0">
+                      <div className="flex items-center justify-center gap-1.5 mb-1">
+                        <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0e540b]" />
+                        <span className="text-xs font-medium font-assistant text-gray-600">
+                          Price
+                        </span>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-assistant font-bold text-[#0e540b]">
+                        ₹{offer.price}
+                      </p>
+                    </div>
+
+                    {/* Description */}
+                    {offer.description && (
+                      <p className="text-gray-900 font-assistant text-sm font-bold text-center mb-3 leading-relaxed flex-shrink-0 px-2">
+                        {offer.description}
+                      </p>
+                    )}
+
+                    {/* Vegetables List */}
+                    {offer.vegetables && offer.vegetables.length > 0 && (
+                      <div className="bg-green-50 rounded-lg p-2.5 sm:p-3 mb-3 border border-green-100 flex-shrink-0">
+                        <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
+                          <Check className="w-3.5 h-3.5 font-assistant text-[#0e540b]" />
+                          What's Included:
+                        </p>
+                        <ul className="space-y-1.5 font-assistant">
+                          {offer.vegetables.slice(0, 3).map((veg, index) => (
+                            <li
+                              key={veg._id || index}
+                              className="text-xs text-gray-700 flex items-center gap-1.5"
+                            >
+                              <div className="w-1 h-1 rounded-full bg-[#0e540b] flex-shrink-0"></div>
+                              <span className="truncate font-assistant">
+                                {veg.name}
+                              </span>
+                            </li>
+                          ))}
+                          {offer.vegetables.length > 3 && (
+                            <li className="text-xs text-[#0e540b] font-medium flex items-center gap-1.5">
+                              <div className="w-1 h-1 rounded-full font-assistant bg-[#0e540b] flex-shrink-0"></div>
+                              +{offer.vegetables.length - 3} more vegetables
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Select Button */}
+                    <button
+                      aria-label={`Select ${offer.title} package`}
+                      className="w-full font-assistant bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2.5 sm:py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 group-hover:scale-105 text-xs sm:text-sm mt-auto"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      Select Package
+                    </button>
+                  </div>
+
+                  {/* Popular Badge */}
+                  {offer.popular && (
+                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
+                      Popular
+                    </div>
+                  )}
+
+                  {/* Click Count Badge (Optional - for analytics) */}
+                  {offer.clickCount > 0 && (
+                    <div className="absolute bottom-2 left-2 bg-gray-100 text-gray-700 text-[9px] font-medium px-1.5 py-0.5 rounded-full">
+                      {offer.clickCount} views
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Help Section */}
+            <div className="mt-4 sm:mt-6 text-center px-2">
+              <div className="bg-white rounded-xl shadow-md p-3 sm:p-4 max-w-2xl mx-auto border border-green-100">
+                <div className="flex items-center justify-center gap-1.5 mb-2">
+                  <Leaf className="w-4 h-4 text-[#0e540b]" />
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-800">
+                    Fresh & Organic
+                  </h3>
+                </div>
+                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                  All packages include farm-fresh, organic vegetables delivered
+                  directly to your doorstep. You can customize your selection in
+                  the next step.
+                </p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -23,6 +23,7 @@
     "react-google-recaptcha-v3": "^1.11.0",
     "react-hook-form": "^7.63.0",
     "react-i18next": "^16.0.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.2",
     "tailwindcss": "^4.1.13",
     "twilio": "^5.9.0"
