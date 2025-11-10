@@ -66,6 +66,7 @@ const VegetableCart = () => {
           `${import.meta.env.VITE_API_SERVER_URL}/api/orders/today/orders`
         );
         setOrderCount(response.data.data.count + 1);
+        console.log(orderCount)
       } catch (error) {
         console.error("Error fetching order count:", error);
       }
@@ -152,7 +153,7 @@ const VegetableCart = () => {
   const deliveryCharge = 20;
 
   // Generate Order ID
-  const generateOrderId = (orderCount = 1) => {
+  const generateOrderId = (orderCount) => {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");

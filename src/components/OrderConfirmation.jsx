@@ -76,6 +76,7 @@ const OrderConfirmation = () => {
           `${import.meta.env.VITE_API_SERVER_URL}/api/orders/today/orders`
         );
         setOrderCount(res.data.data.count + 1);
+        console.log(orderCount)
       } catch (err) {
         console.error("Error fetching order count:", err);
       }
@@ -85,7 +86,7 @@ const OrderConfirmation = () => {
 
   const handleNewOrder = () => resetOrder();
 
-  const generateOrderId = (count = 1) => {
+  const generateOrderId = (count) => {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -213,7 +214,7 @@ const OrderConfirmation = () => {
     isBasketOrder,
     totalAmount,
   ]);
-  // console.log(orderData)
+  console.log(orderData)
 
   // 🧾 Submit Order
   const handleSubmitOrder = useCallback(
