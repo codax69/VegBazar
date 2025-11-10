@@ -31,7 +31,9 @@ const OrderConfirmation = () => {
     isOrderPlaced,
     paymentMethod,
   } = useOrderContext();
-
+ console.log(formData)
+ console.log(formData.city)
+ console.log(formData.area)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [orderCount, setOrderCount] = useState(1);
@@ -214,7 +216,7 @@ const OrderConfirmation = () => {
     isBasketOrder,
     totalAmount,
   ]);
-  // console.log(orderData)
+  console.log(orderData)
 
   // 🧾 Submit Order
   const handleSubmitOrder = useCallback(
