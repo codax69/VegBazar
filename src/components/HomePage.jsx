@@ -14,9 +14,9 @@ import {
   Minus,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
-import Veggies from "../../public/veggies.svg";
-import Store from "../../public/fruit-Store.svg";
-import vegbazarLogo from "../../public/vegbazar.svg";
+import Veggies from "../assets/veggies.svg";
+import Store from "";
+import vegbazarLogo from "../assets/Fruit-Store.svg";
 import axios from "axios";
 
 const Homepage = () => {
