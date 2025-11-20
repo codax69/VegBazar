@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, List } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
 
@@ -74,6 +74,12 @@ const VegetableSelection = () => {
     [selectedOffer?.vegetableLimit, setSelectedVegetables]
   );
 
+  // Handle "All Vegetables" button click
+  const handleAllVegetables = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    navigate("/all-vegetables");
+  }, [navigate]);
+
   // Fetch vegetables with loading state
   useEffect(() => {
     const fetchOfferDetails = async () => {
@@ -146,21 +152,33 @@ const VegetableSelection = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-32 sm:pb-20">
       {/* Mobile optimized container */}
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <div className="bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg p-3 sm:p-5 md:p-7">
           {/* Mobile-First Header */}
           <div className="mb-4 sm:mb-5">
-            {/* Back Button */}
-            <button
-              onClick={handleBack}
-              className="font-assistant flex items-center text-[#0e540b] hover:text-green-700 transition-colors text-sm sm:text-base touch-manipulation active:scale-95 mb-3 sm:mb-4"
-              aria-label="Back to Offers"
-            >
-              <ArrowLeft size={18} className="mr-2" />
-              Back to Offers
-            </button>
+            {/* Back Button and All Vegetables Button Row */}
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <button
+                onClick={handleBack}
+                className="font-assistant flex items-center text-[#0e540b] hover:text-green-700 transition-colors text-sm sm:text-base touch-manipulation active:scale-95"
+                aria-label="Back to Offers"
+              >
+                <ArrowLeft size={18} className="mr-2" />
+                Back to Offers
+              </button>
+              
+              <button
+                onClick={handleAllVegetables}
+                className="font-assistant flex items-center gap-1.5 px-3 py-1.5 bg-[#0e540b] text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-green-700 transition-colors touch-manipulation active:scale-95"
+                aria-label="View All Vegetables"
+              >
+                <List size={16} />
+                <span className="hidden xs:inline">All Vegetables</span>
+                <span className="xs:hidden">All</span>
+              </button>
+            </div>
 
             {/* Title Section */}
             <div className="text-center px-2">
@@ -282,8 +300,8 @@ const VegetableSelection = () => {
                 })}
               </div>
 
-              {/* Action Section - Mobile Optimized */}
-              <div className="text-center space-y-2 sm:space-y-3">
+              {/* Action Section - Desktop Only (Hidden on Mobile) */}
+              <div className="hidden sm:block text-center space-y-2 sm:space-y-3">
                 {canProceed ? (
                   <button
                     onClick={handleContinue}
@@ -311,6 +329,36 @@ const VegetableSelection = () => {
                 )}
               </div>
             </>
+          )}
+        </div>
+      </div>
+
+      {/* Sticky Bottom Bar - Mobile Only */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl z-50">
+        <div className="px-4 py-3">
+          {canProceed ? (
+            <button
+              onClick={handleContinue}
+              className="font-assistant w-full px-6 py-3.5 rounded-xl font-bold 
+              text-base transition-all duration-300 text-white transform active:scale-95
+              bg-[#0e540b] shadow-lg
+              touch-manipulation min-h-[52px] flex items-center justify-center"
+            >
+              Continue to Checkout
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3">
+                <p className="font-assistant text-sm text-red-600 font-medium text-center">
+                  Select {remainingCount} more vegetable{remainingCount !== 1 ? "s" : ""} to proceed
+                </p>
+              </div>
+              {selectedVegetables.length === 0 && (
+                <p className="font-assistant text-xs text-gray-500 text-center">
+                   Tap on vegetables above to select them
+                </p>
+              )}
+            </div>
           )}
         </div>
       </div>

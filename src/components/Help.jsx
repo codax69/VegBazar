@@ -22,6 +22,7 @@ const Help = () => {
   const handleSubmit = async() => {
 
     const submitTestimonial = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/testimonials`,feedback)
+    // eslint-disable-next-line no-unused-vars
     const data = await submitTestimonial.data
     // console.log(data)
     if (!feedback.name || !feedback.email || !feedback.comment || feedback.rating === 0) {

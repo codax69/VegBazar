@@ -23,6 +23,7 @@ import Navbar from "./components/Navbar";
 import OrderTracking from "./components/OrderTracking";
 import { Home, Tag, ShoppingBag, Phone, Menu, X } from "lucide-react";
 import BackButtonHandler from "./components/BackButtonHandler";
+import { CartProvider, useCart } from "./Context/CartContext";
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -163,9 +164,11 @@ const VegetableSellingApp = () => {
       reCaptchaKey={import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY}
       scriptProps={{ async: false, defer: false, appendTo: "head" }}
     >
-      <Router>
-        <AppContent />
-      </Router>
+      <CartProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </CartProvider>
     </GoogleReCaptchaProvider>
   );
 };

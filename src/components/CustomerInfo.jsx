@@ -38,6 +38,22 @@ const CustomerInfo = () => {
 
   const watchedCity = watch("city");
 
+  /* ----------------------------------------------
+      1️⃣ LOAD CUSTOMER INFO FROM LOCAL STORAGE
+  ------------------------------------------------*/
+  useEffect(() => {
+    const saved = localStorage.getItem("customerInfo");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      Object.keys(parsed).forEach((key) => {
+        if (parsed[key]) setValue(key, parsed[key]);
+      });
+
+      // Also update context
+      setFormData(parsed);
+    }
+  }, [setValue, setFormData]);
+
   const CityApiCall = async () => {
     try {
       const response = await axios.get(
@@ -57,9 +73,18 @@ const CustomerInfo = () => {
     if (watchedCity) setValue("area", "");
   }, [watchedCity, setValue]);
 
+  /* ----------------------------------------------
+      2️⃣ SAVE CUSTOMER INFO TO LOCAL STORAGE
+  ------------------------------------------------*/
   const onSubmit = (data) => {
     window.scrollTo(0, 0);
+
+    // Save to context
     setFormData(data);
+
+    // Save to localStorage
+    localStorage.setItem("customerInfo", JSON.stringify(data));
+
     navigate(selectedOffer ? "/billing" : "/veg-bag");
   };
 
@@ -101,7 +126,7 @@ const CustomerInfo = () => {
                   title: "24/7 Support",
                   desc: "Always here to help you",
                 },
-                // eslint-disable-next-line no-unused-vars
+              // eslint-disable-next-line no-unused-vars
               ].map(({ icon: Icon, title, desc }, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
@@ -163,9 +188,7 @@ const CustomerInfo = () => {
                     errors.address ? "border-red-500" : "border-gray-300"
                   } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] resize-none bg-white`}
                   placeholder="House no., Street name, Landmark..."
-                  {...register("address", {
-                    required: "Address is required.",
-                  })}
+                  {...register("address", { required: "Address is required." })}
                 />
                 {errors.address && (
                   <p className="flex items-center gap-1 mt-1 text-red-500 text-xs">
@@ -175,7 +198,7 @@ const CustomerInfo = () => {
                 )}
               </div>
 
-              {/* City & Area */}
+              {/* City + Area */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-poppins text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
@@ -212,14 +235,10 @@ const CustomerInfo = () => {
                     className={`w-full font-assistant px-3 py-2 text-sm border ${
                       errors.area ? "border-red-500" : "border-gray-300"
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] ${
-                      !watchedCity
-                        ? "bg-gray-100 cursor-not-allowed"
-                        : "bg-white"
+                      !watchedCity ? "bg-gray-100 cursor-not-allowed" : "bg-white"
                     }`}
                     disabled={!watchedCity}
-                    {...register("area", {
-                      required: "Please select an area.",
-                    })}
+                    {...register("area", { required: "Please select an area." })}
                   >
                     <option value="">
                       {watchedCity ? "Select Area" : "Select City First"}
@@ -297,10 +316,9 @@ const CustomerInfo = () => {
                 )}
               </div>
 
-              {/* Submit */}
               <button
                 type="submit"
-                className="w-full font-assistant  bg-[#0e540b] text-white font-semibold py-3 px-6 rounded-lg hover:bg-[#0a3f08] transition-all duration-300 shadow-md flex items-center justify-center gap-2 mt-4 text-sm"
+                className="w-full font-assistant bg-[#0e540b] text-white font-semibold py-3 px-6 rounded-lg hover:bg-[#0a3f08] transition-all duration-300 shadow-md flex items-center justify-center gap-2 mt-4 text-sm"
               >
                 Continue to Offers
                 <FiArrowRight className="w-4 h-4" />

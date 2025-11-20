@@ -48,13 +48,13 @@ const BillingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pt-20 pb-24 lg:pb-0">
       <div className="max-w-6xl mx-auto">
         {/* Back */}
         <button
           onClick={() => {
             window.scrollTo(0, 0);
-            navigate("/select-vegetables");
+            navigate(window.history());
           }}
           className="flex items-center gap-1.5 mb-3 text-gray-700 hover:text-[#0e540b] transition-colors group"
         >
@@ -182,8 +182,8 @@ const BillingPage = () => {
             </div>
           </div>
 
-          {/* Right Section */}
-          <div className="lg:col-span-1">
+          {/* Right Section - Desktop Only */}
+          <div className="lg:col-span-1 hidden lg:block">
             <div className="bg-white text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100 lg:sticky lg:top-4">
               <h2 className="text-base font-poppins font-bold text-gray-800 mb-3 flex items-center gap-1.5">
                 <FiShield className="size-4 text-[#0e540b]" />
@@ -210,44 +210,6 @@ const BillingPage = () => {
                   </span>
                 </div>
               </div>
-
-              {/* Price Comparison Table */}
-              {/* <div className="mt-4 border border-green-100 rounded-xl overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-green-100 text-[#023D01]">
-                    <tr>
-                      <th className="py-2 px-3 text-left font-semibold">
-                        Category
-                      </th>
-                      <th className="py-2 px-3 text-right font-semibold">
-                        Price (₹)
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white text-[#023D01]">
-                    <tr className="border-b border-gray-200">
-                      <td className="py-2 px-3">Local Market</td>
-                      <td className="py-2 px-3 text-right font-medium">
-                        ₹{marketTotal.toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-2 px-3">VegBazar Offer</td>
-                      <td className="py-2 px-3 text-right font-medium text-green-600">
-                        ₹{vegBazarTotal.toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-bold text-[#0e540b]">
-                        You Save
-                      </td>
-                      <td className="py-2 px-3 text-right font-bold text-[#0e540b]">
-                        ₹{savings.toFixed(2)}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div> */}
 
               {/* Payment Button */}
               <div className="space-y-2 mt-3">
@@ -293,6 +255,46 @@ const BillingPage = () => {
                 <p className="text-[10px] font-assistant text-gray-500">{desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Sticky Payment Button */}
+      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-white border-t border-gray-200 shadow-2xl z-50">
+        <div className="px-4 py-3">
+          {/* Bill Summary - Compact */}
+          <div className="flex justify-between items-center mb-2 text-sm">
+            <span className="text-gray-600 font-assistant">Total Amount</span>
+            <span className="text-lg font-bold text-[#0e540b]">₹{totalAmount}</span>
+          </div>
+
+          {/* Payment Button */}
+          {paymentMethod === "ONLINE" && (
+            <div className="w-full">
+              <RazorpayPayment orderType="basket" />
+            </div>
+          )}
+          {paymentMethod === "COD" && (
+            <button
+              onClick={handleCOD}
+              className="w-full py-3 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg active:scale-95"
+            >
+              Place Order - ₹{totalAmount}
+            </button>
+          )}
+          {!paymentMethod && (
+            <button
+              disabled
+              className="w-full py-3 rounded-xl font-assistant bg-gray-300 text-gray-500 font-bold cursor-not-allowed"
+            >
+              Select Payment Method
+            </button>
+          )}
+
+          {/* Secure Badge */}
+          <div className="mt-2 flex items-center font-assistant justify-center space-x-1.5 text-[10px] text-gray-500">
+            <FiLock className="size-3" />
+            <span>Secure Checkout</span>
           </div>
         </div>
       </div>
