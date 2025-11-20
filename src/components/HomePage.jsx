@@ -516,8 +516,8 @@ const Homepage = () => {
   const features = [
     {
       icon: Clock,
-      title: "10-Min Delivery",
-      desc: "Lightning fast delivery to your doorstep",
+      title: "Delivery",
+      desc: "fast delivery to your doorstep",
     },
     {
       icon: Leaf,
@@ -527,7 +527,7 @@ const Homepage = () => {
     {
       icon: Star,
       title: "Quality Promise",
-      desc: "100% fresh or money back guarantee",
+      desc: "100% fresh or replace on your door guarantee",
     },
     {
       icon: Package,
@@ -546,7 +546,10 @@ const Homepage = () => {
       {/* Floating Cart Button */}
       {totalCartItems > 0 && (
         <button
-          onClick={() => navigate("/vegetable-cart")}
+          onClick={() => {
+            window.scrollTo(0, 0);
+            navigate("/veg-bag");
+          }}
           className="fixed bottom-24 md:bottom-20 right-10 z-50 bg-[#0e540b] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform duration-300 flex items-center gap-2"
         >
           <ShoppingCart className="w-6 h-6" />
@@ -852,7 +855,10 @@ const Homepage = () => {
             Start your healthy journey today
           </p>
           <button
-            onClick={() => navigate("/vegetables")}
+            onClick={() => {
+              window.scrollTo(0, 0);
+              navigate("/vegetables");
+            }}
             className="bg-white text-[#0e540b] px-10 py-4 rounded-xl font-bold text-lg hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
           >
             Shop Now
@@ -913,7 +919,10 @@ const Homepage = () => {
               <ul className="space-y-2 text-sm">
                 <li>
                   <a
-                    href="#"
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                      navigate("/help");
+                    }}
                     className="text-white/70 hover:text-white transition-colors"
                   >
                     Contact Us
@@ -921,7 +930,10 @@ const Homepage = () => {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                      navigate("/track-your-order");
+                    }}
                     className="text-white/70 hover:text-white transition-colors"
                   >
                     Track Order

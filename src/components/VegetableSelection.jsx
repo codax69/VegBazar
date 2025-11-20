@@ -152,7 +152,7 @@ const VegetableSelection = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32 sm:pb-20">
+    <div className="min-h-screen bg-gray-50 pt-5 pb-20 sm:pb-20">
       {/* Mobile optimized container */}
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <div className="bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg p-3 sm:p-5 md:p-7">
@@ -199,7 +199,7 @@ const VegetableSelection = () => {
                 </p>
               )}
 
-              <div className="inline-flex font-poppins items-center gap-2 bg-green-50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mt-2">
+              <div className="inline-flex font-poppins items-center gap-2 bg-green-50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
                 <span className="font-assistant text-xs sm:text-sm md:text-base font-semibold">
                   <span
                     className={canProceed ? "text-green-600" : "text-gray-700"}
@@ -223,13 +223,6 @@ const VegetableSelection = () => {
             </div>
           ) : (
             <>
-              {/* Info Banner */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
-                <p className="text-[10px] sm:text-xs md:text-sm text-blue-800 text-center font-assistant">
-                  💡 All vegetables are priced at {offerWeightDisplay} as per this offer
-                </p>
-              </div>
-
               {/* Vegetables Grid - Mobile Optimized */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
                 {vegetables.map((vegetable) => {

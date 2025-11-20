@@ -48,13 +48,13 @@ const BillingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pt-20 pb-24 lg:pb-0">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pt-8 md:pt-20 pb-20 lg:pb-0">
       <div className="max-w-6xl mx-auto">
         {/* Back */}
         <button
           onClick={() => {
             window.scrollTo(0, 0);
-            navigate(window.history());
+            navigate("/select-vegetables");
           }}
           className="flex items-center gap-1.5 mb-3 text-gray-700 hover:text-[#0e540b] transition-colors group"
         >

@@ -446,7 +446,7 @@ const CustomizedVegetableSelection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white pb-32">
+    <div className="min-h-screen bg-white pb-20 md:pb-32">
       <div className="w-full max-w-7xl mx-auto mt-5 bg-white p-4 sm:p-6 md:p-8">
         {/* Header */}
         <div className="flex items-center md:justify-between gap-10 mb-8 pb-4 border-b-2 border-gray-100">

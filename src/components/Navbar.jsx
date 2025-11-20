@@ -72,6 +72,11 @@ const Navbar = () => {
       icon: MdLocalShipping,
       label: "Track",
       activeColor: "text-green-600",
+    },{
+      path: "/help",
+      icon: FiPhone,
+      label: "Contact",
+      activeColor: "text-green-600",
     },
   ];
 
@@ -253,7 +258,7 @@ const Navbar = () => {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={`
-                  flex flex-col items-center justify-center gap-1 cursor-pointer
+                  flex flex-col items-center justify-center gap-0.5 cursor-pointer
                   transition-all duration-300 px-3 py-1 rounded-lg
                   ${active ? "scale-110" : "scale-100"}
                 `}
@@ -266,7 +271,7 @@ const Navbar = () => {
                 >
                   <Icon
                     className={`
-                      w-6 h-6 transition-all duration-300
+                      w-5 h-5 transition-all duration-300
                       ${active ? item.activeColor : "text-gray-500"}
                     `}
                   />

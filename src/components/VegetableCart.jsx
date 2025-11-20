@@ -390,7 +390,7 @@ const VegetableCart = () => {
             pricePerUnit * acc[existingIndex].quantity;
         } else {
           // Keep separate: different ID or different weight
-          console.log(`➕ Adding ${item.name} (${weight}) as separate item`);
+          // console.log(`➕ Adding ${item.name} (${weight}) as separate item`);
           acc.push({
             ...item,
             vegetableId: vegetableId,
@@ -401,15 +401,15 @@ const VegetableCart = () => {
         return acc;
       }, []);
 
-      console.log(
-        "✅ Final unique vegetables:",
-        uniqueVegetables.map((i) => ({
-          id: i.vegetableId || i.id,
-          name: i.name,
-          weight: i.weight,
-          qty: i.quantity,
-        }))
-      );
+      // console.log(
+      //   "✅ Final unique vegetables:",
+      //   uniqueVegetables.map((i) => ({
+      //     id: i.vegetableId || i.id,
+      //     name: i.name,
+      //     weight: i.weight,
+      //     qty: i.quantity,
+      //   }))
+      // );
 
       // Update cart if duplicates were merged
       if (uniqueVegetables.length !== normalizedItems.length) {
@@ -453,9 +453,9 @@ const VegetableCart = () => {
           const pricePerUnit =
             parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
 
-          console.log(
-            `📦 Mapping vegetable: ${item.name}, ID: ${vegetableId}, Weight: ${item.weight}, Qty: ${item.quantity}`
-          );
+          // console.log(
+          //   `📦 Mapping vegetable: ${item.name}, ID: ${vegetableId}, Weight: ${item.weight}, Qty: ${item.quantity}`
+          // );
 
           return {
             vegetable: vegetableId,
@@ -475,22 +475,22 @@ const VegetableCart = () => {
         orderDate: new Date().toISOString(),
       };
 
-      console.log(
-        "📤 Order Data being sent:",
-        JSON.stringify(orderData, null, 2)
-      );
-      console.log(
-        `📊 Sending ${uniqueVegetables.length} unique vegetables to backend`
-      );
-      console.log(
-        "🆔 Vegetable IDs being sent:",
-        uniqueVegetables.map((v) => ({
-          id: v.vegetableId || v.id,
-          name: v.name,
-          weight: v.weight,
-          qty: v.quantity,
-        }))
-      );
+      // console.log(
+      //   "📤 Order Data being sent:",
+      //   JSON.stringify(orderData, null, 2)
+      // );
+      // console.log(
+      //   `📊 Sending ${uniqueVegetables.length} unique vegetables to backend`
+      // );
+      // console.log(
+      //   "🆔 Vegetable IDs being sent:",
+      //   uniqueVegetables.map((v) => ({
+      //     id: v.vegetableId || v.id,
+      //     name: v.name,
+      //     weight: v.weight,
+      //     qty: v.quantity,
+      //   }))
+      // );
 
       if (paymentMethod === "COD") {
         const response = await axios.post(
@@ -554,7 +554,7 @@ const VegetableCart = () => {
         <div className="mb-4 md:mb-3">
           <div className="flex gap-1 flex-col items-center justify-between">
             <button
-              onClick={() => navigate("/vegetables")}
+              onClick={() => navigate("/")}
               className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-green-700 hover:bg-green-50 rounded-lg transition font-assistant text-sm font-semibold"
             >
               <ArrowLeft size={16} className="mr-1" />
@@ -578,7 +578,10 @@ const VegetableCart = () => {
               Add fresh vegetables to get started!
             </p>
             <button
-              onClick={() => window.history.back()}
+              onClick={() => {
+                window.scrollTo(0, 0);
+                navigate("/");
+              }}
               className="font-assistant px-4 py-2 bg-green-700 text-white rounded-lg font-semibold text-sm hover:bg-green-800 transition"
             >
               Browse Vegetables

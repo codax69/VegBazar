@@ -4,7 +4,7 @@ import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
 
 const VegetableOffers = () => {
-  const { offers, setSelectedOffer, setVegetableOrder, navigate } =
+  const { offers, setSelectedOffer, setVegetableOrder,setSelectedVegetables ,navigate } =
     useOrderContext();
 
   // Track offer click
@@ -21,6 +21,7 @@ const VegetableOffers = () => {
   };
   useEffect(() => {
     setVegetableOrder([]);
+    setSelectedVegetables([]);
   }, []);
 
   const handleOfferSelect = async (offer) => {

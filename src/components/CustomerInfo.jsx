@@ -38,9 +38,6 @@ const CustomerInfo = () => {
 
   const watchedCity = watch("city");
 
-  /* ----------------------------------------------
-      1️⃣ LOAD CUSTOMER INFO FROM LOCAL STORAGE
-  ------------------------------------------------*/
   useEffect(() => {
     const saved = localStorage.getItem("customerInfo");
     if (saved) {
@@ -73,9 +70,6 @@ const CustomerInfo = () => {
     if (watchedCity) setValue("area", "");
   }, [watchedCity, setValue]);
 
-  /* ----------------------------------------------
-      2️⃣ SAVE CUSTOMER INFO TO LOCAL STORAGE
-  ------------------------------------------------*/
   const onSubmit = (data) => {
     window.scrollTo(0, 0);
 
@@ -126,7 +120,7 @@ const CustomerInfo = () => {
                   title: "24/7 Support",
                   desc: "Always here to help you",
                 },
-              // eslint-disable-next-line no-unused-vars
+                // eslint-disable-next-line no-unused-vars
               ].map(({ icon: Icon, title, desc }, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
@@ -235,10 +229,14 @@ const CustomerInfo = () => {
                     className={`w-full font-assistant px-3 py-2 text-sm border ${
                       errors.area ? "border-red-500" : "border-gray-300"
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] ${
-                      !watchedCity ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+                      !watchedCity
+                        ? "bg-gray-100 cursor-not-allowed"
+                        : "bg-white"
                     }`}
                     disabled={!watchedCity}
-                    {...register("area", { required: "Please select an area." })}
+                    {...register("area", {
+                      required: "Please select an area.",
+                    })}
                   >
                     <option value="">
                       {watchedCity ? "Select Area" : "Select City First"}
@@ -318,11 +316,29 @@ const CustomerInfo = () => {
 
               <button
                 type="submit"
-                className="w-full font-assistant bg-[#0e540b] text-white font-semibold py-3 px-6 rounded-lg hover:bg-[#0a3f08] transition-all duration-300 shadow-md flex items-center justify-center gap-2 mt-4 text-sm"
+                className="hidden font-assistant w-full px-6 py-3.5 rounded-xl font-bold 
+              text-base transition-all duration-300 text-white transform active:scale-95
+              bg-[#0e540b] shadow-lg
+              touch-manipulation min-h-[52px] md:flex items-center justify-center"
               >
-                Continue to Offers
+                Continue
                 <FiArrowRight className="w-4 h-4" />
               </button>
+              <div className="fixed md:hidden lg:hidden bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+                <div className="w-full md:max-w-5xl mx-auto px-4 py-3 md:py-4">
+                  <button
+                    type="submit"
+                    onClick={handleSubmit(onSubmit)}
+                    className="font-assistant w-full px-6 py-3.5 rounded-xl font-bold 
+            text-base transition-all duration-300 text-white transform active:scale-95
+            bg-[#0e540b] hover:bg-[#0a3f08] shadow-lg
+            touch-manipulation min-h-[52px] flex items-center justify-center gap-2"
+                  >
+                    Continue
+                    <FiArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
             </form>
           </div>
         </div>
