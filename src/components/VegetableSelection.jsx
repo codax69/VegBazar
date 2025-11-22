@@ -1,13 +1,165 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, memo } from "react";
 import { ArrowLeft, CheckCircle, List } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
+
+// Memoized VegetableCard component
+const VegetableCard = memo(({ 
+  vegetable, 
+  isSelected, 
+  isDisabled, 
+  onToggle 
+}) => {
+  const priceInfo = vegetable.priceForOffer;
+  const savings = priceInfo.marketPrice && priceInfo.marketPrice > priceInfo.price 
+    ? (priceInfo.marketPrice - priceInfo.price).toFixed(2) 
+    : null;
+
+  return (
+    <button
+      onClick={() => !isDisabled && onToggle(vegetable)}
+      disabled={isDisabled}
+      className={`w-full p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 touch-manipulation active:scale-95 ${
+        isSelected
+          ? "bg-green-100 border-[#0e540b] shadow-lg"
+          : "bg-[#f0fcf6] border-gray-300 shadow-md"
+      } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+      aria-label={`${isSelected ? "Deselect" : "Select"} ${vegetable.name}`}
+      aria-pressed={isSelected}
+    >
+      {/* Vegetable Image and Selection */}
+      <div className="text-center">
+        <div className="relative">
+          <img
+            className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover mx-auto rounded-lg sm:rounded-xl mb-1.5 sm:mb-2"
+            src={vegetable.image}
+            alt={vegetable.name}
+            loading="lazy"
+            decoding="async"
+          />
+          {isSelected && (
+            <div className="absolute -top-1 -right-1 bg-[#0e540b] rounded-full p-0.5 sm:p-1">
+              <CheckCircle size={14} className="text-white sm:w-4 sm:h-4" />
+            </div>
+          )}
+        </div>
+        <p className="font-medium font-assistant text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1">
+          {vegetable.name}
+        </p>
+      </div>
+
+      {/* Price Display */}
+      <div className="mt-1 sm:mt-2 text-center">
+        <div className="flex items-center justify-center gap-1 sm:gap-2">
+          <p className="font-assistant text-[#0e540b] font-bold text-sm sm:text-base">
+            ₹{priceInfo.price}
+          </p>
+          {priceInfo.marketPrice && priceInfo.marketPrice > priceInfo.price && (
+            <p className="font-assistant text-gray-400 line-through text-[10px] sm:text-xs">
+              ₹{priceInfo.marketPrice}
+            </p>
+          )}
+        </div>
+        <p className="text-[11px] sm:text-[11px] text-gray-500 font-assistant">
+          per {priceInfo.weight}
+        </p>
+        {savings && (
+          <p className="text-[9px] sm:text-[10px] text-green-600 font-assistant font-semibold mt-0.5">
+            Save ₹{savings}
+          </p>
+        )}
+      </div>
+    </button>
+  );
+});
+
+VegetableCard.displayName = 'VegetableCard';
+
+// Memoized Action Section
+const ActionSection = memo(({ 
+  canProceed, 
+  remainingCount, 
+  selectedCount,
+  onContinue 
+}) => (
+  <div className="hidden sm:block text-center space-y-2 sm:space-y-3">
+    {canProceed ? (
+      <button
+        onClick={onContinue}
+        className="font-assistant w-full px-6 sm:px-8 py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl font-bold 
+        text-sm sm:text-base md:text-lg transition-all duration-300 text-white transform hover:scale-105 active:scale-95
+        bg-[#0e540b] hover:bg-gradient-to-r hover:from-[#0e540b] hover:to-[#063a06] shadow-lg hover:shadow-xl
+        touch-manipulation min-h-[44px] sm:min-h-[48px]"
+      >
+        Continue to Checkout
+      </button>
+    ) : (
+      <div className="space-y-2">
+        <div className="bg-red-50 border-2 border-red-200 rounded-lg sm:rounded-xl p-2.5 sm:p-3">
+          <p className="font-assistant text-xs sm:text-sm text-red-600 font-medium">
+            Please select {remainingCount} more vegetable
+            {remainingCount !== 1 ? "s" : ""} to proceed
+          </p>
+        </div>
+        {selectedCount === 0 && (
+          <p className="font-assistant text-xs sm:text-sm text-gray-500 px-2">
+            👆 Tap on vegetables above to select them
+          </p>
+        )}
+      </div>
+    )}
+  </div>
+));
+
+ActionSection.displayName = 'ActionSection';
+
+// Memoized Mobile Bottom Bar
+const MobileBottomBar = memo(({ 
+  canProceed, 
+  remainingCount, 
+  selectedCount,
+  onContinue 
+}) => (
+  <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-[#f0fcf6] border-t-2 border-gray-200 shadow-2xl z-50">
+    <div className="px-4 py-3">
+      {canProceed ? (
+        <button
+          onClick={onContinue}
+          className="font-assistant w-full px-6 py-3.5 rounded-xl font-bold 
+          text-base transition-all duration-300 text-white transform active:scale-95
+          bg-[#0e540b] shadow-lg
+          touch-manipulation min-h-[52px] flex items-center justify-center"
+        >
+          Continue to Checkout
+        </button>
+      ) : (
+        <div className="space-y-2">
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3">
+            <p className="font-assistant text-sm text-red-600 font-medium text-center">
+              Select {remainingCount} more vegetable{remainingCount !== 1 ? "s" : ""} to proceed
+            </p>
+          </div>
+          {selectedCount === 0 && (
+            <p className="font-assistant text-xs text-gray-500 text-center">
+               Tap on vegetables above to select them
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+));
+
+MobileBottomBar.displayName = 'MobileBottomBar';
 
 const VegetableSelection = () => {
   const { selectedOffer, selectedVegetables, setSelectedVegetables, navigate } =
     useOrderContext();
   const [vegetables, setVegetables] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Memoize API URL
+  const API_URL = useMemo(() => import.meta.env.VITE_API_SERVER_URL, []);
 
   // Get the price for the offer's specified weight
   const getPriceForOfferWeight = useCallback((prices, marketPrices, offerWeight) => {
@@ -41,9 +193,15 @@ const VegetableSelection = () => {
     };
   }, []);
 
-  const isSelected = useCallback(
-    (vegetableId) => selectedVegetables.some((v) => v._id === vegetableId),
+  // Memoize selected vegetable IDs for faster lookups
+  const selectedIds = useMemo(
+    () => new Set(selectedVegetables.map(v => v._id)),
     [selectedVegetables]
+  );
+
+  const isSelected = useCallback(
+    (vegetableId) => selectedIds.has(vegetableId),
+    [selectedIds]
   );
 
   const handleVegetableToggle = useCallback(
@@ -52,10 +210,8 @@ const VegetableSelection = () => {
         const alreadySelected = prev.some((v) => v._id === vegetable._id);
 
         if (alreadySelected) {
-          // Remove from selected
           return prev.filter((v) => v._id !== vegetable._id);
         } else if (prev.length < selectedOffer?.vegetableLimit) {
-          // Add with the offer's specified weight pricing
           return [
             ...prev,
             {
@@ -74,7 +230,6 @@ const VegetableSelection = () => {
     [selectedOffer?.vegetableLimit, setSelectedVegetables]
   );
 
-  // Handle "All Vegetables" button click
   const handleAllVegetables = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     navigate("/all-vegetables");
@@ -83,26 +238,23 @@ const VegetableSelection = () => {
   // Fetch vegetables with loading state
   useEffect(() => {
     const fetchOfferDetails = async () => {
+      if (!selectedOffer?._id) return;
+
       try {
         setLoading(true);
         const response = await axios.get(
-          `${import.meta.env.VITE_API_SERVER_URL}/api/offers/${
-            selectedOffer?._id
-          }`
+          `${API_URL}/api/offers/${selectedOffer._id}`
         );
         const data = response.data.data.vegetables || [];
         
-        // Get the offer weight (use weight or totalWeight from offer)
         const offerWeight = selectedOffer?.weight || selectedOffer?.totalWeight || '500g';
         
-        // Get price for each vegetable based on offer weight
-        const processedVegetables = data.map(v => {
-          const priceForOffer = getPriceForOfferWeight(v.prices, v.marketPrices, offerWeight);
-          return {
-            ...v,
-            priceForOffer
-          };
-        }).filter(v => v.priceForOffer !== null); // Filter out vegetables without pricing
+        const processedVegetables = data
+          .map(v => {
+            const priceForOffer = getPriceForOfferWeight(v.prices, v.marketPrices, offerWeight);
+            return priceForOffer ? { ...v, priceForOffer } : null;
+          })
+          .filter(Boolean);
         
         setVegetables(processedVegetables);
       } catch (error) {
@@ -112,10 +264,8 @@ const VegetableSelection = () => {
       }
     };
 
-    if (selectedOffer?._id) {
-      fetchOfferDetails();
-    }
-  }, [selectedOffer, getPriceForOfferWeight]);
+    fetchOfferDetails();
+  }, [selectedOffer, getPriceForOfferWeight, API_URL]);
 
   // Memoized calculations
   const canProceed = useMemo(
@@ -128,13 +278,6 @@ const VegetableSelection = () => {
     [selectedOffer?.vegetableLimit, selectedVegetables.length]
   );
 
-  // Format offer weight display
-  const offerWeightDisplay = useMemo(() => {
-    const weight = selectedOffer?.weight || selectedOffer?.totalWeight;
-    if (!weight) return "";
-    return weight.toString();
-  }, [selectedOffer]);
-
   const handleContinue = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     navigate("/customer-info");
@@ -146,16 +289,20 @@ const VegetableSelection = () => {
   }, [navigate]);
 
   // Redirect if no offer selected
+  useEffect(() => {
+    if (!selectedOffer) {
+      navigate("/offers");
+    }
+  }, [selectedOffer, navigate]);
+
   if (!selectedOffer) {
-    navigate("/offers");
     return null;
   }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-5 pb-20 sm:pb-20">
-      {/* Mobile optimized container */}
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg p-3 sm:p-5 md:p-7">
+        <div className="bg-[#f0fcf6] rounded-lg sm:rounded-xl shadow-md sm:shadow-lg p-3 sm:p-5 md:p-7">
           {/* Mobile-First Header */}
           <div className="mb-4 sm:mb-5">
             {/* Back Button and All Vegetables Button Row */}
@@ -192,7 +339,6 @@ const VegetableSelection = () => {
                 - ₹{selectedOffer.price}
               </p>
               
-              {/* Offer Description */}
               {selectedOffer.description && (
                 <p className="text-xs sm:text-sm text-gray-600 font-assistant mb-2 px-2">
                   {selectedOffer.description}
@@ -223,138 +369,43 @@ const VegetableSelection = () => {
             </div>
           ) : (
             <>
-              {/* Vegetables Grid - Mobile Optimized */}
+              {/* Vegetables Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
                 {vegetables.map((vegetable) => {
                   const selected = isSelected(vegetable._id);
-                  const isDisabled =
-                    !selected &&
-                    selectedVegetables.length >= selectedOffer.vegetableLimit;
-                  
-                  const priceInfo = vegetable.priceForOffer;
+                  const isDisabled = !selected && selectedVegetables.length >= selectedOffer.vegetableLimit;
 
                   return (
-                    <button
+                    <VegetableCard
                       key={vegetable._id}
-                      onClick={() => !isDisabled && handleVegetableToggle(vegetable)}
-                      disabled={isDisabled}
-                      className={`w-full p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 touch-manipulation active:scale-95 ${
-                        selected
-                          ? "bg-green-100 border-[#0e540b] shadow-lg"
-                          : "bg-white border-gray-300 shadow-md"
-                      } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                      aria-label={`${selected ? "Deselect" : "Select"} ${vegetable.name}`}
-                      aria-pressed={selected}
-                    >
-                      {/* Vegetable Image and Selection */}
-                      <div className="text-center">
-                        <div className="relative">
-                          <img
-                            className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover mx-auto rounded-lg sm:rounded-xl mb-1.5 sm:mb-2"
-                            src={vegetable.image}
-                            alt={vegetable.name}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                          {selected && (
-                            <div className="absolute -top-1 -right-1 bg-[#0e540b] rounded-full p-0.5 sm:p-1">
-                              <CheckCircle size={14} className="text-white sm:w-4 sm:h-4" />
-                            </div>
-                          )}
-                        </div>
-                        <p className="font-medium font-assistant text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1">
-                          {vegetable.name}
-                        </p>
-                      </div>
-
-                      {/* Price Display */}
-                      <div className="mt-1 sm:mt-2 text-center">
-                        <div className="flex items-center justify-center gap-1 sm:gap-2">
-                          <p className="font-assistant text-[#0e540b] font-bold text-sm sm:text-base">
-                            ₹{priceInfo.price}
-                          </p>
-                          {priceInfo.marketPrice && priceInfo.marketPrice > priceInfo.price && (
-                            <p className="font-assistant text-gray-400 line-through text-[10px] sm:text-xs">
-                              ₹{priceInfo.marketPrice}
-                            </p>
-                          )}
-                        </div>
-                        <p className="text-[11px] sm:text-[11px] text-gray-500 font-assistant">
-                          per {priceInfo.weight}
-                        </p>
-                        {priceInfo.marketPrice && priceInfo.marketPrice > priceInfo.price && (
-                          <p className="text-[9px] sm:text-[10px] text-green-600 font-assistant font-semibold mt-0.5">
-                            Save ₹{(priceInfo.marketPrice - priceInfo.price).toFixed(2)}
-                          </p>
-                        )}
-                      </div>
-                    </button>
+                      vegetable={vegetable}
+                      isSelected={selected}
+                      isDisabled={isDisabled}
+                      onToggle={handleVegetableToggle}
+                    />
                   );
                 })}
               </div>
 
-              {/* Action Section - Desktop Only (Hidden on Mobile) */}
-              <div className="hidden sm:block text-center space-y-2 sm:space-y-3">
-                {canProceed ? (
-                  <button
-                    onClick={handleContinue}
-                    className="font-assistant w-full px-6 sm:px-8 py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl font-bold 
-                    text-sm sm:text-base md:text-lg transition-all duration-300 text-white transform hover:scale-105 active:scale-95
-                    bg-[#0e540b] hover:bg-gradient-to-r hover:from-[#0e540b] hover:to-[#063a06] shadow-lg hover:shadow-xl
-                    touch-manipulation min-h-[44px] sm:min-h-[48px]"
-                  >
-                    Continue to Checkout
-                  </button>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="bg-red-50 border-2 border-red-200 rounded-lg sm:rounded-xl p-2.5 sm:p-3">
-                      <p className="font-assistant text-xs sm:text-sm text-red-600 font-medium">
-                        Please select {remainingCount} more vegetable
-                        {remainingCount !== 1 ? "s" : ""} to proceed
-                      </p>
-                    </div>
-                    {selectedVegetables.length === 0 && (
-                      <p className="font-assistant text-xs sm:text-sm text-gray-500 px-2">
-                        👆 Tap on vegetables above to select them
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
+              {/* Desktop Action Section */}
+              <ActionSection
+                canProceed={canProceed}
+                remainingCount={remainingCount}
+                selectedCount={selectedVegetables.length}
+                onContinue={handleContinue}
+              />
             </>
           )}
         </div>
       </div>
 
-      {/* Sticky Bottom Bar - Mobile Only */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl z-50">
-        <div className="px-4 py-3">
-          {canProceed ? (
-            <button
-              onClick={handleContinue}
-              className="font-assistant w-full px-6 py-3.5 rounded-xl font-bold 
-              text-base transition-all duration-300 text-white transform active:scale-95
-              bg-[#0e540b] shadow-lg
-              touch-manipulation min-h-[52px] flex items-center justify-center"
-            >
-              Continue to Checkout
-            </button>
-          ) : (
-            <div className="space-y-2">
-              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3">
-                <p className="font-assistant text-sm text-red-600 font-medium text-center">
-                  Select {remainingCount} more vegetable{remainingCount !== 1 ? "s" : ""} to proceed
-                </p>
-              </div>
-              {selectedVegetables.length === 0 && (
-                <p className="font-assistant text-xs text-gray-500 text-center">
-                   Tap on vegetables above to select them
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Mobile Bottom Bar */}
+      <MobileBottomBar
+        canProceed={canProceed}
+        remainingCount={remainingCount}
+        selectedCount={selectedVegetables.length}
+        onContinue={handleContinue}
+      />
     </div>
   );
 };

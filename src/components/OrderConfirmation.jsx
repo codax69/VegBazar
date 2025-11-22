@@ -330,7 +330,7 @@ const OrderConfirmation = () => {
         </button>
 
         {/* Main Card */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-[#f0fcf6] rounded-xl shadow-lg overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-[#0e540b] to-green-700 p-4">
             <div className="flex items-center justify-center gap-2 mb-1">
@@ -460,7 +460,7 @@ const OrderConfirmation = () => {
                       return (
                         <div
                           key={i}
-                          className="bg-white p-2 rounded border border-green-200 flex justify-between items-center"
+                          className="bg-[#f0fcf6] p-2 rounded border border-green-200 flex justify-between items-center"
                         >
                           <div className="flex-1">
                             <span className="font-medium font-assistant text-gray-800 text-sm">
@@ -527,7 +527,7 @@ const OrderConfirmation = () => {
 
                 {/* Price Summary - For custom orders */}
                 {isCustomOrder && (
-                  <div className="mt-3 p-3 bg-white rounded border border-green-200">
+                  <div className="mt-3 p-3 bg-[#f0fcf6] rounded border border-green-200">
                     <div className="space-y-1.5 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600 font-assistant">
@@ -559,7 +559,7 @@ const OrderConfirmation = () => {
 
                 {/* Price Summary - For basket orders */}
                 {isBasketOrder && (
-                  <div className="mt-3 p-3 bg-white rounded border border-green-200">
+                  <div className="mt-3 p-3 bg-[#f0fcf6] rounded border border-green-200">
                     <div className="space-y-1.5 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600 font-poppins">

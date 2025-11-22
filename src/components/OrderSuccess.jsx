@@ -64,7 +64,7 @@ const OrderSuccess = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center py-6 px-3 sm:px-4 pt-20">
-      <div className="max-w-2xl w-full bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-xl">
+      <div className="max-w-2xl w-full bg-[#f0fcf6] p-4 sm:p-6 md:p-8 rounded-2xl shadow-xl">
         {/* Success Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-4">
@@ -203,7 +203,7 @@ const OrderSuccess = ({
                   {displayVegetables.map((veg) => (
                     <div
                       key={veg.key}
-                      className="bg-white p-2 sm:p-3 rounded-lg border border-green-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1"
+                      className="bg-[#f0fcf6] p-2 sm:p-3 rounded-lg border border-green-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1"
                     >
                       <div className="flex-1 min-w-0">
                         <span className="font-medium text-gray-800 font-assistant text-sm break-words">

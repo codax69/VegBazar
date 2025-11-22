@@ -119,7 +119,7 @@ const AppContent = () => {
     <ThemeProvider>
       <OrderContext.Provider value={contextValue}>
         <BackButtonHandler />
-        <div className="min-h-screen bg-gradient-to-b from-green-50 via-blue-50 to-green-100 flex flex-col">
+        <div className="min-h-screen bg-[#f0fcf6] flex flex-col">
           <Navbar />
           <div className="pt-16 flex-1 container max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
             {![
@@ -127,6 +127,7 @@ const AppContent = () => {
               "/veg-bag",
               "/vegetables",
               "/track-your-order",
+              "/help",
               ...(selectedOffer === null ? ["/customer-info"] : []),
             ].includes(location.pathname) && <ProgressIndicator />}
             <Routes>

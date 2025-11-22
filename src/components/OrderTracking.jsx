@@ -199,10 +199,6 @@ const OrderTracking = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fbfefc] via-green-50 to-emerald-50 py-5 sm:py-8 px-3 sm:px-4" style={{ fontFamily: 'Assistant, sans-serif' }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Amiko:wght@400;600;700&family=Assistant:wght@300;400;500;600;700&display=swap');
-      `}</style>
-      
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
@@ -213,7 +209,7 @@ const OrderTracking = () => {
         </div>
 
         {/* Search Box */}
-        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 border-t-4 border-[#0e540b]">
+        <div className="bg-[#f0fcf6] rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 border-t-4 border-[#0e540b]">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
@@ -257,7 +253,7 @@ const OrderTracking = () => {
             </button>
 
             {/* Status Card */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-[#f0fcf6] rounded-xl shadow-lg overflow-hidden">
               <div className={`${statusConfig[orderData.status]?.bgColor || 'bg-gray-100'} p-4 sm:p-6 border-b-4 ${statusConfig[orderData.status]?.borderColor || 'border-gray-500'}`}>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex items-center gap-3">
@@ -346,7 +342,7 @@ const OrderTracking = () => {
             {/* Customer & Order Details */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Customer Info */}
-              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-[#F54A00]">
+              <div className="bg-[#f0fcf6] rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-[#F54A00]">
                 <h3 className="text-lg sm:text-xl font-bold text-[#0e540b] mb-3 sm:mb-4 flex items-center gap-2" style={{ fontFamily: 'Amiko, sans-serif' }}>
                   <FiUser className="w-4 h-4 sm:w-5 sm:h-5 text-[#F54A00]" />
                   Customer Details
@@ -391,7 +387,7 @@ const OrderTracking = () => {
               </div>
 
               {/* Order Items */}
-              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-[#0e540b]">
+              <div className="bg-[#f0fcf6] rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-[#0e540b]">
                 <h3 className="text-lg sm:text-xl font-bold text-[#0e540b] mb-3 sm:mb-4 flex items-center gap-2" style={{ fontFamily: 'Amiko, sans-serif' }}>
                   <FiPackage className="w-4 h-4 sm:w-5 sm:h-5 text-[#F54A00]" />
                   Order Summary
@@ -471,7 +467,7 @@ const OrderTracking = () => {
 
             {/* Timeline */}
             {orderData.timeline && orderData.timeline.length > 0 && (
-              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-[#F54A00]">
+              <div className="bg-[#f0fcf6] rounded-xl shadow-lg p-4 sm:p-6 border-t-4 border-[#F54A00]">
                 <h3 className="text-lg sm:text-xl font-bold text-[#0e540b] mb-3 sm:mb-4 flex items-center gap-2" style={{ fontFamily: 'Amiko, sans-serif' }}>
                   <FiClock className="w-4 h-4 sm:w-5 sm:h-5 text-[#F54A00]" />
                   Order Timeline

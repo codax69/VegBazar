@@ -85,12 +85,12 @@ const CustomerInfo = () => {
   return (
     <div className="min-h-fit bg-gradient-to-br from-green-50 to-emerald-50 pt-10 md:pt-20 md:px-4 flex items-center justify-center">
       <div className="w-full md:max-w-5xl">
-        <div className="bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
+        <div className="bg-[#f0fcf6] rounded-xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
           {/* Left Side */}
           <div className="hidden md:block w-full lg:w-2/5 bg-[#0e540b] text-white p-6 sm:p-8">
             <div className="mb-2 sm:mb-2">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-10 sm:w-14 sm:h-14 bg-white rounded-full flex items-center justify-center">
+                <div className="w-12 h-10 sm:w-14 sm:h-14 bg-[#f0fcf6] rounded-full flex items-center justify-center">
                   <FiUser className="text-[#0e540b]" />
                 </div>
               </div>
@@ -123,7 +123,7 @@ const CustomerInfo = () => {
                 // eslint-disable-next-line no-unused-vars
               ].map(({ icon: Icon, title, desc }, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                  <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-[#f0fcf6] bg-opacity-20 rounded-lg flex items-center justify-center">
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#0e540b]" />
                   </div>
                   <div>
@@ -140,7 +140,7 @@ const CustomerInfo = () => {
           </div>
 
           {/* Right Side - Form */}
-          <div className="w-full lg:w-3/5 bg-white p-6 sm:p-8">
+          <div className="w-full lg:w-3/5 bg-[#f0fcf6] p-6 sm:p-8">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Name */}
               <div>
@@ -152,7 +152,7 @@ const CustomerInfo = () => {
                   type="text"
                   className={`w-full font-assistant px-3 py-2 text-sm border ${
                     errors.name ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] bg-white`}
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] bg-[#f0fcf6]`}
                   placeholder="Enter your full name"
                   {...register("name", {
                     required: "Name is required.",
@@ -180,7 +180,7 @@ const CustomerInfo = () => {
                   rows="2"
                   className={`w-full font-assistant px-3 py-2 text-sm border ${
                     errors.address ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] resize-none bg-white`}
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] resize-none bg-[#f0fcf6]`}
                   placeholder="House no., Street name, Landmark..."
                   {...register("address", { required: "Address is required." })}
                 />
@@ -202,7 +202,7 @@ const CustomerInfo = () => {
                   <select
                     className={`w-full font-assistant px-3 py-2 text-sm border ${
                       errors.city ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] bg-white`}
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] bg-[#f0fcf6]`}
                     {...register("city", { required: "Please select a city." })}
                   >
                     <option value="">Select City</option>
@@ -231,7 +231,7 @@ const CustomerInfo = () => {
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] ${
                       !watchedCity
                         ? "bg-gray-100 cursor-not-allowed"
-                        : "bg-white"
+                        : "bg-[#f0fcf6]"
                     }`}
                     disabled={!watchedCity}
                     {...register("area", {
@@ -268,7 +268,7 @@ const CustomerInfo = () => {
                   type="tel"
                   className={`w-full font-assistant px-3 py-2 text-sm border ${
                     errors.mobile ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] bg-white`}
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] bg-[#f0fcf6]`}
                   placeholder="10-digit mobile number"
                   {...register("mobile", {
                     required: "Mobile number is required.",
@@ -296,7 +296,7 @@ const CustomerInfo = () => {
                   type="email"
                   className={`w-full font-assistant px-3 py-2 text-sm border ${
                     errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] bg-white`}
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] bg-[#f0fcf6]`}
                   placeholder="your.email@example.com"
                   {...register("email", {
                     required: "Email is required.",
@@ -324,7 +324,7 @@ const CustomerInfo = () => {
                 Continue
                 <FiArrowRight className="w-4 h-4" />
               </button>
-              <div className="fixed md:hidden lg:hidden bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+              <div className="fixed md:hidden lg:hidden bottom-0 left-0 right-0 bg-[#f0fcf6] border-t border-gray-200 shadow-lg z-50">
                 <div className="w-full md:max-w-5xl mx-auto px-4 py-3 md:py-4">
                   <button
                     type="submit"

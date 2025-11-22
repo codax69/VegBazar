@@ -64,14 +64,14 @@ const VegetableOffers = () => {
               {offers.map((offer) => (
                 <div
                   key={offer._id}
-                  className="group relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] active:scale-95 sm:hover:-translate-y-1 sm:hover:scale-[1.02] overflow-hidden flex flex-col"
+                  className="group relative bg-[#f0fcf6] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] active:scale-95 sm:hover:-translate-y-1 sm:hover:scale-[1.02] overflow-hidden flex flex-col"
                   onClick={() => handleOfferSelect(offer)}
                 >
                   {/* Header with Icon */}
                   <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-3 sm:p-4 text-center relative overflow-hidden flex-shrink-0">
                     <div className="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 bg-[#0e540b] opacity-10 rounded-bl-full"></div>
                     <div className="relative z-10">
-                      <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
+                      <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#f0fcf6] rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
                         <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-[#0e540b]" />
                       </div>
                       <h3 className="text-base font-poppins sm:text-lg font-bold text-gray-800 mb-1">
@@ -166,7 +166,7 @@ const VegetableOffers = () => {
 
             {/* Help Section */}
             <div className="mt-4 sm:mt-6 text-center px-2">
-              <div className="bg-white rounded-xl shadow-md p-3 sm:p-4 max-w-2xl mx-auto border border-green-100">
+              <div className="bg-[#f0fcf6] rounded-xl shadow-md p-3 sm:p-4 max-w-2xl mx-auto border border-green-100">
                 <div className="flex items-center justify-center gap-1.5 mb-2">
                   <Leaf className="w-4 h-4 text-[#0e540b]" />
                   <h3 className="text-sm sm:text-base font-semibold text-gray-800">

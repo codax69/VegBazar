@@ -51,7 +51,7 @@ const Help = () => {
         </div>
 
         {/* Contact Section */}
-        <div className="bg-white rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
+        <div className="bg-[#f0fcf6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl md:text-2xl font-poppins font-semibold mb-3 flex items-center gap-2 text-[#0e540b]">
             <MessageSquare className="w-5 h-5" /> Get in Touch
           </h2>
@@ -102,7 +102,7 @@ const Help = () => {
         </div>
 
         {/* Feedback Form */}
-        <div className="bg-white rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
+        <div className="bg-[#f0fcf6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl font-poppins font-semibold mb-3 text-[#0e540b]">
             Quick Feedback
           </h2>
@@ -193,7 +193,7 @@ const Help = () => {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-white rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
+        <div className="bg-[#f0fcf6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl font-poppins font-semibold mb-3 text-[#0e540b]">
             FAQs
           </h2>

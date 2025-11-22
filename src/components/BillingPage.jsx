@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useCallback, memo } from "react";
 import { useOrderContext } from "../Context/OrderContext";
 import RazorpayPayment from "./RazorpayPayment";
 import {
@@ -10,9 +10,71 @@ import {
   FiShield,
   FiAlertCircle,
   FiArrowLeft,
+  FiPercent,
 } from "react-icons/fi";
 import { LuBanknote } from "react-icons/lu";
 import { BiLeaf } from "react-icons/bi";
+
+// Memoized components for better performance
+const PaymentMethodButton = memo(({ method, isActive, onClick }) => {
+  const isOnline = method === "ONLINE";
+  
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full p-3 rounded-xl border-2 transition-all duration-300 ${
+        isActive
+          ? "border-[#023D01] bg-gradient-to-r from-green-50 to-emerald-50 shadow-md"
+          : "border-gray-200 hover:border-[#023D01] hover:bg-gray-100"
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <div
+            className={`size-4 rounded-full border-2 flex items-center justify-center ${
+              isActive ? "border-[#0e540b]" : "border-gray-300"
+            }`}
+          >
+            {isActive && <div className="size-2 rounded-full bg-[#0e540b]" />}
+          </div>
+          <div className="text-left">
+            <p className="font-semibold text-gray-800 text-sm">
+              {isOnline ? "Online Payment" : "Cash on Delivery"}
+            </p>
+            <p className="text-[10px] text-black">
+              {isOnline ? "UPI, Cards, Net Banking" : "Pay when you receive"}
+            </p>
+          </div>
+        </div>
+        {isOnline ? (
+          <FiCreditCard className="size-5 text-[#0e540b]" />
+        ) : (
+          <LuBanknote className="size-5 text-[#0e540b]" />
+        )}
+      </div>
+    </button>
+  );
+});
+
+PaymentMethodButton.displayName = 'PaymentMethodButton';
+
+const TrustBadge = memo(({ icon: Icon, title, desc }) => (
+  <div className="space-y-1">
+    <Icon className="size-6 text-green-600 mx-auto" />
+    <p className="text-xs font-semibold font-poppins text-gray-800">{title}</p>
+    <p className="text-[10px] font-assistant text-gray-500">{desc}</p>
+  </div>
+));
+
+TrustBadge.displayName = 'TrustBadge';
+
+const VegetableTag = memo(({ name, price }) => (
+  <div className="bg-gradient-to-r font-assistant from-green-100 to-emerald-100 text-[#0e540b] px-2.5 py-1 rounded-lg font-medium text-xs border border-green-200">
+    {name} - ₹{price}
+  </div>
+));
+
+VegetableTag.displayName = 'VegetableTag';
 
 const BillingPage = () => {
   const {
@@ -25,38 +87,65 @@ const BillingPage = () => {
 
   const deliveryCharge = 20;
 
-  if ((!selectedOffer || selectedVegetables.length === 0)) {
+  // Redirect if no offer selected
+  if (!selectedOffer || selectedVegetables.length === 0) {
     window.scrollTo(0, 0);
     navigate("/offers");
     return null;
   }
 
-  const pricePerVegetable = selectedOffer?.price / selectedVegetables.length || 0;
-  const vegBazarTotal = selectedOffer?.price || 0;
-  const marketTotal = selectedVegetables.reduce(
-    (sum, veg) => sum + (veg.marketPrice || veg.price || 0),
-    0
-  );
+  // Memoized calculations
+  const calculations = useMemo(() => {
+    const pricePerVegetable = selectedOffer?.price / selectedVegetables.length || 0;
+    const vegBazarTotal = selectedOffer?.price || 0;
+    const marketTotal = selectedVegetables.reduce(
+      (sum, veg) => sum + (veg.marketPrice || veg.price || 0),
+      0
+    );
+    const savings = marketTotal - vegBazarTotal;
+    const savingsPercentage = marketTotal > 0 ? ((savings / marketTotal) * 100).toFixed(0) : 0;
+    const totalAmount = vegBazarTotal + deliveryCharge;
 
-  // eslint-disable-next-line no-unused-vars
-  const savings = marketTotal - vegBazarTotal;
-  const totalAmount = selectedOffer?.price + deliveryCharge;
+    return {
+      pricePerVegetable,
+      vegBazarTotal,
+      marketTotal,
+      savings,
+      savingsPercentage,
+      totalAmount,
+    };
+  }, [selectedOffer, selectedVegetables, deliveryCharge]);
 
-  const handleCOD = async () => {
+  // Memoized handlers
+  const handleBack = useCallback(() => {
+    window.scrollTo(0, 0);
+    navigate("/select-vegetables");
+  }, [navigate]);
+
+  const handleCOD = useCallback(async () => {
     window.scrollTo(0, 0);
     navigate("/order-confirmation");
-  };
+  }, [navigate]);
+
+  const handlePaymentMethodChange = useCallback((method) => {
+    setPaymentMethod(method);
+  }, [setPaymentMethod]);
+
+  // Trust badges data
+  const trustBadges = useMemo(() => [
+    { icon: FiCheckCircle, title: "Fresh", desc: "Quality Guaranteed" },
+    { icon: FiTruck, title: "Same Day Delivery", desc: "4–5 PM" },
+    { icon: FiShield, title: "Safe Payment", desc: "Encrypted & Secure" },
+  ], []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pt-8 md:pt-20 pb-20 lg:pb-0">
-      <div className="max-w-6xl mx-auto">
-        {/* Back */}
+      <div className="max-w-6xl mx-auto px-4">
+        {/* Back Button */}
         <button
-          onClick={() => {
-            window.scrollTo(0, 0);
-            navigate("/select-vegetables");
-          }}
+          onClick={handleBack}
           className="flex items-center gap-1.5 mb-3 text-gray-700 hover:text-[#0e540b] transition-colors group"
+          aria-label="Go back to select vegetables"
         >
           <FiArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
           <span className="font-medium font-assistant text-sm">Back</span>
@@ -67,9 +156,73 @@ const BillingPage = () => {
           <h1 className="text-xl font-amiko sm:text-2xl font-bold text-[#0e540b] mb-1">
             Checkout
           </h1>
-          <p className="text-xs font-assistant  text-gray-600">
+          <p className="text-xs font-assistant text-gray-600">
             Review your order and complete payment
           </p>
+        </div>
+
+        {/* Top Bill Summary - Prominent Display */}
+        <div className="md:hidden lg:hidden bg-gradient-to-r from-[#0e540b] to-green-700 text-white rounded-2xl shadow-2xl p-6 mb-6 border-2 border-green-600">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold font-poppins flex items-center gap-2">
+              <FiShield className="size-5" />
+              Order Summary
+            </h2>
+            {calculations.savings > 0 && (
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <FiPercent className="size-4" />
+                <span className="text-sm font-bold">
+                  Save {calculations.savingsPercentage}%
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {/* Plan Price */}
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-assistant opacity-90">Plan Price</span>
+              <span className="text-lg font-bold font-assistant">
+                ₹{calculations.vegBazarTotal}
+              </span>
+            </div>
+
+            {/* Market Price */}
+            {calculations.marketTotal > calculations.vegBazarTotal && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-assistant opacity-90">Market Price</span>
+                <span className="text-base font-assistant line-through opacity-75">
+                  ₹{calculations.marketTotal.toFixed(2)}
+                </span>
+              </div>
+            )}
+
+            {/* Savings */}
+            {calculations.savings > 0 && (
+              <div className="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
+                <span className="text-sm font-assistant font-semibold">You Save</span>
+                <span className="text-lg font-bold font-assistant text-green-200">
+                  ₹{calculations.savings.toFixed(2)}
+                </span>
+              </div>
+            )}
+
+            {/* Delivery Charge */}
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-assistant opacity-90">Delivery Charge</span>
+              <span className="text-base font-assistant">₹{deliveryCharge}</span>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-white/30 pt-3 mt-3">
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-bold font-assistant">Total Amount</span>
+                <span className="text-3xl font-bold font-assistant">
+                  ₹{calculations.totalAmount}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -77,13 +230,13 @@ const BillingPage = () => {
           {/* Left Section */}
           <div className="lg:col-span-2 space-y-3">
             {/* Selected Plan */}
-            <div className="bg-white text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+            <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-base font-poppins font-bold text-gray-800 flex items-center gap-1.5">
                   <FiPackage className="size-4 text-[#0e540b]" />
                   Your Plan
                 </h2>
-                <span className="bg-green-100 font-poppins text-green-800 px-2.5 py-0.5 rounded-full text-md font-semibold">
+                <span className="bg-green-100 font-poppins text-green-800 px-2.5 py-0.5 rounded-full text-sm font-semibold">
                   {selectedOffer.title}
                 </span>
               </div>
@@ -98,77 +251,45 @@ const BillingPage = () => {
             </div>
 
             {/* Vegetables */}
-            <div className="bg-white text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
-              <h2 className="text-base font-poppins font-bold text-gray-800 mb-2 flex items-center gap-1.5">
-                <BiLeaf className="size-4 text-[#0e540b]" />
-                Selected Vegetables
-              </h2>
+            <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-base font-poppins font-bold text-gray-800 flex items-center gap-1.5">
+                  <BiLeaf className="size-4 text-[#0e540b]" />
+                  Selected Vegetables
+                </h2>
+                <span className="text-xs font-assistant text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                  {selectedVegetables.length} items
+                </span>
+              </div>
               <div className="flex flex-wrap gap-1.5">
                 {selectedVegetables.map((veg, i) => (
-                  <div
-                    key={i}
-                    className="bg-gradient-to-r font-assistant from-green-100 to-emerald-100 text-[#0e540b] px-2.5 py-1 rounded-lg font-medium text-xs border border-green-200"
-                  >
-                    {veg.name} - ₹{pricePerVegetable.toFixed(2)}
-                  </div>
+                  <VegetableTag
+                    key={`${veg.id || veg._id}-${i}`}
+                    name={veg.name}
+                    price={calculations.pricePerVegetable.toFixed(2)}
+                  />
                 ))}
               </div>
             </div>
 
             {/* Payment Method */}
-            <div className="bg-white text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+            <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
               <h2 className="text-base font-poppins font-bold text-gray-800 mb-2 flex items-center gap-1.5">
                 <FiCreditCard className="size-4 text-[#0e540b]" />
                 Payment Method
               </h2>
 
               <div className="space-y-2">
-                {["ONLINE", "COD"].map((method) => {
-                  const isActive = paymentMethod === method;
-                  const isOnline = method === "ONLINE";
-                  return (
-                    <button
-                      key={method}
-                      onClick={() => setPaymentMethod(method)}
-                      className={`w-full p-3 rounded-xl border-2 transition-all duration-300 ${
-                        isActive
-                          ? "border-[#023D01] bg-gradient-to-r from-green-50 to-emerald-50 shadow-md"
-                          : "border-gray-200 hover:border-[#023D01] hover:bg-gray-100"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div
-                            className={`size-4 rounded-full border-2 flex items-center justify-center ${
-                              isActive
-                                ? "border-[#0e540b]"
-                                : "border-gray-300"
-                            }`}
-                          >
-                            {isActive && (
-                              <div className="size-2 rounded-full bg-[#0e540b]" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-800 text-sm">
-                              {isOnline ? "Online Payment" : "Cash on Delivery"}
-                            </p>
-                            <p className="text-[10px] text-black">
-                              {isOnline
-                                ? "UPI, Cards, Net Banking"
-                                : "Pay when you receive"}
-                            </p>
-                          </div>
-                        </div>
-                        {isOnline ? (
-                          <FiCreditCard className="size-5 text-[#0e540b]" />
-                        ) : (
-                          <LuBanknote className="size-5 text-[#0e540b]" />
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
+                <PaymentMethodButton
+                  method="ONLINE"
+                  isActive={paymentMethod === "ONLINE"}
+                  onClick={() => handlePaymentMethodChange("ONLINE")}
+                />
+                <PaymentMethodButton
+                  method="COD"
+                  isActive={paymentMethod === "COD"}
+                  onClick={() => handlePaymentMethodChange("COD")}
+                />
               </div>
 
               {!paymentMethod && (
@@ -182,17 +303,17 @@ const BillingPage = () => {
             </div>
           </div>
 
-          {/* Right Section - Desktop Only */}
+          {/* Right Section - Desktop Sidebar */}
           <div className="lg:col-span-1 hidden lg:block">
-            <div className="bg-white text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100 lg:sticky lg:top-4">
+            <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100 lg:sticky lg:top-4">
               <h2 className="text-base font-poppins font-bold text-gray-800 mb-3 flex items-center gap-1.5">
                 <FiShield className="size-4 text-[#0e540b]" />
-                Bill Summary
+                Quick Summary
               </h2>
 
               <div className="space-y-2 mb-3 text-sm">
                 <div className="flex justify-between text-gray-600">
-                  <span>Plan Price</span>
+                  <span className="font-assistant">Plan Price</span>
                   <span className="font-semibold font-assistant text-gray-800">
                     ₹{selectedOffer.price}
                   </span>
@@ -203,23 +324,35 @@ const BillingPage = () => {
                     ₹{deliveryCharge}
                   </span>
                 </div>
+                {calculations.savings > 0 && (
+                  <div className="flex justify-between font-assistant text-green-700 bg-green-50 px-2 py-1 rounded-lg">
+                    <span className="font-semibold">You Save</span>
+                    <span className="font-bold">
+                      ₹{calculations.savings.toFixed(2)}
+                    </span>
+                  </div>
+                )}
                 <div className="border-t border-dashed border-gray-300 pt-2 flex justify-between items-center">
-                  <span className="font-bold font-assistant text-gray-800">Total Amount</span>
+                  <span className="font-bold font-assistant text-gray-800">
+                    Total Amount
+                  </span>
                   <span className="text-xl font-bold text-[#0e540b]">
-                    ₹{totalAmount}
+                    ₹{calculations.totalAmount}
                   </span>
                 </div>
               </div>
 
               {/* Payment Button */}
               <div className="space-y-2 mt-3">
-                {paymentMethod === "ONLINE" && <RazorpayPayment orderType="basket" />}
+                {paymentMethod === "ONLINE" && (
+                  <RazorpayPayment orderType="basket" />
+                )}
                 {paymentMethod === "COD" && (
                   <button
                     onClick={handleCOD}
-                    className="w-full py-2.5 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl"
+                    className="w-full py-2.5 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
                   >
-                    Place Order - ₹{totalAmount}
+                    Place Order - ₹{calculations.totalAmount}
                   </button>
                 )}
                 {!paymentMethod && (
@@ -241,31 +374,39 @@ const BillingPage = () => {
         </div>
 
         {/* Trust Badges */}
-        <div className="mt-4 bg-white text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+        <div className="mt-4 bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
           <div className="grid grid-cols-3 gap-3 text-center">
-            {[
-              { icon: FiCheckCircle, title: "Fresh", desc: "Quality Guaranteed" },
-              { icon: FiTruck, title: "Same Day Delivery", desc: "4–5 PM" },
-              { icon: FiShield, title: "Safe Payment", desc: "Encrypted & Secure" },
-            // eslint-disable-next-line no-unused-vars
-            ].map(({ icon: Icon, title, desc }, i) => (
-              <div key={i} className="space-y-1">
-                <Icon className="size-6 text-green-600 mx-auto" />
-                <p className="text-xs font-semibold font-poppins text-gray-800">{title}</p>
-                <p className="text-[10px] font-assistant text-gray-500">{desc}</p>
-              </div>
+            {trustBadges.map((badge, i) => (
+              <TrustBadge
+                key={i}
+                icon={badge.icon}
+                title={badge.title}
+                desc={badge.desc}
+              />
             ))}
           </div>
         </div>
       </div>
 
       {/* Mobile Sticky Payment Button */}
-      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-white border-t border-gray-200 shadow-2xl z-50">
+      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[#f0fcf6] border-t border-gray-200 shadow-2xl z-50">
         <div className="px-4 py-3">
           {/* Bill Summary - Compact */}
-          <div className="flex justify-between items-center mb-2 text-sm">
-            <span className="text-gray-600 font-assistant">Total Amount</span>
-            <span className="text-lg font-bold text-[#0e540b]">₹{totalAmount}</span>
+          <div className="space-y-1 mb-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600 font-assistant">Total Amount</span>
+              <span className="text-xl font-bold text-[#0e540b]">
+                ₹{calculations.totalAmount}
+              </span>
+            </div>
+            {calculations.savings > 0 && (
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-gray-500 font-assistant">You save</span>
+                <span className="text-green-600 font-semibold font-assistant">
+                  ₹{calculations.savings.toFixed(2)} ({calculations.savingsPercentage}%)
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Payment Button */}
@@ -279,7 +420,7 @@ const BillingPage = () => {
               onClick={handleCOD}
               className="w-full py-3 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg active:scale-95"
             >
-              Place Order - ₹{totalAmount}
+              Place Order - ₹{calculations.totalAmount}
             </button>
           )}
           {!paymentMethod && (
