@@ -15,6 +15,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
+import { useBillContext } from "../Context/BillContext";
 import OrderSuccess from "./OrderSuccess";
 import OrderFailed from "./OrderFailed";
 import OrderLoading from "./OrderLoading";
@@ -23,137 +24,93 @@ const OrderConfirmation = () => {
   const {
     formData,
     selectedOffer,
-    selectedVegetables,
     resetOrder,
     navigate,
-    vegetableOrder,
     setIsOrderPlaced,
     isOrderPlaced,
     paymentMethod,
   } = useOrderContext();
+
+  const {
+    orderType,
+    isCustomOrder,
+    isBasketOrder,
+    displayItems,
+    packageName,
+    totalAmount,
+    orderCount,
+    generateOrderId,
+    customCalculations,
+    basketCalculations,
+    appliedCoupon,
+    couponDiscount,
+    deliveryCharge,
+  } = useBillContext();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [orderCount, setOrderCount] = useState(1);
+  const [savedOrderData, setSavedOrderData] = useState(null);
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  // Helpers
-  const getOrderItems = (order) => {
-    if (!order) return [];
-    if (Array.isArray(order)) return order;
-    if (order.items && Array.isArray(order.items)) return order.items;
-    return [];
-  };
-
-  const getOrderSummary = (order) => {
-    if (order && typeof order === "object" && order.summary)
-      return order.summary;
-    return null;
-  };
-
-  // Detect order type
-  const orderType = useMemo(() => {
-    const customItems = getOrderItems(vegetableOrder);
-    if (customItems.length > 0) return "custom";
-    if (selectedOffer && selectedVegetables.length > 0) return "basket";
-    return null;
-  }, [vegetableOrder, selectedOffer, selectedVegetables]);
-
-  const isCustomOrder = orderType === "custom";
-  const isBasketOrder = orderType === "basket";
-
+  // ✅ CRITICAL: Check for saved order on mount and immediately show success
   useEffect(() => {
-    if (!orderType) {
+    const orderDataFromStorage = sessionStorage.getItem("lastOrderData");
+    console.log("🔍 Checking sessionStorage on mount:", orderDataFromStorage);
+    
+    if (orderDataFromStorage) {
+      try {
+        const parsedData = JSON.parse(orderDataFromStorage);
+        console.log("✅ Found order data:", parsedData);
+        setSavedOrderData(parsedData);
+        // ✅ Immediately set order as placed to show success page
+        setIsOrderPlaced(true);
+      } catch (error) {
+        console.error("❌ Error parsing order data:", error);
+      }
+    } else {
+      console.log("ℹ️ No saved order data found");
+    }
+  }, []); // ✅ Run only once on mount
+
+  // Redirect if no order type and no saved order data
+  useEffect(() => {
+    if (!orderType && !savedOrderData && !isOrderPlaced) {
+      console.log("⚠️ No order data, redirecting to home");
       navigate("/");
       window.scrollTo(0, 0);
     }
-  }, [orderType, navigate]);
+  }, [orderType, savedOrderData, isOrderPlaced, navigate]);
 
-  // Fetch daily order count
-  useEffect(() => {
-    const fetchOrderCount = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_SERVER_URL}/api/orders/today/orders`
-        );
-        setOrderCount(res.data.data.count + 1);
-        console.log(orderCount)
-      } catch (err) {
-        console.error("Error fetching order count:", err);
-      }
-    };
-    fetchOrderCount();
-  }, []);
-
-  const handleNewOrder = () => resetOrder();
-
-  const generateOrderId = (count) => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const orderNum = String(count).padStart(3, "0");
-    return `ORD${year}${month}${day}${orderNum}`;
+  const handleNewOrder = () => {
+    console.log("🔄 Clearing order data and resetting");
+    sessionStorage.removeItem("lastOrderData");
+    sessionStorage.removeItem("orderJustPlaced");
+    localStorage.removeItem("orderSummary");
+    localStorage.removeItem("vegbazar_cart");
+    setIsOrderPlaced(false);
+    setSavedOrderData(null);
+    resetOrder();
   };
 
-  // 🧮 Fix — Robust total calculation
-  const calculateCustomTotal = () => {
-    const items = getOrderItems(vegetableOrder);
-    const summary = getOrderSummary(vegetableOrder);
+  // Calculate total savings for basket orders
+  const totalSavings = useMemo(() => {
+    if (!isBasketOrder || !basketCalculations) return 0;
+    return basketCalculations.savings || 0;
+  }, [isBasketOrder, basketCalculations]);
 
-    // Prefer valid summary total if > 0
-    if (summary?.totalAmount && summary.totalAmount > 0)
-      return summary.totalAmount;
-
-    // Otherwise calculate manually
-    const subtotal = items.reduce((acc, item) => {
-      const price =
-        parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
-      const qty = parseInt(item.quantity) || 0;
-      return acc + price * qty;
-    }, 0);
-
-    const delivery = summary?.deliveryCharges ?? 20;
-    const total = subtotal + delivery;
-
-    // Avoid showing only delivery charge
-    return subtotal > 0 ? total : 0;
-  };
-
-  const calculateTotalSavings = () => {
-    return selectedVegetables.reduce((t, v) => {
-      const vegPrice = v.price || 0;
-      const marketPrice = v.marketPrice || vegPrice;
-      return t + (marketPrice - vegPrice);
-    }, 0);
-  };
-
-  const totalSavings = calculateTotalSavings();
-
-  const displayItems = useMemo(() => {
-    if (isCustomOrder) return getOrderItems(vegetableOrder);
-    if (isBasketOrder) return selectedVegetables;
-    return [];
-  }, [isCustomOrder, isBasketOrder, vegetableOrder, selectedVegetables]);
-
-  const packageName = useMemo(() => {
-    if (isCustomOrder) return "Custom Selection";
-    if (isBasketOrder && selectedOffer) return selectedOffer.title;
-    return "N/A";
-  }, [isCustomOrder, isBasketOrder, selectedOffer]);
-
-  const totalAmount = useMemo(() => {
-    if (isCustomOrder) return calculateCustomTotal();
-    if (isBasketOrder && selectedOffer) return (selectedOffer.price || 0) + 20;
-    return 0;
-  }, [isCustomOrder, isBasketOrder, vegetableOrder, selectedOffer]);
-
-  // 🧱 Prepare order data
+  // Prepare order data
   const orderData = useMemo(() => {
+    // ✅ PRIORITY: Use saved order data from VegetableCart (COD)
+    if (savedOrderData) {
+      console.log("📦 Using saved order data:", savedOrderData);
+      return savedOrderData;
+    }
+
+    // Otherwise, prepare order data for basket orders
     const orderId = generateOrderId(orderCount);
 
-    if (isCustomOrder) {
-      const items = getOrderItems(vegetableOrder);
-      const summary = getOrderSummary(vegetableOrder);
+    if (isCustomOrder && customCalculations) {
+      const items = customCalculations.items;
 
       return {
         orderId,
@@ -161,6 +118,7 @@ const OrderConfirmation = () => {
         customerInfo: formData || {},
         selectedVegetables: (items || []).map((item) => ({
           vegetable: item.id || item.vegetableId,
+          name: item.name,
           weight: item.weight,
           quantity: item.quantity,
           pricePerUnit:
@@ -170,15 +128,10 @@ const OrderConfirmation = () => {
             (item.quantity || 0),
           isFromBasket: false,
         })),
-        vegetablesTotal:
-          summary?.subtotal ||
-          (items || []).reduce((total, item) => {
-            const price =
-              parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
-            return total + price * (item.quantity || 0);
-          }, 0),
-        deliveryCharges: summary?.deliveryCharges ?? 20,
-        totalAmount: summary?.totalAmount ?? totalAmount ?? 0,
+        vegetablesTotal: customCalculations.vegetablesTotal,
+        deliveryCharges: customCalculations.deliveryCharge,
+        totalAmount: customCalculations.totalAmount,
+        couponDiscount: customCalculations.couponDiscount || 0,
         paymentMethod,
         paymentStatus: paymentMethod === "COD" ? "pending" : "awaiting_payment",
         orderStatus: "placed",
@@ -192,35 +145,48 @@ const OrderConfirmation = () => {
         customerInfo: formData || {},
         selectedOffer: selectedOffer || {},
         orderType: "basket",
-        selectedVegetables: selectedVegetables || [],
+        selectedVegetables: displayItems || [],
         orderDate: new Date().toISOString(),
         totalAmount: totalAmount ?? 0,
+        couponCode: appliedCoupon?.code || null,
+        couponDiscount: couponDiscount || 0,
+        deliveryCharges: deliveryCharge,
         paymentMethod,
         paymentStatus: paymentMethod === "COD" ? "pending" : "awaiting_payment",
         orderStatus: "placed",
       };
     }
 
-    // fallback — prevent null
     return { orderId, orderType: "unknown" };
   }, [
+    savedOrderData,
     formData,
     selectedOffer,
-    selectedVegetables,
-    vegetableOrder,
+    displayItems,
     orderCount,
     paymentMethod,
     isCustomOrder,
     isBasketOrder,
     totalAmount,
+    customCalculations,
+    appliedCoupon,
+    couponDiscount,
+    deliveryCharge,
+    generateOrderId,
   ]);
-  console.log(orderData)
 
-  // 🧾 Submit Order
+  // Submit Order (for basket orders only - custom COD already created)
   const handleSubmitOrder = useCallback(
     async (e) => {
       e.preventDefault();
       window.scrollTo(0, 0);
+
+      // If order already created (COD from VegetableCart), just show success
+      if (savedOrderData) {
+        console.log("✅ Order already exists, showing success");
+        setIsOrderPlaced(true);
+        return;
+      }
 
       if (!executeRecaptcha) {
         setSubmitError("reCAPTCHA not ready. Try again shortly.");
@@ -249,8 +215,12 @@ const OrderConfirmation = () => {
           orderData
         );
 
-        if (res.status >= 200 && res.status < 300) setIsOrderPlaced(true);
-        else setSubmitError("Order save failed. Try again.");
+        if (res.status >= 200 && res.status < 300) {
+          sessionStorage.setItem("lastOrderData", JSON.stringify(orderData));
+          setIsOrderPlaced(true);
+        } else {
+          setSubmitError("Order save failed. Try again.");
+        }
       } catch (err) {
         console.error("Order submission error:", err);
         setSubmitError(err?.response?.data?.message || err.message);
@@ -258,66 +228,57 @@ const OrderConfirmation = () => {
         setIsSubmitting(false);
       }
     },
-    [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced]
+    [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced, savedOrderData]
   );
 
-  // States
-  if (isSubmitting) return <OrderLoading />;
-  if (submitError)
-    return (
-      <OrderFailed
-        errorMessage={submitError}
-        onRetry={() => setSubmitError(null)}
-        onGoBack={() => {
-          window.scrollTo(0, 0);
-          navigate("/billing");
-        }}
-      />
-    );
-  if (isOrderPlaced)
+  // Log state changes
+  useEffect(() => {
+    console.log("🔄 State Update:", {
+      isOrderPlaced,
+      hasSavedData: !!savedOrderData,
+      isSubmitting,
+      hasError: !!submitError,
+    });
+  }, [isOrderPlaced, savedOrderData, isSubmitting, submitError]);
+
+  // ✅ RENDER LOGIC: Show success immediately if order is placed
+  if (isOrderPlaced && orderData) {
+    console.log("✅ Rendering OrderSuccess with data:", orderData);
     return (
       <OrderSuccess
         orderData={orderData}
         formData={formData}
         selectedOffer={selectedOffer}
-        selectedVegetables={displayItems}
+        selectedVegetables={orderData.selectedVegetables || displayItems}
         onNewOrder={handleNewOrder}
       />
     );
+  }
 
   if (isSubmitting) {
+    console.log("⏳ Showing loading state");
     return <OrderLoading />;
   }
-
+  
   if (submitError) {
+    console.log("❌ Showing error:", submitError);
     return (
       <OrderFailed
         errorMessage={submitError}
         onRetry={() => setSubmitError(null)}
         onGoBack={() => {
           window.scrollTo(0, 0);
-          navigate("/billing");
+          navigate(savedOrderData || isCustomOrder ? "/veg-bag" : "/billing");
         }}
       />
     );
   }
 
-  if (isOrderPlaced) {
-    return (
-      <OrderSuccess
-        orderData={orderData}
-        formData={formData}
-        selectedOffer={selectedOffer}
-        selectedVegetables={displayItems}
-        onNewOrder={handleNewOrder}
-      />
-    );
-  }
-
+  // Show confirmation form for basket orders
+  console.log("📋 Showing confirmation form");
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-4 pt-20">
-      <div className="max-w-5xl mx-auto">
-        {/* Back Button */}
+      <div className="max-w-5xl mx-auto px-4">
         <button
           onClick={() => {
             navigate(isCustomOrder ? "/veg-bag" : "/billing");
@@ -329,9 +290,7 @@ const OrderConfirmation = () => {
           <span className="font-medium font-assistant text-sm">Back</span>
         </button>
 
-        {/* Main Card */}
         <div className="bg-[#f0fcf6] rounded-xl shadow-lg overflow-hidden">
-          {/* Header */}
           <div className="bg-gradient-to-r from-[#0e540b] to-green-700 p-4">
             <div className="flex items-center justify-center gap-2 mb-1">
               <Package className="w-6 h-6 text-white" />
@@ -344,17 +303,15 @@ const OrderConfirmation = () => {
             </p>
           </div>
 
-          {/* Order Details */}
           <div className="p-5">
+            {/* Order details here for basket orders */}
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200 mb-4">
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
                     <Package className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">
-                        Order ID
-                      </p>
+                      <p className="text-xs text-gray-500 font-poppins">Order ID</p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm">
                         {orderData.orderId}
                       </p>
@@ -363,9 +320,7 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <User className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">
-                        Full Name
-                      </p>
+                      <p className="text-xs text-gray-500 font-poppins">Full Name</p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm">
                         {formData.name}
                       </p>
@@ -374,9 +329,7 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <Phone className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">
-                        Mobile Number
-                      </p>
+                      <p className="text-xs text-gray-500 font-poppins">Mobile Number</p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm">
                         {formData.mobile}
                       </p>
@@ -388,9 +341,7 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <Mail className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs text-gray-500 font-poppins">
-                        Email Address
-                      </p>
+                      <p className="text-xs text-gray-500 font-poppins">Email Address</p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm truncate">
                         {formData.email}
                       </p>
@@ -410,9 +361,7 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <CreditCard className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">
-                        Total Amount
-                      </p>
+                      <p className="text-xs text-gray-500 font-poppins">Total Amount</p>
                       <p className="font-bold text-[#0e540b] text-lg">
                         ₹{totalAmount.toFixed(2)}
                       </p>
@@ -420,178 +369,8 @@ const OrderConfirmation = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Address Section - Inline */}
-              {formData.address && (
-                <div className="mb-4 pb-4 border-b border-green-200">
-                  <div className="flex gap-2">
-                    <MapPin className="w-4 h-4 text-[#0e540b] flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs text-gray-500 font-poppins mb-0.5 font-poppins">
-                        Delivery Address
-                      </p>
-                      <p className="text-gray-700 text-xs font-assistant">
-                        {formData.address}, {formData.area}, {formData.city}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Vegetables Section */}
-              <div>
-                <p className="font-semibold font-assistant text-gray-700 mb-2 flex items-center gap-2 text-sm">
-                  <ShoppingBag className="w-4 h-4 text-[#0e540b]" />
-                  {isCustomOrder
-                    ? "Selected Vegetables"
-                    : "Vegetables in Package"}{" "}
-                  ({displayItems.length} items)
-                </p>
-
-                {isCustomOrder ? (
-                  // Custom order - show items with quantities and prices
-                  <div className="space-y-2 mb-3">
-                    {displayItems.map((item, i) => {
-                      const price =
-                        parseFloat(item.pricePerUnit) ||
-                        parseFloat(item.price) ||
-                        0;
-                      const itemTotal = price * item.quantity;
-                      return (
-                        <div
-                          key={i}
-                          className="bg-[#f0fcf6] p-2 rounded border border-green-200 flex justify-between items-center"
-                        >
-                          <div className="flex-1">
-                            <span className="font-medium font-assistant text-gray-800 text-sm">
-                              {item.name}
-                            </span>
-                            <span className="text-xs font-assistant text-gray-600 ml-2">
-                              ({item.weight})
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xs font-assistant text-gray-600">
-                              ₹{price.toFixed(2)} × {item.quantity}
-                            </div>
-                            <div className="font-semibold font-assistant text-green-700 text-sm">
-                              ₹{itemTotal.toFixed(2)}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : isBasketOrder ? (
-                  // Basket order - show vegetable names only
-                  <div className="space-y-2">
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Package className="w-4 h-4 text-amber-700" />
-                        <span className="font-semibold font-assistant text-amber-900 text-sm">
-                          {selectedOffer?.title}
-                        </span>
-                      </div>
-                      <div className="text-xs font-assistant text-amber-800">
-                        Package Price: ₹{selectedOffer?.price || 0}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {displayItems.map((v, i) => (
-                        <span
-                          key={i}
-                          className="bg-green-100 font-assistant text-green-800 px-2 py-1 rounded text-xs font-medium border border-green-200"
-                        >
-                          {typeof v === "string" ? v : v.name}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Total Savings - Only for basket orders */}
-                {isBasketOrder && totalSavings > 0 && (
-                  <div className="mt-2 p-2 bg-green-100 rounded border border-green-300">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold font-poppins text-green-800 flex items-center gap-1.5 text-xs">
-                        <TrendingDown className="w-3.5 h-3.5" />
-                        Total Savings (vs Market Price)
-                      </span>
-                      <span className="font-bold text-base font-assistant text-green-700">
-                        ₹{Math.round(totalSavings)}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Price Summary - For custom orders */}
-                {isCustomOrder && (
-                  <div className="mt-3 p-3 bg-[#f0fcf6] rounded border border-green-200">
-                    <div className="space-y-1.5 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 font-assistant">
-                          Vegetables Total
-                        </span>
-                        <span className="font-semibold">
-                          ₹{(orderData.vegetablesTotal || 0).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 font-assistant">
-                          Delivery Charges
-                        </span>
-                        <span className="font-semibold">
-                          ₹{(orderData.deliveryCharges || 20).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="border-t border-gray-200 pt-1.5 flex justify-between">
-                        <span className="font-bold text-gray-800">
-                          Total Amount
-                        </span>
-                        <span className="font-bold text-green-700 text-base font-assistant">
-                          ₹{totalAmount.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Price Summary - For basket orders */}
-                {isBasketOrder && (
-                  <div className="mt-3 p-3 bg-[#f0fcf6] rounded border border-green-200">
-                    <div className="space-y-1.5 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 font-poppins">
-                          Package Price
-                        </span>
-                        <span className="font-semibold font-assistant">
-                          ₹{(selectedOffer?.price || 0).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 font-poppins">
-                          Delivery Charges
-                        </span>
-                        <span className="font-semibold font-assistant">
-                          ₹20.00
-                        </span>
-                      </div>
-                      <div className="border-t border-gray-200 pt-1.5 flex justify-between">
-                        <span className="font-bold text-gray-800 font-poppins">
-                          Total Amount
-                        </span>
-                        <span className="font-bold font-assistant text-green-700 text-base">
-                          ₹{totalAmount.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
 
-            {/* reCAPTCHA v3 Badge Info */}
             <div className="bg-gray-50 p-2 rounded-lg mb-4 border border-gray-200">
               <div className="flex items-center gap-1.5 text-xs text-gray-600 font-assistant">
                 <Shield className="w-3.5 h-3.5 text-green-600" />
@@ -618,7 +397,6 @@ const OrderConfirmation = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               onClick={handleSubmitOrder}
               disabled={isSubmitting || !executeRecaptcha}
@@ -630,7 +408,6 @@ const OrderConfirmation = () => {
           </div>
         </div>
 
-        {/* Security Notice */}
         <div className="mt-3 text-center text-xs text-gray-600">
           <p className="flex items-center justify-center gap-1.5">
             <CheckCircle className="w-3.5 h-3.5 text-[#0e540b] font-assistant" />

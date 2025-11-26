@@ -20,7 +20,7 @@ const BackButtonHandler = () => {
       const routes = {
         // Order flow
         "/order-confirmation": "/veg-bag",
-        "/billing": selectedOffer ? "/select-vegetables" : "/veg-bag",
+        "/billing": selectedOffer ? "/select-vegetables" : "/offers",
         "/select-vegetables": "/offers",
         
         // Shopping flow

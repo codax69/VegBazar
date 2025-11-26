@@ -1,6 +1,10 @@
-import React, { useMemo, useCallback, memo } from "react";
+import React, { useMemo, useCallback, memo, useState, useEffect } from "react";
 import { useOrderContext } from "../Context/OrderContext";
+import { useBillContext } from "../Context/BillContext";
 import RazorpayPayment from "./RazorpayPayment";
+import CouponCodeSection from "./CouponCodeSection";
+import axios from "axios";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import {
   FiPackage,
   FiCreditCard,
@@ -14,11 +18,15 @@ import {
 } from "react-icons/fi";
 import { LuBanknote } from "react-icons/lu";
 import { BiLeaf } from "react-icons/bi";
+import OrderLoading from "./OrderLoading";
+import OrderFailed from "./OrderFailed";
+
+const API_URL = import.meta.env.VITE_API_SERVER_URL;
 
 // Memoized components for better performance
 const PaymentMethodButton = memo(({ method, isActive, onClick }) => {
   const isOnline = method === "ONLINE";
-  
+
   return (
     <button
       onClick={onClick}
@@ -56,7 +64,7 @@ const PaymentMethodButton = memo(({ method, isActive, onClick }) => {
   );
 });
 
-PaymentMethodButton.displayName = 'PaymentMethodButton';
+PaymentMethodButton.displayName = "PaymentMethodButton";
 
 const TrustBadge = memo(({ icon: Icon, title, desc }) => (
   <div className="space-y-1">
@@ -66,7 +74,7 @@ const TrustBadge = memo(({ icon: Icon, title, desc }) => (
   </div>
 ));
 
-TrustBadge.displayName = 'TrustBadge';
+TrustBadge.displayName = "TrustBadge";
 
 const VegetableTag = memo(({ name, price }) => (
   <div className="bg-gradient-to-r font-assistant from-green-100 to-emerald-100 text-[#0e540b] px-2.5 py-1 rounded-lg font-medium text-xs border border-green-200">
@@ -74,47 +82,167 @@ const VegetableTag = memo(({ name, price }) => (
   </div>
 ));
 
-VegetableTag.displayName = 'VegetableTag';
+VegetableTag.displayName = "VegetableTag";
 
 const BillingPage = () => {
   const {
     selectedOffer,
     selectedVegetables,
+    formData,
     navigate,
     paymentMethod,
     setPaymentMethod,
+    setIsOrderPlaced,
   } = useOrderContext();
 
-  const deliveryCharge = 20;
+  const {
+    isBasketOrder,
+    basketCalculations,
+    totalAmount,
+    appliedCoupon,
+    couponDiscount,
+    deliveryCharge,
+    handleApplyCoupon,
+    handleRemoveCoupon,
+  } = useBillContext();
+
+  const { executeRecaptcha } = useGoogleReCaptcha();
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [orderCount, setOrderCount] = useState(null);
+  const [isLoadingOrderCount, setIsLoadingOrderCount] = useState(true);
+
+  // Generate Order ID function
+  const generateOrderId = useCallback((count) => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const orderNum = String(count).padStart(3, "0");
+    return `ORD${year}${month}${day}${orderNum}`;
+  }, []);
+
+  // Fetch order count on mount
+  useEffect(() => {
+    const fetchOrderCount = async () => {
+      try {
+        setIsLoadingOrderCount(true);
+        const res = await axios.get(`${API_URL}/api/orders/today/orders`);
+        setOrderCount(res.data.data.count + 1);
+      } catch (err) {
+        console.error("Error fetching order count:", err);
+        // Fallback: use timestamp-based ID if fetch fails
+        setOrderCount(Date.now() % 1000);
+      } finally {
+        setIsLoadingOrderCount(false);
+      }
+    };
+
+    fetchOrderCount();
+  }, []);
+
+  // Redirect if no basket order
+  useEffect(() => {
+    if (!isBasketOrder || !selectedOffer || selectedVegetables.length === 0) {
+      window.scrollTo(0, 0);
+      navigate("/offers");
+    }
+  }, [isBasketOrder, selectedOffer, selectedVegetables, navigate]);
 
   // Redirect if no offer selected
   if (!selectedOffer || selectedVegetables.length === 0) {
-    window.scrollTo(0, 0);
-    navigate("/offers");
     return null;
   }
 
-  // Memoized calculations
-  const calculations = useMemo(() => {
-    const pricePerVegetable = selectedOffer?.price / selectedVegetables.length || 0;
-    const vegBazarTotal = selectedOffer?.price || 0;
-    const marketTotal = selectedVegetables.reduce(
-      (sum, veg) => sum + (veg.marketPrice || veg.price || 0),
-      0
-    );
-    const savings = marketTotal - vegBazarTotal;
-    const savingsPercentage = marketTotal > 0 ? ((savings / marketTotal) * 100).toFixed(0) : 0;
-    const totalAmount = vegBazarTotal + deliveryCharge;
+  const calculations = basketCalculations;
 
+  // Order Data - Memoized with all dependencies
+  const orderData = useMemo(() => {
+    if (!orderCount) return null;
+
+    const orderId = generateOrderId(orderCount);
     return {
-      pricePerVegetable,
-      vegBazarTotal,
-      marketTotal,
-      savings,
-      savingsPercentage,
-      totalAmount,
+      orderId,
+      customerInfo: formData || {},
+      selectedOffer: selectedOffer || {},
+      orderType: "basket",
+      selectedVegetables: selectedVegetables || [],
+      orderDate: new Date().toISOString(),
+      totalAmount: totalAmount,
+      couponCode: appliedCoupon?.code || null,
+      couponDiscount: couponDiscount || 0,
+      deliveryCharges: deliveryCharge,
+      paymentMethod,
+      paymentStatus: paymentMethod === "COD" ? "pending" : "awaiting_payment",
+      orderStatus: "placed",
     };
-  }, [selectedOffer, selectedVegetables, deliveryCharge]);
+  }, [
+    orderCount,
+    formData,
+    selectedOffer,
+    selectedVegetables,
+    totalAmount,
+    appliedCoupon,
+    couponDiscount,
+    deliveryCharge,
+    paymentMethod,
+    generateOrderId,
+  ]);
+
+  // Handle COD Order Submission
+  const handleCOD = useCallback(
+    async (e) => {
+      e.preventDefault();
+      window.scrollTo(0, 0);
+
+      if (!executeRecaptcha) {
+        setSubmitError("reCAPTCHA not ready. Try again shortly.");
+        return;
+      }
+
+      if (!orderData) {
+        setSubmitError("Order data not ready. Please wait.");
+        return;
+      }
+
+      if (isSubmitting) return;
+
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      try {
+        const captchaToken = await executeRecaptcha("submit_order");
+        if (!captchaToken) throw new Error("Captcha not generated.");
+
+        const captchaRes = await axios.post(`${API_URL}/api/verify-captcha`, {
+          token: captchaToken,
+          action: "submit_order",
+        });
+
+        if (!captchaRes.data.success)
+          throw new Error("Captcha verification failed.");
+
+        const res = await axios.post(
+          `${API_URL}/api/orders/create-order`,
+          orderData
+        );
+
+        if (res.status >= 200 && res.status < 300) {
+          setIsOrderPlaced(true);
+          navigate("/order-confirmation");
+        } else {
+          setSubmitError("Order save failed. Try again.");
+        }
+      } catch (err) {
+        console.error("Order submission error:", err);
+        setSubmitError(err?.response?.data?.message || err.message);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced, navigate]
+  );
 
   // Memoized handlers
   const handleBack = useCallback(() => {
@@ -122,21 +250,36 @@ const BillingPage = () => {
     navigate("/select-vegetables");
   }, [navigate]);
 
-  const handleCOD = useCallback(async () => {
-    window.scrollTo(0, 0);
-    navigate("/order-confirmation");
-  }, [navigate]);
-
-  const handlePaymentMethodChange = useCallback((method) => {
-    setPaymentMethod(method);
-  }, [setPaymentMethod]);
+  const handlePaymentMethodChange = useCallback(
+    (method) => {
+      setPaymentMethod(method);
+    },
+    [setPaymentMethod]
+  );
 
   // Trust badges data
-  const trustBadges = useMemo(() => [
-    { icon: FiCheckCircle, title: "Fresh", desc: "Quality Guaranteed" },
-    { icon: FiTruck, title: "Same Day Delivery", desc: "4–5 PM" },
-    { icon: FiShield, title: "Safe Payment", desc: "Encrypted & Secure" },
-  ], []);
+  const trustBadges = useMemo(
+    () => [
+      { icon: FiCheckCircle, title: "Fresh", desc: "Quality Guaranteed" },
+      { icon: FiTruck, title: "Same Day Delivery", desc: "4–5 PM" },
+      { icon: FiShield, title: "Safe Payment", desc: "Encrypted & Secure" },
+    ],
+    []
+  );
+
+  // Loading and Error States
+  if (isSubmitting || isLoadingOrderCount) return <OrderLoading />;
+  if (submitError)
+    return (
+      <OrderFailed
+        errorMessage={submitError}
+        onRetry={() => setSubmitError(null)}
+        onGoBack={() => {
+          window.scrollTo(0, 0);
+          navigate("/select-vegetables");
+        }}
+      />
+    );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pt-8 md:pt-20 pb-20 lg:pb-0">
@@ -161,6 +304,17 @@ const BillingPage = () => {
           </p>
         </div>
 
+        {/* Coupon Section - Mobile (Before Bill Summary) */}
+        <div className="md:hidden lg:hidden mb-4">
+          <CouponCodeSection
+            onApplyCoupon={handleApplyCoupon}
+            appliedCoupon={appliedCoupon}
+            onRemoveCoupon={handleRemoveCoupon}
+            subtotal={calculations.vegBazarTotal}
+            isMobile={true}
+          />
+        </div>
+
         {/* Top Bill Summary - Prominent Display */}
         <div className="md:hidden lg:hidden bg-gradient-to-r from-[#0e540b] to-green-700 text-white rounded-2xl shadow-2xl p-6 mb-6 border-2 border-green-600">
           <div className="flex items-center justify-between mb-4">
@@ -181,7 +335,9 @@ const BillingPage = () => {
           <div className="space-y-3">
             {/* Plan Price */}
             <div className="flex justify-between items-center">
-              <span className="text-sm font-assistant opacity-90">Plan Price</span>
+              <span className="text-sm font-assistant opacity-90">
+                Plan Price
+              </span>
               <span className="text-lg font-bold font-assistant">
                 ₹{calculations.vegBazarTotal}
               </span>
@@ -190,9 +346,23 @@ const BillingPage = () => {
             {/* Market Price */}
             {calculations.marketTotal > calculations.vegBazarTotal && (
               <div className="flex justify-between items-center">
-                <span className="text-sm font-assistant opacity-90">Market Price</span>
+                <span className="text-sm font-assistant opacity-90">
+                  Market Price
+                </span>
                 <span className="text-base font-assistant line-through opacity-75">
                   ₹{calculations.marketTotal.toFixed(2)}
+                </span>
+              </div>
+            )}
+
+            {/* Coupon Discount */}
+            {couponDiscount > 0 && (
+              <div className="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
+                <span className="text-sm font-assistant font-semibold">
+                  Coupon Discount
+                </span>
+                <span className="text-lg font-bold font-assistant text-green-200">
+                  -₹{couponDiscount.toFixed(2)}
                 </span>
               </div>
             )}
@@ -200,7 +370,9 @@ const BillingPage = () => {
             {/* Savings */}
             {calculations.savings > 0 && (
               <div className="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
-                <span className="text-sm font-assistant font-semibold">You Save</span>
+                <span className="text-sm font-assistant font-semibold">
+                  Total Savings
+                </span>
                 <span className="text-lg font-bold font-assistant text-green-200">
                   ₹{calculations.savings.toFixed(2)}
                 </span>
@@ -209,16 +381,22 @@ const BillingPage = () => {
 
             {/* Delivery Charge */}
             <div className="flex justify-between items-center">
-              <span className="text-sm font-assistant opacity-90">Delivery Charge</span>
-              <span className="text-base font-assistant">₹{deliveryCharge}</span>
+              <span className="text-sm font-assistant opacity-90">
+                Delivery Charge
+              </span>
+              <span className="text-base font-assistant">
+                {deliveryCharge === 0 ? "FREE" : `₹${deliveryCharge}`}
+              </span>
             </div>
 
             {/* Divider */}
             <div className="border-t border-white/30 pt-3 mt-3">
               <div className="flex justify-between items-center">
-                <span className="text-lg font-bold font-assistant">Total Amount</span>
+                <span className="text-lg font-bold font-assistant">
+                  Total Amount
+                </span>
                 <span className="text-3xl font-bold font-assistant">
-                  ₹{calculations.totalAmount}
+                  ₹{totalAmount.toFixed(2)}
                 </span>
               </div>
             </div>
@@ -305,69 +483,99 @@ const BillingPage = () => {
 
           {/* Right Section - Desktop Sidebar */}
           <div className="lg:col-span-1 hidden lg:block">
-            <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100 lg:sticky lg:top-4">
-              <h2 className="text-base font-poppins font-bold text-gray-800 mb-3 flex items-center gap-1.5">
-                <FiShield className="size-4 text-[#0e540b]" />
-                Quick Summary
-              </h2>
+            <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100 lg:sticky lg:top-4 space-y-3">
+              {/* Coupon Section - Desktop (Top of sidebar) */}
+              <CouponCodeSection
+                onApplyCoupon={handleApplyCoupon}
+                appliedCoupon={appliedCoupon}
+                onRemoveCoupon={handleRemoveCoupon}
+                subtotal={calculations.vegBazarTotal}
+                isMobile={false}
+              />
 
-              <div className="space-y-2 mb-3 text-sm">
-                <div className="flex justify-between text-gray-600">
-                  <span className="font-assistant">Plan Price</span>
-                  <span className="font-semibold font-assistant text-gray-800">
-                    ₹{selectedOffer.price}
-                  </span>
-                </div>
-                <div className="flex justify-between font-assistant text-gray-600">
-                  <span>Delivery Charge</span>
-                  <span className="font-semibold text-gray-800">
-                    ₹{deliveryCharge}
-                  </span>
-                </div>
-                {calculations.savings > 0 && (
-                  <div className="flex justify-between font-assistant text-green-700 bg-green-50 px-2 py-1 rounded-lg">
-                    <span className="font-semibold">You Save</span>
-                    <span className="font-bold">
-                      ₹{calculations.savings.toFixed(2)}
+              {/* Quick Summary */}
+              <div>
+                <h2 className="text-base font-poppins font-bold text-gray-800 mb-3 flex items-center gap-1.5">
+                  <FiShield className="size-4 text-[#0e540b]" />
+                  Quick Summary
+                </h2>
+
+                <div className="space-y-2 mb-3 text-sm">
+                  <div className="flex justify-between text-gray-600">
+                    <span className="font-assistant">Plan Price</span>
+                    <span className="font-semibold font-assistant text-gray-800">
+                      ₹{selectedOffer.price}
                     </span>
                   </div>
-                )}
-                <div className="border-t border-dashed border-gray-300 pt-2 flex justify-between items-center">
-                  <span className="font-bold font-assistant text-gray-800">
-                    Total Amount
-                  </span>
-                  <span className="text-xl font-bold text-[#0e540b]">
-                    ₹{calculations.totalAmount}
-                  </span>
+
+                  {/* Coupon Discount */}
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between font-assistant text-green-700 bg-green-50 px-2 py-1 rounded-lg">
+                      <span className="font-semibold">Coupon Discount</span>
+                      <span className="font-bold">
+                        -₹{couponDiscount.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between font-assistant text-gray-600">
+                    <span>Delivery Charge</span>
+                    <span className="font-semibold text-gray-800">
+                      {deliveryCharge === 0 ? "FREE" : `₹${deliveryCharge}`}
+                    </span>
+                  </div>
+
+                  {calculations.savings > 0 && (
+                    <div className="flex justify-between font-assistant text-green-700 bg-green-50 px-2 py-1 rounded-lg">
+                      <span className="font-semibold">Total Savings</span>
+                      <span className="font-bold">
+                        ₹{calculations.savings.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="border-t border-dashed border-gray-300 pt-2 flex justify-between items-center">
+                    <span className="font-bold font-assistant text-gray-800">
+                      Total Amount
+                    </span>
+                    <span className="text-xl font-bold text-[#0e540b]">
+                      ₹{totalAmount.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Payment Button */}
-              <div className="space-y-2 mt-3">
-                {paymentMethod === "ONLINE" && (
-                  <RazorpayPayment orderType="basket" />
-                )}
-                {paymentMethod === "COD" && (
-                  <button
-                    onClick={handleCOD}
-                    className="w-full py-2.5 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
-                  >
-                    Place Order - ₹{calculations.totalAmount}
-                  </button>
-                )}
-                {!paymentMethod && (
-                  <button
-                    disabled
-                    className="w-full py-2.5 rounded-xl font-assistant bg-gray-300 text-gray-500 font-bold cursor-not-allowed"
-                  >
-                    Select Payment Method
-                  </button>
-                )}
-              </div>
+                {/* Payment Button */}
+                <div className="space-y-2 mt-3">
+                  {paymentMethod === "ONLINE" && orderData && (
+                    <RazorpayPayment
+                      orderType="basket"
+                      couponCode={appliedCoupon?.code}
+                      orderData={orderData}
+                    />
+                  )}
+                  {paymentMethod === "COD" && (
+                    <button
+                      onClick={handleCOD}
+                      disabled={!orderData}
+                      className="w-full py-2.5 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Place Order - ₹{totalAmount.toFixed(2)}
+                    </button>
+                  )}
+                  {!paymentMethod && (
+                    <button
+                      disabled
+                      className="w-full py-2.5 rounded-xl font-assistant bg-gray-300 text-gray-500 font-bold cursor-not-allowed"
+                    >
+                      Select Payment Method
+                    </button>
+                  )}
+                </div>
 
-              <div className="mt-3 flex items-center font-assistant justify-center space-x-1.5 text-[10px] text-gray-500">
-                <FiLock className="size-3" />
-                <span>Secure Checkout</span>
+                <div className="mt-3 flex items-center font-assistant justify-center space-x-1.5 text-[10px] text-gray-500">
+                  <FiLock className="size-3" />
+                  <span>Secure Checkout</span>
+                </div>
               </div>
             </div>
           </div>
@@ -396,31 +604,37 @@ const BillingPage = () => {
             <div className="flex justify-between items-center text-sm">
               <span className="text-gray-600 font-assistant">Total Amount</span>
               <span className="text-xl font-bold text-[#0e540b]">
-                ₹{calculations.totalAmount}
+                ₹{totalAmount.toFixed(2)}
               </span>
             </div>
             {calculations.savings > 0 && (
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-500 font-assistant">You save</span>
                 <span className="text-green-600 font-semibold font-assistant">
-                  ₹{calculations.savings.toFixed(2)} ({calculations.savingsPercentage}%)
+                  ₹{calculations.savings.toFixed(2)} (
+                  {calculations.savingsPercentage}%)
                 </span>
               </div>
             )}
           </div>
 
           {/* Payment Button */}
-          {paymentMethod === "ONLINE" && (
+          {paymentMethod === "ONLINE" && orderData && (
             <div className="w-full">
-              <RazorpayPayment orderType="basket" />
+              <RazorpayPayment
+                orderType="basket"
+                couponCode={appliedCoupon?.code}
+                orderData={orderData}
+              />
             </div>
           )}
           {paymentMethod === "COD" && (
             <button
               onClick={handleCOD}
-              className="w-full py-3 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg active:scale-95"
+              disabled={!orderData}
+              className="w-full py-3 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Place Order - ₹{calculations.totalAmount}
+              Place Order - ₹{totalAmount.toFixed(2)}
             </button>
           )}
           {!paymentMethod && (

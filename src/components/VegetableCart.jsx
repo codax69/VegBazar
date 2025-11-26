@@ -14,12 +14,10 @@ import {
 import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
 import RazorpayPayment from "./RazorpayPayment";
+import CouponCodeSection from "./CouponCodeSection";
 
-// Constants
-const DELIVERY_CHARGE = 20;
 const API_URL = import.meta.env.VITE_API_SERVER_URL;
 
-// Helper functions moved outside component for better performance
 const getOrderItems = (order) => {
   if (!order) return [];
   if (Array.isArray(order)) return order;
@@ -64,6 +62,10 @@ const VegetableCart = () => {
 
   const [selectedAddress, setSelectedAddress] = useState("");
   const [orderCount, setOrderCount] = useState(1);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  // ✅ ADDED: Dynamic delivery charge from backend
+  const [deliveryCharge, setDeliveryCharge] = useState(20);
 
   // Memoized items and summary
   const items = useMemo(() => getOrderItems(vegetableOrder), [vegetableOrder]);
@@ -85,7 +87,7 @@ const VegetableCart = () => {
     };
   }, [formData]);
 
-  // Memoized calculations
+  // ✅ FIXED: Memoized calculations now use dynamic delivery charge
   const subtotal = useMemo(() => {
     if (summary?.subtotal) return summary.subtotal;
     return items.reduce((total, item) => {
@@ -96,9 +98,14 @@ const VegetableCart = () => {
     }, 0);
   }, [items, summary]);
 
+  // ✅ FIXED: Total calculation now uses backend delivery charge
   const total = useMemo(() => {
-    return summary?.totalAmount || subtotal + DELIVERY_CHARGE;
-  }, [summary, subtotal]);
+    // Use summary from backend if available, otherwise calculate
+    if (summary?.totalAmount) {
+      return summary.totalAmount;
+    }
+    return subtotal - couponDiscount + deliveryCharge;
+  }, [summary, subtotal, couponDiscount, deliveryCharge]);
 
   const isCheckoutDisabled = !selectedAddress || !paymentMethod;
 
@@ -126,10 +133,8 @@ const VegetableCart = () => {
   // Load cart from localStorage (only once on mount)
   useEffect(() => {
     if (items.length === 0) {
-      // Check if order was just placed - if yes, don't restore cart
       const orderJustPlaced = sessionStorage.getItem("orderJustPlaced");
       if (orderJustPlaced) {
-        // Clear the flag after reading it
         sessionStorage.removeItem("orderJustPlaced");
         return;
       }
@@ -144,6 +149,11 @@ const VegetableCart = () => {
               ...parsedSummary,
               items: normalizedItems,
             });
+
+            // ✅ ADDED: Set delivery charge from saved summary
+            if (parsedSummary.summary?.deliveryCharges !== undefined) {
+              setDeliveryCharge(parsedSummary.summary.deliveryCharges);
+            }
           }
         } catch (error) {
           console.error("❌ Error loading cart:", error);
@@ -151,11 +161,10 @@ const VegetableCart = () => {
         }
       }
     }
-  }, []); // Only run once on mount
+  }, []);
 
   // Save cart to localStorage (debounced)
   useEffect(() => {
-    // Don't save if order was just placed
     const orderJustPlaced = sessionStorage.getItem("orderJustPlaced");
     if (orderJustPlaced) {
       return;
@@ -172,31 +181,95 @@ const VegetableCart = () => {
               timestamp: new Date().toISOString(),
             };
         localStorage.setItem("orderSummary", JSON.stringify(orderData));
-      }, 500); // Debounce by 500ms
+      }, 500);
 
       return () => clearTimeout(timeoutId);
     } else if (items.length === 0) {
-      // If cart is empty, remove from localStorage
       localStorage.removeItem("orderSummary");
       localStorage.removeItem("vegbazar_cart");
     }
   }, [items, vegetableOrder]);
 
   // Memoized API call for price calculation
-  const calculatePrice = useCallback(async (orderItems) => {
+  const calculatePrice = useCallback(async (orderItems, couponCode = null) => {
     const normalizedItems = orderItems.map((item) => ({
       vegetableId: item.vegetableId || item.id,
       weight: item.weight,
       quantity: item.quantity,
     }));
 
-    const { data } = await axios.post(`${API_URL}/api/orders/calculate-price`, {
+    const payload = {
       items: normalizedItems,
-    });
+    };
+
+    if (couponCode) {
+      payload.couponCode = couponCode;
+    }
+
+    const { data } = await axios.post(
+      `${API_URL}/api/orders/calculate-price`,
+      payload
+    );
     return data.data;
   }, []);
 
-  // Memoized update quantity handler
+  // ✅ FIXED: Coupon handlers now update delivery charge from backend
+  const handleApplyCoupon = useCallback(
+    async (couponCode) => {
+      try {
+        const updatedPrices = await calculatePrice(items, couponCode);
+
+        if (updatedPrices.coupon && updatedPrices.coupon.applied) {
+          setAppliedCoupon(updatedPrices.coupon);
+          setCouponDiscount(updatedPrices.coupon.discount || 0);
+
+          // ✅ ADDED: Update delivery charge from backend response
+          setDeliveryCharge(updatedPrices.summary.deliveryCharges || 0);
+
+          setVegetableOrder({
+            ...vegetableOrder,
+            items: items,
+            summary: updatedPrices.summary,
+            coupon: updatedPrices.coupon,
+          });
+        } else {
+          throw new Error(updatedPrices.coupon?.error || "Invalid coupon code");
+        }
+      } catch (error) {
+        console.error("❌ Coupon application failed:", error);
+        throw new Error(
+          error.response?.data?.message ||
+            error.message ||
+            "Failed to apply coupon"
+        );
+      }
+    },
+    [items, vegetableOrder, calculatePrice, setVegetableOrder]
+  );
+
+  // ✅ FIXED: Remove coupon handler recalculates delivery charge
+  const handleRemoveCoupon = useCallback(async () => {
+    try {
+      const updatedPrices = await calculatePrice(items);
+
+      setAppliedCoupon(null);
+      setCouponDiscount(0);
+
+      // ✅ ADDED: Update delivery charge from backend response
+      setDeliveryCharge(updatedPrices.summary.deliveryCharges || 20);
+
+      setVegetableOrder({
+        ...vegetableOrder,
+        items: items,
+        summary: updatedPrices.summary,
+        coupon: null,
+      });
+    } catch (error) {
+      console.error("❌ Failed to remove coupon:", error);
+    }
+  }, [items, vegetableOrder, calculatePrice, setVegetableOrder]);
+
+  // ✅ FIXED: Update quantity recalculates delivery charge
   const updateQuantity = useCallback(
     async (index, change) => {
       try {
@@ -210,7 +283,10 @@ const VegetableCart = () => {
         const updatedItems = [...items];
         updatedItems[index] = { ...updatedItems[index], quantity: newQuantity };
 
-        const updatedPrices = await calculatePrice(updatedItems);
+        const updatedPrices = await calculatePrice(
+          updatedItems,
+          appliedCoupon?.code
+        );
         const itemsWithPrices = updatedItems.map((item) => {
           const calculatedItem = updatedPrices.items.find(
             (i) =>
@@ -221,7 +297,7 @@ const VegetableCart = () => {
             ? {
                 ...item,
                 pricePerUnit: calculatedItem.pricePerUnit,
-                totalPrice: calculatedItem.totalPrice,
+                totalPrice: calculatedItem.subtotal,
               }
             : item;
         });
@@ -232,25 +308,35 @@ const VegetableCart = () => {
             : {
                 items: itemsWithPrices,
                 summary: updatedPrices.summary || {},
+                coupon: updatedPrices.coupon || appliedCoupon,
                 timestamp: updatedPrices.timestamp || new Date().toISOString(),
               }
         );
+
+        // ✅ ADDED: Update delivery charge and coupon discount
+        if (updatedPrices.coupon?.discount) {
+          setCouponDiscount(updatedPrices.coupon.discount);
+        }
+        setDeliveryCharge(updatedPrices.summary.deliveryCharges || 20);
       } catch (error) {
         console.error("❌ Failed to update quantity:", error);
         alert("Failed to update quantity. Please try again.");
       }
     },
-    [items, vegetableOrder, calculatePrice, setVegetableOrder]
+    [items, vegetableOrder, appliedCoupon, calculatePrice, setVegetableOrder]
   );
 
-  // Memoized remove item handler
+  // ✅ FIXED: Remove item recalculates delivery charge
   const removeItem = useCallback(
     async (index) => {
       try {
         const updatedItems = items.filter((_, i) => i !== index);
 
         if (updatedItems.length > 0) {
-          const updatedPrices = await calculatePrice(updatedItems);
+          const updatedPrices = await calculatePrice(
+            updatedItems,
+            appliedCoupon?.code
+          );
           const itemsWithPrices = updatedItems.map((item) => {
             const calculatedItem = updatedPrices.items.find(
               (i) =>
@@ -261,7 +347,7 @@ const VegetableCart = () => {
               ? {
                   ...item,
                   pricePerUnit: calculatedItem.pricePerUnit,
-                  totalPrice: calculatedItem.totalPrice,
+                  totalPrice: calculatedItem.subtotal,
                 }
               : item;
           });
@@ -272,12 +358,22 @@ const VegetableCart = () => {
               : {
                   items: itemsWithPrices,
                   summary: updatedPrices.summary || {},
+                  coupon: updatedPrices.coupon || appliedCoupon,
                   timestamp:
                     updatedPrices.timestamp || new Date().toISOString(),
                 }
           );
+
+          // ✅ ADDED: Update delivery charge and coupon discount
+          if (updatedPrices.coupon?.discount) {
+            setCouponDiscount(updatedPrices.coupon.discount);
+          }
+          setDeliveryCharge(updatedPrices.summary.deliveryCharges || 20);
         } else {
           setVegetableOrder([]);
+          setAppliedCoupon(null);
+          setCouponDiscount(0);
+          setDeliveryCharge(20); // ✅ ADDED: Reset to default
           localStorage.removeItem("orderSummary");
         }
       } catch (error) {
@@ -285,10 +381,9 @@ const VegetableCart = () => {
         alert("Failed to remove item. Please try again.");
       }
     },
-    [items, vegetableOrder, calculatePrice, setVegetableOrder]
+    [items, vegetableOrder, appliedCoupon, calculatePrice, setVegetableOrder]
   );
 
-  // Memoized checkout handler
   const handleCheckout = useCallback(async () => {
     try {
       if (!selectedAddress || !paymentMethod) {
@@ -302,7 +397,6 @@ const VegetableCart = () => {
         return;
       }
 
-      // Normalize and deduplicate items
       const normalizedItems = items.map((item) => ({
         ...item,
         vegetableId: item.vegetableId || item.id,
@@ -329,7 +423,6 @@ const VegetableCart = () => {
         return acc;
       }, []);
 
-      // Update cart if duplicates were merged
       if (uniqueVegetables.length !== normalizedItems.length) {
         setVegetableOrder(
           Array.isArray(vegetableOrder)
@@ -338,15 +431,20 @@ const VegetableCart = () => {
         );
       }
 
-      const priceDetails = await calculatePrice(uniqueVegetables);
+      const priceDetails = await calculatePrice(
+        uniqueVegetables,
+        appliedCoupon?.code
+      );
       const orderId = generateOrderId(orderCount);
 
+      // ✅ CRITICAL: Prepare order data with ALL vegetable details including name
       const orderData = {
         orderId,
         orderType: "custom",
         customerInfo: formData,
         selectedVegetables: uniqueVegetables.map((item) => ({
           vegetable: item.vegetableId || item.id,
+          name: item.name, // ✅ ADDED: Include vegetable name
           weight: item.weight,
           quantity: item.quantity,
           pricePerUnit:
@@ -354,14 +452,12 @@ const VegetableCart = () => {
           subtotal: (parseFloat(item.pricePerUnit) || 0) * item.quantity,
           isFromBasket: false,
         })),
-        vegetablesTotal:
-          summary?.subtotal || priceDetails?.summary?.subtotal || subtotal,
+        couponCode: appliedCoupon?.code || null,
+        couponDiscount: appliedCoupon?.discount || 0, // ✅ ADDED: Include coupon discount
+        vegetablesTotal: priceDetails?.summary?.subtotal || subtotal,
         deliveryCharges:
-          summary?.deliveryCharges ||
-          priceDetails?.summary?.deliveryCharges ||
-          DELIVERY_CHARGE,
-        totalAmount:
-          summary?.totalAmount || priceDetails?.summary?.totalAmount || total,
+          priceDetails?.summary?.deliveryCharges || deliveryCharge,
+        totalAmount: priceDetails?.summary?.totalAmount || total,
         paymentMethod,
         paymentStatus: paymentMethod === "COD" ? "pending" : "awaiting_payment",
         orderStatus: "placed",
@@ -369,22 +465,34 @@ const VegetableCart = () => {
       };
 
       if (paymentMethod === "COD") {
+        // ✅ STEP 1: Create order via API
         await axios.post(`${API_URL}/api/orders/create-order`, orderData);
-        
-        // IMPORTANT: Clear order state FIRST before removing localStorage
-        // This prevents the save useEffect from running and re-saving the cart
-        setVegetableOrder([]);
-        
-        // Set flag to prevent cart restoration on refresh
+
+        // ✅ STEP 2: Store complete order data in sessionStorage BEFORE clearing cart
+        sessionStorage.setItem("lastOrderData", JSON.stringify(orderData));
         sessionStorage.setItem("orderJustPlaced", "true");
-        
-        // Small delay to ensure state update completes before clearing storage
+
+        console.log(
+          "✅ Order created and stored in sessionStorage:",
+          orderData
+        );
+
+        // ✅ STEP 3: Clear cart state
+        setVegetableOrder([]);
+        setAppliedCoupon(null);
+        setCouponDiscount(0);
+        setDeliveryCharge(20);
+
+        // ✅ STEP 4: Clear localStorage
         setTimeout(() => {
           localStorage.removeItem("orderSummary");
           localStorage.removeItem("vegbazar_cart");
-        }, 10);
-        
+        }, 100);
+
+        // ✅ STEP 5: Set order placed flag BEFORE navigation
         setIsOrderPlaced(true);
+
+        // ✅ STEP 6: Navigate to success page
         window.scrollTo(0, 0);
         navigate("/order-confirmation");
       }
@@ -407,6 +515,8 @@ const VegetableCart = () => {
     summary,
     subtotal,
     total,
+    appliedCoupon,
+    deliveryCharge,
     calculatePrice,
     setVegetableOrder,
     setIsOrderPlaced,
@@ -492,6 +602,17 @@ const VegetableCart = () => {
         <div className="flex flex-col lg:flex-row gap-3 md:gap-2.5">
           {/* Left Side - Cart Items */}
           <div className="flex-1 lg:w-2/3 space-y-3 md:space-y-2.5">
+            {/* Coupon Section - Mobile */}
+            <div className="lg:hidden">
+              <CouponCodeSection
+                onApplyCoupon={handleApplyCoupon}
+                appliedCoupon={appliedCoupon}
+                onRemoveCoupon={handleRemoveCoupon}
+                subtotal={subtotal}
+                isMobile={true}
+              />
+            </div>
+
             {/* Mobile Bill Summary */}
             <div className="lg:hidden bg-[#f0fcf6] p-4 rounded-lg shadow-md">
               <h3 className="font-poppins text-base font-bold text-gray-800 mb-3 border-b pb-2">
@@ -504,12 +625,26 @@ const VegetableCart = () => {
                     ₹{subtotal.toFixed(2)}
                   </span>
                 </div>
+
+                {/* Coupon Discount */}
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between items-center text-green-600">
+                    <span className="font-assistant">Coupon Discount</span>
+                    <span className="font-assistant font-semibold">
+                      -₹{couponDiscount.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex justify-between items-center">
                   <span className="font-assistant text-gray-600">
                     Delivery Charge
                   </span>
+                  {/* ✅ FIXED: Display delivery charge from backend */}
                   <span className="font-assistant font-semibold text-gray-800">
-                    ₹{(summary?.deliveryCharges || DELIVERY_CHARGE).toFixed(2)}
+                    {deliveryCharge === 0
+                      ? "FREE"
+                      : `₹${deliveryCharge.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="border-t border-gray-200 pt-2 mt-2">
@@ -559,12 +694,16 @@ const VegetableCart = () => {
           {/* Right Side - Desktop Price Summary */}
           <PriceSummary
             subtotal={subtotal}
-            deliveryCharge={summary?.deliveryCharges || DELIVERY_CHARGE}
+            deliveryCharge={deliveryCharge} // ✅ FIXED: Pass dynamic delivery charge
             total={total}
             isCheckoutDisabled={isCheckoutDisabled}
             paymentMethod={paymentMethod}
             vegetableOrder={vegetableOrder}
             handleCheckout={handleCheckout}
+            onApplyCoupon={handleApplyCoupon}
+            appliedCoupon={appliedCoupon}
+            onRemoveCoupon={handleRemoveCoupon}
+            couponDiscount={couponDiscount}
           />
         </div>
       </div>
@@ -576,6 +715,7 @@ const VegetableCart = () => {
         isCheckoutDisabled={isCheckoutDisabled}
         total={total}
         handleCheckout={handleCheckout}
+        appliedCoupon={appliedCoupon}
       />
     </div>
   );
@@ -841,62 +981,96 @@ const PriceSummary = React.memo(
     paymentMethod,
     vegetableOrder,
     handleCheckout,
+    onApplyCoupon,
+    appliedCoupon,
+    onRemoveCoupon,
+    couponDiscount,
   }) => (
     <div className="lg:w-1/3 hidden lg:block">
-      <div className="bg-[#f0fcf6] p-3 rounded-lg shadow-md lg:sticky lg:top-4">
-        <h3 className="font-poppins text-sm font-bold text-gray-800 mb-2.5 border-b pb-1.5">
-          Price Summary
-        </h3>
-        <div className="space-y-2 mb-3">
-          <div className="flex justify-between items-center">
-            <span className="font-assistant text-xs text-gray-600">
-              Subtotal
-            </span>
-            <span className="font-assistant font-semibold text-gray-800 text-sm">
-              ₹{subtotal.toFixed(2)}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="font-assistant text-xs text-gray-600">
-              Delivery Charge
-            </span>
-            <span className="font-assistant font-semibold text-gray-800 text-sm">
-              ₹{deliveryCharge.toFixed(2)}
-            </span>
-          </div>
-          <div className="border-t border-gray-200 pt-2">
+      <div className="bg-[#f0fcf6] p-3 rounded-lg shadow-md lg:sticky lg:top-4 space-y-3">
+        {/* Coupon Section */}
+        <CouponCodeSection
+          onApplyCoupon={onApplyCoupon}
+          appliedCoupon={appliedCoupon}
+          onRemoveCoupon={onRemoveCoupon}
+          subtotal={subtotal}
+          isMobile={false}
+        />
+
+        {/* Price Summary */}
+        <div>
+          <h3 className="font-poppins text-sm font-bold text-gray-800 mb-2.5 border-b pb-1.5">
+            Price Summary
+          </h3>
+          <div className="space-y-2 mb-3">
             <div className="flex justify-between items-center">
-              <span className="font-poppins font-bold text-gray-800 text-sm">
-                Total Amount
+              <span className="font-assistant text-xs text-gray-600">
+                Subtotal
               </span>
-              <span className="font-amiko font-bold text-green-700 text-base">
-                ₹{total.toFixed(2)}
+              <span className="font-assistant font-semibold text-gray-800 text-sm">
+                ₹{subtotal.toFixed(2)}
               </span>
             </div>
+
+            {/* Coupon Discount */}
+            {couponDiscount > 0 && (
+              <div className="flex justify-between items-center text-green-600">
+                <span className="font-assistant text-xs">Coupon Discount</span>
+                <span className="font-assistant font-semibold text-sm">
+                  -₹{couponDiscount.toFixed(2)}
+                </span>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center">
+              <span className="font-assistant text-xs text-gray-600">
+                Delivery Charge
+              </span>
+              {/* ✅ FIXED: Show dynamic delivery charge */}
+              <span className="font-assistant font-semibold text-gray-800 text-sm">
+                {deliveryCharge === 0
+                  ? "FREE"
+                  : `₹${deliveryCharge.toFixed(2)}`}
+              </span>
+            </div>
+            <div className="border-t border-gray-200 pt-2">
+              <div className="flex justify-between items-center">
+                <span className="font-poppins font-bold text-gray-800 text-sm">
+                  Total Amount
+                </span>
+                <span className="font-amiko font-bold text-green-700 text-base">
+                  ₹{total.toFixed(2)}
+                </span>
+              </div>
+            </div>
           </div>
+          {isCheckoutDisabled && (
+            <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded-lg">
+              <p className="font-assistant text-[10px] text-orange-700 font-semibold">
+                ⚠️ Please select delivery address and payment method to proceed
+              </p>
+            </div>
+          )}
+          {paymentMethod === "ONLINE" ? (
+            <RazorpayPayment
+              orderType="custom"
+              vegetableOrder={vegetableOrder}
+              couponCode={appliedCoupon}
+            />
+          ) : (
+            <button
+              onClick={handleCheckout}
+              disabled={isCheckoutDisabled}
+              className={`font-assistant w-full py-2 rounded-lg font-bold text-sm transition transform shadow-md ${
+                isCheckoutDisabled
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-green-700 text-white hover:bg-green-800 hover:scale-[1.02]"
+              }`}
+            >
+              {isCheckoutDisabled ? "Complete Selection" : "Place Order"}
+            </button>
+          )}
         </div>
-        {isCheckoutDisabled && (
-          <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded-lg">
-            <p className="font-assistant text-[10px] text-orange-700 font-semibold">
-              ⚠️ Please select delivery address and payment method to proceed
-            </p>
-          </div>
-        )}
-        {paymentMethod === "ONLINE" ? (
-          <RazorpayPayment orderType="custom" vegetableOrder={vegetableOrder} />
-        ) : (
-          <button
-            onClick={handleCheckout}
-            disabled={isCheckoutDisabled}
-            className={`font-assistant w-full py-2 rounded-lg font-bold text-sm transition transform shadow-md ${
-              isCheckoutDisabled
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-green-700 text-white hover:bg-green-800 hover:scale-[1.02]"
-            }`}
-          >
-            {isCheckoutDisabled ? "Complete Selection" : "Place Order"}
-          </button>
-        )}
       </div>
     </div>
   )
@@ -909,6 +1083,7 @@ const MobileCheckoutButton = React.memo(
     isCheckoutDisabled,
     total,
     handleCheckout,
+    appliedCoupon,
   }) => (
     <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[#f0fcf6] border-t border-gray-200 shadow-2xl z-50">
       <div className="px-4 py-3">
@@ -917,6 +1092,7 @@ const MobileCheckoutButton = React.memo(
             <RazorpayPayment
               orderType="custom"
               vegetableOrder={vegetableOrder}
+              couponCode={appliedCoupon}
             />
           </div>
         ) : (

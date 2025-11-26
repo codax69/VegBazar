@@ -24,6 +24,7 @@ import OrderTracking from "./components/OrderTracking";
 import { Home, Tag, ShoppingBag, Phone, Menu, X } from "lucide-react";
 import BackButtonHandler from "./components/BackButtonHandler";
 import { CartProvider, useCart } from "./Context/CartContext";
+import { BillProvider } from "./Context/BillContext";
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -118,6 +119,7 @@ const AppContent = () => {
   return (
     <ThemeProvider>
       <OrderContext.Provider value={contextValue}>
+        <BillProvider>
         <BackButtonHandler />
         <div className="min-h-screen bg-[#f0fcf6] flex flex-col">
           <Navbar />
@@ -153,6 +155,7 @@ const AppContent = () => {
             </Routes>
           </div>
         </div>
+        </BillProvider>
       </OrderContext.Provider>
     </ThemeProvider>
   );

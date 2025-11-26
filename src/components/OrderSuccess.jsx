@@ -9,6 +9,8 @@ import {
   CreditCard,
   MapPin,
 } from "lucide-react";
+import { useBillContext } from "../Context/BillContext";
+import { useOrderContext } from "../Context/OrderContext";
 import CopyOrderButton from "./CopyOrderButton";
 
 const OrderSuccess = ({
@@ -18,6 +20,19 @@ const OrderSuccess = ({
   selectedVegetables,
   onNewOrder,
 }) => {
+  // Use BillContext for order calculations and data
+  const {
+    isCustomOrder,
+    isBasketOrder,
+    couponDiscount,
+    deliveryCharge,
+    customCalculations,
+    basketCalculations,
+  } = useBillContext();
+
+  // Use OrderContext for navigation
+  const { navigate } = useOrderContext();
+
   // Helper function to extract vegetable name
   const getVegetableName = (veg) => {
     if (typeof veg === "string") return veg;
@@ -25,42 +40,85 @@ const OrderSuccess = ({
     return "Unknown Vegetable";
   };
 
-  // Determine order type and calculate total
+  // Determine order type and calculate total using orderData from database
   const orderInfo = useMemo(() => {
-    const isCustomOrder = orderData?.orderType === "custom";
-    const isBasketOrder = orderData?.orderType === "basket";
-
-    let totalAmount = 0;
-    let packageTitle = "N/A";
-
-    if (isCustomOrder) {
-      totalAmount = orderData?.totalAmount || 0;
-      packageTitle = "Custom Selection";
-    } else if (isBasketOrder) {
-      totalAmount = (selectedOffer?.price || 0) + 20;
-      packageTitle = selectedOffer?.title || "Basket Package";
+    if (!orderData) {
+      return {
+        orderId: "N/A",
+        orderType: "unknown",
+        packageTitle: "N/A",
+        subtotal: 0,
+        discount: 0,
+        delivery: 0,
+        totalAmount: 0,
+        selectedVegetables: [],
+      };
     }
 
+    const {
+      orderId,
+      orderType,
+      vegetablesTotal = 0,
+      couponDiscount: orderCouponDiscount = 0,
+      deliveryCharges = 20,
+      totalAmount = 0,
+      selectedVegetables: orderSelectedVegetables = [],
+    } = orderData;
+
+    const packageTitle =
+      orderType === "custom"
+        ? "Custom Selection"
+        : orderType === "basket"
+        ? selectedOffer?.title || "Basket Package"
+        : "N/A";
+
     return {
-      isCustomOrder,
-      isBasketOrder,
-      totalAmount,
+      orderId,
+      orderType,
       packageTitle,
+      subtotal: vegetablesTotal,
+      discount: orderCouponDiscount,
+      delivery: deliveryCharges,
+      totalAmount,
+      selectedVegetables: orderSelectedVegetables,
     };
   }, [orderData, selectedOffer]);
 
-  // Format vegetables for display
+  // Format vegetables for display from orderData
   const displayVegetables = useMemo(() => {
-    if (!selectedVegetables || selectedVegetables.length === 0) return [];
+    // Use vegetables from orderData if available, otherwise use selectedVegetables prop
+    const vegsToDisplay = orderInfo.selectedVegetables?.length > 0
+      ? orderInfo.selectedVegetables
+      : selectedVegetables || [];
 
-    return selectedVegetables.map((veg, index) => ({
+    if (!vegsToDisplay || vegsToDisplay.length === 0) return [];
+
+    return vegsToDisplay.map((veg, index) => ({
       key: index,
       name: getVegetableName(veg),
-      quantity: veg?.quantity,
-      weight: veg?.weight,
-      price: veg?.pricePerUnit || veg?.price,
+      quantity: veg?.quantity || 1,
+      weight: veg?.weight || "N/A",
+      price: veg?.pricePerUnit || veg?.price || 0,
+      subtotal: (veg?.pricePerUnit || veg?.price || 0) * (veg?.quantity || 1),
     }));
-  }, [selectedVegetables]);
+  }, [orderInfo.selectedVegetables, selectedVegetables]);
+
+  // Handle new order navigation
+  const handleNewOrder = () => {
+    if (onNewOrder) {
+      onNewOrder();
+    } else {
+      navigate("/");
+    }
+  };
+
+  // Extract customer info from orderData
+  const customerInfo = useMemo(() => {
+    if (!orderData?.customerInfo) {
+      return formData || {};
+    }
+    return orderData.customerInfo;
+  }, [orderData, formData]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center py-6 px-3 sm:px-4 pt-20">
@@ -96,14 +154,15 @@ const OrderSuccess = ({
                     Order ID
                   </p>
                   <span className="font-semibold text-gray-800 font-assistant break-all">
-                    {orderData?.orderId || "N/A"}
+                    {orderInfo.orderId}
                   </span>
                 </div>
-                {orderData?.orderId && (
-                  <CopyOrderButton orderId={orderData.orderId} />
+                {orderInfo.orderId && orderInfo.orderId !== "N/A" && (
+                  <CopyOrderButton orderId={orderInfo.orderId} />
                 )}
               </div>
             </div>
+
             {/* Customer Name */}
             <div className="flex items-start gap-2">
               <User className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
@@ -112,7 +171,7 @@ const OrderSuccess = ({
                   Customer Name
                 </p>
                 <p className="font-semibold text-gray-800 font-assistant break-words">
-                  {formData?.name || "N/A"}
+                  {customerInfo?.name || "N/A"}
                 </p>
               </div>
             </div>
@@ -125,7 +184,7 @@ const OrderSuccess = ({
                   Mobile
                 </p>
                 <p className="font-semibold text-gray-800 font-assistant">
-                  {formData?.mobile || "N/A"}
+                  {customerInfo?.mobile || "N/A"}
                 </p>
               </div>
             </div>
@@ -138,7 +197,7 @@ const OrderSuccess = ({
                   Email
                 </p>
                 <p className="font-semibold text-gray-800 font-assistant truncate">
-                  {formData?.email || "N/A"}
+                  {customerInfo?.email || "N/A"}
                 </p>
               </div>
             </div>
@@ -148,7 +207,9 @@ const OrderSuccess = ({
               <ShoppingBag className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm font-poppins text-gray-500">
-                  {orderInfo.isCustomOrder ? "Order Type" : "Package"}
+                  {orderInfo.orderType === "custom"
+                    ? "Order Type"
+                    : "Package"}
                 </p>
                 <p className="font-semibold text-gray-800 font-assistant break-words">
                   {orderInfo.packageTitle}
@@ -170,8 +231,51 @@ const OrderSuccess = ({
             </div>
           </div>
 
+          {/* Price Breakdown */}
+          <div className="mt-4 pt-4 border-t border-green-200">
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="font-assistant text-gray-600">Subtotal</span>
+                <span className="font-assistant font-semibold text-gray-800">
+                  ₹{orderInfo.subtotal.toFixed(2)}
+                </span>
+              </div>
+
+              {orderInfo.discount > 0 && (
+                <div className="flex justify-between items-center text-green-600">
+                  <span className="font-assistant">Coupon Discount</span>
+                  <span className="font-assistant font-semibold">
+                    -₹{orderInfo.discount.toFixed(2)}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center">
+                <span className="font-assistant text-gray-600">
+                  Delivery Charge
+                </span>
+                <span className="font-assistant font-semibold text-gray-800">
+                  {orderInfo.delivery === 0
+                    ? "FREE"
+                    : `₹${orderInfo.delivery.toFixed(2)}`}
+                </span>
+              </div>
+
+              <div className="border-t border-green-200 pt-2 mt-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-poppins font-bold text-gray-800">
+                    Total
+                  </span>
+                  <span className="font-amiko font-bold text-[#0e540b] text-lg">
+                    ₹{orderInfo.totalAmount.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Delivery Address - if available */}
-          {formData?.address && (
+          {customerInfo?.address && (
             <div className="mt-4 pt-4 border-t border-green-200">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
@@ -180,9 +284,9 @@ const OrderSuccess = ({
                     Delivery Address
                   </p>
                   <p className="text-sm font-assistant text-gray-700 break-words">
-                    {formData.address}
-                    {formData.area && `, ${formData.area}`}
-                    {formData.city && `, ${formData.city}`}
+                    {customerInfo.address}
+                    {customerInfo.area && `, ${customerInfo.area}`}
+                    {customerInfo.city && `, ${customerInfo.city}`}
                   </p>
                 </div>
               </div>
@@ -193,12 +297,12 @@ const OrderSuccess = ({
           {displayVegetables.length > 0 && (
             <div className="mt-4 pt-4 border-t border-green-200">
               <p className="font-semibold font-poppins text-gray-700 mb-3 flex items-center gap-2 text-sm sm:text-base">
-                <ShoppingBag className="w-4 h-4 text-[#0e540b]  flex-shrink-0" />
+                <ShoppingBag className="w-4 h-4 text-[#0e540b] flex-shrink-0" />
                 Selected Vegetables ({displayVegetables.length})
               </p>
 
               {/* For Custom Orders - Show detailed list */}
-              {orderInfo.isCustomOrder ? (
+              {orderInfo.orderType === "custom" ? (
                 <div className="space-y-2">
                   {displayVegetables.map((veg) => (
                     <div
@@ -221,7 +325,7 @@ const OrderSuccess = ({
                             ₹{parseFloat(veg.price).toFixed(2)} × {veg.quantity}
                           </div>
                           <div className="font-semibold text-green-700 text-sm font-assistant">
-                            ₹{(parseFloat(veg.price) * veg.quantity).toFixed(2)}
+                            ₹{veg.subtotal.toFixed(2)}
                           </div>
                         </div>
                       )}
@@ -236,7 +340,7 @@ const OrderSuccess = ({
                       key={veg.key}
                       className="bg-green-100 font-assistant text-green-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-poppins font-medium border border-green-200"
                     >
-                      {veg.name}
+                      {veg.name} ({veg.weight})
                     </span>
                   ))}
                 </div>
@@ -244,6 +348,33 @@ const OrderSuccess = ({
             </div>
           )}
         </div>
+
+        {/* Order Status Badge */}
+        {orderData?.paymentStatus && (
+          <div className="mb-6 p-4 rounded-xl border-l-4 border-green-600 bg-green-50">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-gray-800 font-assistant text-sm sm:text-base">
+                  Payment Status:{" "}
+                  <span className="capitalize text-green-700">
+                    {orderData.paymentStatus.replace("_", " ")}
+                  </span>
+                </p>
+                {orderData.paymentMethod && (
+                  <p className="text-xs sm:text-sm text-gray-600 font-assistant mt-1">
+                    Payment Method:{" "}
+                    <span className="font-semibold">
+                      {orderData.paymentMethod === "COD"
+                        ? "Cash on Delivery"
+                        : "Online Payment"}
+                    </span>
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Next Steps Card */}
         <div className="bg-yellow-50 p-4 rounded-xl mb-6 border border-yellow-200">
@@ -256,7 +387,9 @@ const OrderSuccess = ({
               <p className="text-gray-700 text-xs sm:text-sm font-assistant">
                 Your order has been received and will be processed shortly. You
                 will receive a confirmation call on{" "}
-                <strong className="text-gray-900">{formData?.mobile}</strong>{" "}
+                <strong className="text-gray-900">
+                  {customerInfo?.mobile || "your registered number"}
+                </strong>{" "}
                 within 30 minutes.
               </p>
             </div>
@@ -265,10 +398,10 @@ const OrderSuccess = ({
 
         {/* Place Another Order Button */}
         <button
-          onClick={onNewOrder}
-          className="w-full bg-[#0e540b] text-white py-3 px-6 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm sm:text-base"
+          onClick={handleNewOrder}
+          className="w-full bg-[#0e540b] text-white py-3 px-6 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm sm:text-base font-assistant"
         >
-          <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 font-assistant" />
+          <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
           Place Another Order
         </button>
       </div>

@@ -4,7 +4,7 @@ import axios from "axios";
 import { useOrderContext } from "../Context/OrderContext";
 import { CreditCard, Loader2, AlertCircle } from "lucide-react";
 
-const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
+const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder, couponCode }) => {
   const {
     selectedOffer,
     selectedVegetables,
@@ -46,16 +46,18 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
     );
   }, [orderType, selectedOffer, selectedVegetables]);
 
-  // Calculate total amount
+  // ✅ FIXED: Calculate total amount considering coupon discount
   const totalAmount = useMemo(() => {
     if (isCustomOrder && vegetableOrder) {
       const items = getOrderItems(vegetableOrder);
       const summary = getOrderSummary(vegetableOrder);
 
+      // Use summary total if available (includes coupon discount and delivery)
       if (summary?.totalAmount && summary.totalAmount > 0) {
         return summary.totalAmount;
       }
 
+      // Fallback calculation
       const subtotal = items.reduce((acc, item) => {
         const price =
           parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
@@ -68,39 +70,42 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
     }
 
     if (isBasketOrder && selectedOffer) {
-      return (selectedOffer.price || 0) + 20;
+      // ✅ FIXED: For basket orders, check if coupon is applied
+      // If couponCode is passed as object with discount info, use it
+      const offerPrice = selectedOffer.price || 0;
+      const discount = couponCode?.discount || 0;
+      const deliveryCharge = 20; // Basket orders always have ₹20 delivery
+      
+      return Math.max(0, offerPrice - discount) + deliveryCharge;
     }
 
     return 0;
-  }, [isCustomOrder, isBasketOrder, vegetableOrder, selectedOffer]);
+  }, [isCustomOrder, isBasketOrder, vegetableOrder, selectedOffer, couponCode]);
 
   // Load Razorpay script dynamically
   const loadScript = useCallback((src) => {
     return new Promise((resolve) => {
       // Check if already loaded
       if (window.Razorpay) {
-        // console.log("✅ Razorpay already loaded");
         setScriptLoaded(true);
         resolve(true);
         return;
       }
 
-      // console.log("⏳ Loading Razorpay script...");
       const script = document.createElement("script");
       script.src = src;
-      
+
       script.onload = () => {
-        // console.log("✅ Razorpay script loaded successfully");
         setScriptLoaded(true);
         resolve(true);
       };
-      
+
       script.onerror = () => {
         console.error("❌ Razorpay script failed to load");
         setScriptLoaded(false);
         resolve(false);
       };
-      
+
       document.body.appendChild(script);
     });
   }, []);
@@ -140,7 +145,7 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
     return `ORD${year}${month}${day}${orderNum}`;
   }, []);
 
-  // Build order data
+  // ✅ FIXED: Build order data with coupon code
   const buildOrderData = useCallback(
     (orderId) => {
       try {
@@ -170,12 +175,13 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
                   parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
                 return total + price * (item.quantity || 0);
               }, 0),
-            deliveryCharges: summary?.deliveryCharges ?? 20,
             totalAmount: totalAmount,
             paymentMethod: "ONLINE",
             paymentStatus: "awaiting_payment",
             orderStatus: "placed",
             orderDate: new Date().toISOString(),
+            // ✅ ADDED: Pass coupon code (could be string or object with code property)
+            couponCode: typeof couponCode === 'string' ? couponCode : couponCode?.code,
           };
         }
 
@@ -191,6 +197,8 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
             paymentMethod: "ONLINE",
             paymentStatus: "awaiting_payment",
             orderStatus: "placed",
+            // ✅ ADDED: Pass coupon code for basket orders
+            couponCode: typeof couponCode === 'string' ? couponCode : couponCode?.code,
           };
         }
 
@@ -208,6 +216,7 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
       selectedOffer,
       selectedVegetables,
       totalAmount,
+      couponCode, 
     ]
   );
 
@@ -230,7 +239,6 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
 
       // Ensure Razorpay script is loaded
       if (!scriptLoaded) {
-        // console.log("🔄 Script not loaded yet, loading now...");
         const res = await loadScript(
           "https://checkout.razorpay.com/v1/checkout.js"
         );
@@ -244,8 +252,6 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
       const orderId = generateOrderId(orderCount);
       setCurrentOrderId(orderId);
       const orderData = buildOrderData(orderId);
-
-      // console.log("📦 Creating order...", orderId);
 
       // Create order in backend
       const result = await axios.post(
@@ -261,8 +267,6 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
       const razorpayOrderId = result.data.data.razorpayOrder.id;
       const amount = Math.round(totalAmount * 100); // Convert to paise
       const currency = "INR";
-
-      // console.log("💳 Opening Razorpay payment modal...");
 
       // Get order description
       let description = "";
@@ -280,14 +284,15 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
         description,
         order_id: razorpayOrderId,
         handler: async function (response) {
-          // console.log("✅ Payment successful, verifying...");
           try {
-            // Build verification data based on order type
+            // ✅ FIXED: Build verification data with coupon code
             const verifyData = {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
               orderId: orderId,
+              // ✅ ADDED: Include coupon code in verification
+              couponCode: typeof couponCode === 'string' ? couponCode : couponCode?.code,
             };
 
             // Add order-specific data
@@ -299,7 +304,8 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
                 vegetable: item.id || item.vegetableId,
                 weight: item.weight,
                 quantity: item.quantity,
-                pricePerUnit: parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
+                pricePerUnit:
+                  parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
               }));
             } else if (isBasketOrder) {
               verifyData.orderType = "basket";
@@ -308,21 +314,17 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
               verifyData.selectedVegetables = selectedVegetables;
             }
 
-            // console.log("🔍 Verifying payment with data:", {
-            //   ...verifyData,
-            //   razorpay_signature: "[HIDDEN]"
-            // });
-
             const verifyResult = await axios.post(
-              `${import.meta.env.VITE_API_SERVER_URL}/api/orders/verify-payment`,
+              `${
+                import.meta.env.VITE_API_SERVER_URL
+              }/api/orders/verify-payment`,
               verifyData,
               { timeout: 15000 }
             );
 
-            // console.log("✅ Verification response:", verifyResult.data);
+            console.log("✅ Verification response:", verifyResult.data);
 
             if (verifyResult.data.success) {
-              // console.log("✅ Payment verified successfully");
               setIsOrderPlaced(true);
               if (onSuccess) {
                 onSuccess();
@@ -336,8 +338,9 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
             console.error("❌ Payment verification error:", err);
             console.error("Error details:", err.response?.data);
             setError(
-              err.response?.data?.message || 
-              "Payment verification failed. Please contact support with your payment ID: " + response.razorpay_payment_id
+              err.response?.data?.message ||
+                "Payment verification failed. Please contact support with your payment ID: " +
+                  response.razorpay_payment_id
             );
           } finally {
             setIsLoading(false);
@@ -356,7 +359,6 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
         theme: { color: "#0e540b" },
         modal: {
           ondismiss: function () {
-            // console.log("⚠️ Payment cancelled by user");
             setIsLoading(false);
             setError("Payment cancelled. Please try again when ready.");
           },
@@ -439,16 +441,39 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder }) => {
             </p>
           )}
 
+          {/* ✅ FIXED: Show coupon discount info if applied */}
           {isBasketOrder && selectedOffer && (
-            <p className="text-center font-assistant text-xs sm:text-sm text-gray-600">
-              Package: ₹{selectedOffer.price} + ₹20 delivery charge
-            </p>
+            <div className="text-center space-y-1">
+              <p className="font-assistant text-xs sm:text-sm text-gray-600">
+                Package: ₹{selectedOffer.price}
+                {couponCode && couponCode.discount > 0 && (
+                  <span className="text-green-600 font-semibold ml-1">
+                    - ₹{couponCode.discount} (Coupon)
+                  </span>
+                )}
+                {" + ₹20 delivery"}
+              </p>
+              {couponCode && couponCode.code && (
+                <p className="text-xs text-green-600 font-semibold">
+                  Coupon "{couponCode.code}" applied ✓
+                </p>
+              )}
+            </div>
           )}
 
           {isCustomOrder && (
-            <p className="text-center font-assistant text-xs sm:text-sm text-gray-600">
-              Includes ₹20 delivery charge
-            </p>
+            <div className="text-center space-y-1">
+              <p className="font-assistant text-xs sm:text-sm text-gray-600">
+                {vegetableOrder?.summary?.deliveryCharges === 0 
+                  ? "Free Delivery (Order above ₹250)" 
+                  : "Includes ₹20 delivery charge"}
+              </p>
+              {couponCode && (typeof couponCode === 'string' || couponCode.code) && (
+                <p className="text-xs text-green-600 font-semibold">
+                  Coupon "{typeof couponCode === 'string' ? couponCode : couponCode.code}" applied ✓
+                </p>
+              )}
+            </div>
           )}
         </>
       ) : (
