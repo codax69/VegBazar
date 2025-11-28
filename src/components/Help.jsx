@@ -38,7 +38,7 @@ const Help = () => {
   };
 
   return (
-    <div className="min-h-screen pt-20 pb-10 px-3 bg-[#f7faf7]">
+    <div className="min-h-screen md:pt-20 pb-10 px-3 bg-[#f7faf7]">
       <div className="max-w-2xl mx-auto space-y-6 md:space-y-8">
         {/* Header */}
         <div className="text-center mb-4">

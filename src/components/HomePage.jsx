@@ -597,7 +597,7 @@ const Homepage = () => {
       <div className="w-full sm:w-full md:max-w-7xl lg:max-w-7xl h-full mx-auto px-1 md:py-5">
         {/* Top 10 Selling Vegetables Section */}
         <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
-          <div className="p-6">
+          <div className="md:p-6 lg:p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Top 10 Selling Vegetables
             </h3>
@@ -632,7 +632,7 @@ const Homepage = () => {
 
         {/* Top 6 Suggest Vegetables for this Session */}
         <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
-          <div className="p-6">
+          <div className="md:p-6 lg:p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Top 6 Suggested Vegetables for this Session
             </h3>
@@ -737,7 +737,7 @@ const Homepage = () => {
         </div>
 
         {/* Features Section */}
-        <section className="w-full py-12 px-4 bg-[#f0fcf6]">
+        <section className="w-full py-12 px-2 bg-[#f0fcf6]">
           <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {features.map((feature, idx) => {
@@ -847,7 +847,7 @@ const Homepage = () => {
       </div>
 
       {/* Footer */}
-      <footer className="w-full bg-[#0e540b] text-white py-12 mt-12">
+      <footer className="w-full bg-[#0e540b] text-white py-12 mt-12 rounded-3xl">
         <div className="max-w-5xl mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>

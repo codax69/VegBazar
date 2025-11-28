@@ -10,16 +10,11 @@ const VegetableCard = memo(({
   isDisabled, 
   onToggle 
 }) => {
-  const priceInfo = vegetable.priceForOffer;
-  const savings = priceInfo.marketPrice && priceInfo.marketPrice > priceInfo.price 
-    ? (priceInfo.marketPrice - priceInfo.price).toFixed(2) 
-    : null;
-
   return (
     <button
       onClick={() => !isDisabled && onToggle(vegetable)}
       disabled={isDisabled}
-      className={`w-full p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 touch-manipulation active:scale-95 ${
+      className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 touch-manipulation active:scale-95 ${
         isSelected
           ? "bg-green-100 border-[#0e540b] shadow-lg"
           : "bg-[#f0fcf6] border-gray-300 shadow-md"
@@ -27,52 +22,28 @@ const VegetableCard = memo(({
       aria-label={`${isSelected ? "Deselect" : "Select"} ${vegetable.name}`}
       aria-pressed={isSelected}
     >
-      {/* Vegetable Image and Selection */}
       <div className="text-center">
         <div className="relative">
           <img
-            className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover mx-auto rounded-lg sm:rounded-xl mb-1.5 sm:mb-2"
+            className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-cover mx-auto rounded-lg sm:rounded-xl mb-2"
             src={vegetable.image}
             alt={vegetable.name}
             loading="lazy"
             decoding="async"
           />
           {isSelected && (
-            <div className="absolute -top-1 -right-1 bg-[#0e540b] rounded-full p-0.5 sm:p-1">
-              <CheckCircle size={14} className="text-white sm:w-4 sm:h-4" />
+            <div className="absolute -top-1 -right-1 bg-[#0e540b] rounded-full p-1">
+              <CheckCircle size={16} className="text-white sm:w-5 sm:h-5" />
             </div>
           )}
         </div>
-        <p className="font-medium font-assistant text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1">
+        <p className="font-medium font-assistant text-sm sm:text-base leading-tight px-1">
           {vegetable.name}
         </p>
-      </div>
-
-      {/* Price Display */}
-      <div className="mt-1 sm:mt-2 text-center">
-        <div className="flex items-center justify-center gap-1 sm:gap-2">
-          <p className="font-assistant text-[#0e540b] font-bold text-sm sm:text-base">
-            ₹{priceInfo.price}
-          </p>
-          {priceInfo.marketPrice && priceInfo.marketPrice > priceInfo.price && (
-            <p className="font-assistant text-gray-400 line-through text-[10px] sm:text-xs">
-              ₹{priceInfo.marketPrice}
-            </p>
-          )}
-        </div>
-        <p className="text-[11px] sm:text-[11px] text-gray-500 font-assistant">
-          per {priceInfo.weight}
-        </p>
-        {savings && (
-          <p className="text-[9px] sm:text-[10px] text-green-600 font-assistant font-semibold mt-0.5">
-            Save ₹{savings}
-          </p>
-        )}
       </div>
     </button>
   );
 });
-
 VegetableCard.displayName = 'VegetableCard';
 
 // Memoized Action Section

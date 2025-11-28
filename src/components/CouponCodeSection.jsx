@@ -177,7 +177,7 @@ const CouponCodeSection = ({
           <div className="space-y-1.5">
             <button
               onClick={() => {
-                setCouponCode("FIRST50");
+                setCouponCode("FIRST100");
                 setError("");
               }}
               className="w-full bg-white hover:bg-green-50 border border-green-200 rounded-lg p-2 text-left transition-colors group"
@@ -185,7 +185,7 @@ const CouponCodeSection = ({
               <div className="flex items-center justify-between">
                 <div>
                   <p className={`font-bold text-green-700 font-assistant ${isMobile ? 'text-xs' : 'text-sm'}`}>
-                    FIRST50
+                    FIRST100
                   </p>
                   <p className={`text-gray-600 font-assistant ${isMobile ? 'text-[9px]' : 'text-[10px]'}`}>
                     Get ₹50 off on first order

@@ -25,6 +25,7 @@ import { Home, Tag, ShoppingBag, Phone, Menu, X } from "lucide-react";
 import BackButtonHandler from "./components/BackButtonHandler";
 import { CartProvider, useCart } from "./Context/CartContext";
 import { BillProvider } from "./Context/BillContext";
+import BillingSuccess from "./components/BillingSuccess";
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -152,6 +153,7 @@ const AppContent = () => {
               <Route path="/veg-bag" element={<VegetableCart />} />
               <Route path="/track-your-order" element={<OrderTracking />} />
               <Route path="/help" element={<Help />} />
+              <Route path="/order-success" element={<BillingSuccess />} />
             </Routes>
           </div>
         </div>

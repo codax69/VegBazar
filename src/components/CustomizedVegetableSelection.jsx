@@ -39,7 +39,7 @@ const VegetableCard = memo(
     }, [veg, selectedWeight]);
 
     return (
-      <div className="w-full p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border-2 bg-[#f0fcf6] border-gray-300 shadow-md transition-all duration-200 hover:border-[#0e540b] hover:shadow-xl">
+      <div className="w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 bg-[#f0fcf6] border-gray-300 shadow-md transition-all duration-200 hover:border-[#0e540b] hover:shadow-xl">
         {/* Vegetable Image */}
         <div className="text-center">
           <div className="relative">
@@ -436,7 +436,7 @@ const CustomizedVegetableSelection = () => {
 
   return (
     <div className="min-h-screen bg-[#f0fcf6] pb-20 md:pb-32">
-      <div className="w-full max-w-7xl mx-auto mt-5 bg-[#f0fcf6] p-4 sm:p-6 md:p-8">
+      <div className="w-full max-w-7xl mx-auto mt-5 bg-[#f0fcf6] p-4 sm:p-1 md:p-8">
         {/* Header */}
         <div className="flex items-center md:justify-between gap-10 mb-8 pb-4 border-b-2 border-gray-100">
           <button

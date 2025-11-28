@@ -1,7 +1,7 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
 
-const OrderLoading = () => {
+const OrderLoading = ({loadingText,loadingMsg}) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-[#f0fcf6] p-8 rounded-2xl shadow-lg text-center">
@@ -9,10 +9,10 @@ const OrderLoading = () => {
           <Loader2 className="h-16 w-16 text-[#0e540b] animate-spin" />
         </div>
         <h3 className="text-xl font-poppins font-bold text-gray-800 mb-2">
-          Processing Your Order
+          {loadingText}
         </h3>
         <p className="text-gray-600 font-assistant">
-          Please wait while we confirm your order...
+          {loadingMsg}
         </p>
       </div>
     </div>

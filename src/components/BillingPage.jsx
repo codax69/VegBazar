@@ -268,7 +268,8 @@ const BillingPage = () => {
   );
 
   // Loading and Error States
-  if (isSubmitting || isLoadingOrderCount) return <OrderLoading />;
+  if (isSubmitting) return <OrderLoading loadingText="Placing order...." loadingMsg=""/>;
+  if (isLoadingOrderCount) return <OrderLoading loadingText="Loading" loadingMsg="Please wait while we confirm your order..."/>;
   if (submitError)
     return (
       <OrderFailed
@@ -559,7 +560,7 @@ const BillingPage = () => {
                       disabled={!orderData}
                       className="w-full py-2.5 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Place Order - ₹{totalAmount.toFixed(2)}
+                      Place Order 
                     </button>
                   )}
                   {!paymentMethod && (

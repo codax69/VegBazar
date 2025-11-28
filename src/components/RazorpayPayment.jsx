@@ -430,7 +430,7 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder, couponCode }) =
             ) : (
               <>
                 <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
-                Pay Now - ₹{totalAmount.toFixed(2)}
+                Pay Now
               </>
             )}
           </button>

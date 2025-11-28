@@ -541,18 +541,18 @@ const VegetableCart = () => {
   // Render empty cart
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-5 pb-14 lg:pb-0">
+      <div className="min-h-screen bg-gray-50 pt-5 py-14 lg:pb-0">
         <div className="container mx-auto px-4 md:py-4 lg:py-3">
           <div className="mb-4 md:mb-3">
             <div className="flex gap-1 flex-col items-center justify-between">
               <button
                 onClick={handleContinueShopping}
-                className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-green-700 hover:bg-green-50 rounded-lg transition font-assistant text-sm font-semibold"
+                className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-[#0e540b] hover:bg-green-50 rounded-lg transition font-assistant text-sm font-semibold"
               >
                 <ArrowLeft size={16} className="mr-1" />
                 Continue Shopping
               </button>
-              <h2 className="font-amiko text-xl md:text-lg lg:text-base font-bold text-green-700 flex items-center gap-1 sm:gap-2">
+              <h2 className="font-amiko text-xl md:text-xl lg:text-xl font-bold text-[#0e540b] flex items-center gap-1 sm:gap-2">
                 <ShoppingBag size={20} className="md:w-4 md:h-4" />
                 Your Vegetable Bag
               </h2>
@@ -568,7 +568,7 @@ const VegetableCart = () => {
             </p>
             <button
               onClick={handleBrowseVegetables}
-              className="font-assistant px-4 py-2 bg-green-700 text-white rounded-lg font-semibold text-sm hover:bg-green-800 transition"
+              className="font-assistant px-4 py-2 bg-[#0e540b] text-white rounded-lg font-semibold text-sm hover:bg-green-800 transition"
             >
               Browse Vegetables
             </button>
@@ -580,19 +580,19 @@ const VegetableCart = () => {
 
   // Render cart with items
   return (
-    <div className="min-h-screen bg-gray-50 pb-14 lg:pb-0">
+    <div className="min-h-screen bg-gray-50 py-10 lg:pb-0">
       <div className="container mx-auto px-4 md:py-4 lg:py-3">
         {/* Header */}
         <div className="mb-4 md:mb-3">
-          <div className="flex gap-1 flex-col items-center justify-between">
+          <div className="flex gap-1 flex-col items-center justify-baseline">
             <button
               onClick={handleContinueShopping}
-              className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-green-700 hover:bg-green-50 rounded-lg transition font-assistant text-sm font-semibold"
+              className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-[#0e540b] hover:bg-green-50 rounded-lg transition font-assistant text-sm font-semibold"
             >
               <ArrowLeft size={16} className="mr-1" />
               Continue Shopping
             </button>
-            <h2 className="font-amiko text-xl md:text-lg lg:text-base font-bold text-green-700 flex items-center gap-1 sm:gap-2">
+            <h2 className="font-amiko text-xl md:text-xl lg:text-xl font-bold text-[#0e540b] flex items-center gap-1 sm:gap-2">
               <ShoppingBag size={20} className="md:w-4 md:h-4" />
               Your Vegetable Bag
             </h2>
@@ -652,7 +652,7 @@ const VegetableCart = () => {
                     <span className="font-poppins font-bold text-gray-800">
                       Total Amount
                     </span>
-                    <span className="font-amiko font-bold text-green-700 text-lg">
+                    <span className="font-amiko font-bold text-[#0e540b] text-lg">
                       ₹{total.toFixed(2)}
                     </span>
                   </div>
@@ -732,7 +732,7 @@ const AddressSection = React.memo(
   }) => (
     <div className="bg-[#f0fcf6] p-4 md:p-3 rounded-lg shadow-md">
       <h3 className="font-poppins text-base md:text-sm font-bold text-gray-800 mb-3 md:mb-2 flex items-center gap-2">
-        <MapPin size={18} className="text-green-700 md:w-4 md:h-4" />
+        <MapPin size={18} className="text-[#0e540b] md:w-4 md:h-4" />
         Delivery Address
       </h3>
       {!userSavedAddress ? (
@@ -746,7 +746,7 @@ const AddressSection = React.memo(
           </p>
           <button
             onClick={onAddAddress}
-            className="font-assistant px-5 py-2.5 md:px-4 md:py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition text-sm md:text-xs font-semibold inline-flex items-center gap-2"
+            className="font-assistant px-5 py-2.5 md:px-4 md:py-2 bg-[#0e540b] text-white rounded-lg hover:bg-green-800 transition text-sm md:text-xs font-semibold inline-flex items-center gap-2"
           >
             <Plus size={16} className="md:w-3.5 md:h-3.5" />
             Add Delivery Address
@@ -757,7 +757,7 @@ const AddressSection = React.memo(
           <label
             className={`flex gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${
               selectedAddress === "saved"
-                ? "border-green-700 bg-green-50"
+                ? "border-[#0e540b] bg-green-50"
                 : "border-gray-200 hover:border-green-300"
             }`}
           >
@@ -767,7 +767,7 @@ const AddressSection = React.memo(
               value="saved"
               checked={selectedAddress === "saved"}
               onChange={() => setSelectedAddress("saved")}
-              className="mt-0.5 w-4 h-4 md:w-3.5 md:h-3.5 text-green-700 focus:ring-green-700"
+              className="mt-0.5 w-4 h-4 md:w-3.5 md:h-3.5 text-[#0e540b] focus:ring-green-700"
             />
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1.5 md:mb-1">
@@ -777,7 +777,7 @@ const AddressSection = React.memo(
                 {selectedAddress === "saved" && (
                   <CheckCircle
                     size={16}
-                    className="text-green-700 md:w-3.5 md:h-3.5"
+                    className="text-[#0e540b] md:w-3.5 md:h-3.5"
                   />
                 )}
               </div>
@@ -849,7 +849,7 @@ const CartItem = React.memo(({ item, index, updateQuantity, removeItem }) => {
             {item.name} ({item.weight})
           </h4>
           <div className="flex items-center gap-1.5 md:gap-1 mt-0.5">
-            <p className="font-assistant text-sm md:text-xs font-semibold text-green-700">
+            <p className="font-assistant text-sm md:text-xs font-semibold text-[#0e540b]">
               ₹{itemPrice.toFixed(2)} per {item.weight}
             </p>
             {marketPriceForWeight && marketPriceForWeight > itemPrice && (
@@ -879,7 +879,7 @@ const CartItem = React.memo(({ item, index, updateQuantity, removeItem }) => {
             </span>
             <button
               onClick={() => updateQuantity(index, 1)}
-              className="w-6 h-6 md:w-5 md:h-5 flex items-center justify-center bg-green-700 hover:bg-green-800 rounded-full transition"
+              className="w-6 h-6 md:w-5 md:h-5 flex items-center justify-center bg-[#0e540b] hover:bg-green-800 rounded-full transition"
               aria-label="Increase quantity"
             >
               <Plus size={12} className="text-white md:w-2.5 md:h-2.5" />
@@ -907,14 +907,14 @@ const PaymentMethodSection = React.memo(
   ({ paymentMethod, setPaymentMethod }) => (
     <div className="bg-[#f0fcf6] p-4 md:p-3 rounded-lg shadow-md">
       <h3 className="font-poppins text-base md:text-sm font-bold text-gray-800 mb-3 md:mb-2 flex items-center gap-2">
-        <CreditCard size={18} className="text-green-700 md:w-4 md:h-4" />
+        <CreditCard size={18} className="text-[#0e540b] md:w-4 md:h-4" />
         Select Payment Method
       </h3>
       <div className="space-y-2.5 md:space-y-2">
         <label
           className={`flex items-center gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${
             paymentMethod === "COD"
-              ? "border-green-700 bg-green-50"
+              ? "border-[#0e540b] bg-green-50"
               : "border-gray-200 hover:border-green-300"
           }`}
         >
@@ -924,7 +924,7 @@ const PaymentMethodSection = React.memo(
             value="COD"
             checked={paymentMethod === "COD"}
             onChange={(e) => setPaymentMethod(e.target.value)}
-            className="w-4 h-4 md:w-3.5 md:h-3.5 text-green-700 focus:ring-green-700"
+            className="w-4 h-4 md:w-3.5 md:h-3.5 text-[#0e540b] focus:ring-[#0e540b]"
           />
           <Banknote size={22} className="text-gray-600 md:w-5 md:h-5" />
           <div className="flex-1">
@@ -936,13 +936,13 @@ const PaymentMethodSection = React.memo(
             </p>
           </div>
           {paymentMethod === "COD" && (
-            <CheckCircle size={18} className="text-green-700 md:w-4 md:h-4" />
+            <CheckCircle size={18} className="text-[#0e540b] md:w-4 md:h-4" />
           )}
         </label>
         <label
           className={`flex items-center gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${
             paymentMethod === "ONLINE"
-              ? "border-green-700 bg-green-50"
+              ? "border-[#0e540b] bg-green-50"
               : "border-gray-200 hover:border-green-300"
           }`}
         >
@@ -952,7 +952,7 @@ const PaymentMethodSection = React.memo(
             value="ONLINE"
             checked={paymentMethod === "ONLINE"}
             onChange={(e) => setPaymentMethod(e.target.value)}
-            className="w-4 h-4 md:w-3.5 md:h-3.5 text-green-700 focus:ring-green-700"
+            className="w-4 h-4 md:w-3.5 md:h-3.5 text-[#0e540b] focus:ring-[#0e540b]"
           />
           <CreditCard size={22} className="text-gray-600 md:w-5 md:h-5" />
           <div className="flex-1">
@@ -964,7 +964,7 @@ const PaymentMethodSection = React.memo(
             </p>
           </div>
           {paymentMethod === "ONLINE" && (
-            <CheckCircle size={18} className="text-green-700 md:w-4 md:h-4" />
+            <CheckCircle size={18} className="text-[#0e540b] md:w-4 md:h-4" />
           )}
         </label>
       </div>
@@ -1038,7 +1038,7 @@ const PriceSummary = React.memo(
                 <span className="font-poppins font-bold text-gray-800 text-sm">
                   Total Amount
                 </span>
-                <span className="font-amiko font-bold text-green-700 text-base">
+                <span className="font-amiko font-bold text-[#0e540b] text-base">
                   ₹{total.toFixed(2)}
                 </span>
               </div>
