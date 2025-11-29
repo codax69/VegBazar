@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   CheckCircle,
   Package,
@@ -8,13 +9,26 @@ import {
   ShoppingBag,
   CreditCard,
   MapPin,
-  FileText,
-  Truck,
-  Shield,
-  Percent,
+  Copy,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 
-const BillingSuccess = ({ orderData, onNewOrder }) => {
+const BillingSuccess = ({ onNewOrder }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
+  
+  // Get orderData from navigation state
+  const orderData = location.state?.orderData;
+
+  // Redirect if no order data
+  useEffect(() => {
+    if (!orderData) {
+      navigate("/offers");
+    }
+  }, [orderData, navigate]);
+
   // Extract customer info
   const customerInfo = useMemo(() => {
     return orderData?.customerInfo || {};
@@ -27,7 +41,7 @@ const BillingSuccess = ({ orderData, onNewOrder }) => {
     return "Unknown Vegetable";
   };
 
-  // Format vegetables for display (without prices)
+  // Format vegetables for display
   const displayVegetables = useMemo(() => {
     const vegsToDisplay = orderData?.selectedVegetables || [];
     if (!vegsToDisplay || vegsToDisplay.length === 0) return [];
@@ -40,50 +54,62 @@ const BillingSuccess = ({ orderData, onNewOrder }) => {
   }, [orderData]);
 
   // Order billing info
-  const billingInfo = useMemo(() => {
+  const orderInfo = useMemo(() => {
     if (!orderData) {
       return {
         orderId: "N/A",
+        orderType: "basket",
+        packageTitle: "N/A",
         subtotal: 0,
         discount: 0,
         delivery: 0,
         totalAmount: 0,
-        savings: 0,
-        savingsPercentage: 0,
       };
     }
 
-    const subtotal = orderData.vegetablesTotal || orderData.selectedOffer?.price || 0;
+    const subtotal = orderData.selectedOffer?.price || 0;
     const discount = orderData.couponDiscount || 0;
     const delivery = orderData.deliveryCharges || 20;
     const total = orderData.totalAmount || 0;
-    const marketTotal = orderData.marketTotal || subtotal;
-    const savings = marketTotal - subtotal + discount;
-    const savingsPercentage = marketTotal > 0 ? ((savings / marketTotal) * 100).toFixed(0) : 0;
 
     return {
       orderId: orderData.orderId || "N/A",
+      orderType: "basket",
+      packageTitle: orderData.selectedOffer?.title || "N/A",
       subtotal,
       discount,
       delivery,
       totalAmount: total,
       paymentMethod: orderData.paymentMethod || "COD",
       paymentStatus: orderData.paymentStatus || "pending",
-      packageTitle: orderData.selectedOffer?.title || "N/A",
-      savings,
-      savingsPercentage,
     };
   }, [orderData]);
+
+  const handleCopyOrderId = async () => {
+    try {
+      await navigator.clipboard.writeText(orderInfo.orderId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
 
   const handleNewOrder = () => {
     if (onNewOrder) {
       onNewOrder();
+    } else {
+      navigate("/offers");
     }
   };
 
+  if (!orderData) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center py-6 px-3 sm:px-4 pt-20">
-      <div className="max-w-2xl w-full bg-[#f0fcf6] p-4 sm:p-6 md:p-8 rounded-2xl shadow-xl border border-green-100">
+      <div className="max-w-2xl w-full bg-[#f0fcf6] p-4 sm:p-6 md:p-8 rounded-2xl shadow-xl">
         {/* Success Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-4">
@@ -97,250 +123,247 @@ const BillingSuccess = ({ orderData, onNewOrder }) => {
           </p>
         </div>
 
-        {/* Savings Badge */}
-        {billingInfo.savings > 0 && (
-          <div className="mb-4 bg-gradient-to-r from-green-100 to-emerald-100 p-4 rounded-xl border-2 border-green-300">
-            <div className="flex items-center justify-center gap-2">
-              <Percent className="w-5 h-5 text-green-700" />
-              <p className="text-lg font-bold font-poppins text-green-800">
-                You Saved ₹{billingInfo.savings.toFixed(2)} ({billingInfo.savingsPercentage}%)
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Billing Summary Card */}
+        {/* Order Summary Card */}
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 sm:p-6 rounded-xl mb-6 border border-green-200">
           <h3 className="font-bold text-base font-poppins sm:text-lg mb-4 text-[#0e540b] flex items-center gap-2">
-            <FileText className="w-5 h-5 flex-shrink-0" />
-            Billing Summary
+            <Package className="w-5 h-5 flex-shrink-0" />
+            Order Summary
           </h3>
 
-          {/* Order ID */}
-          <div className="mb-4 p-3 bg-white rounded-lg border border-green-200">
-            <div className="flex items-center gap-2">
-              <Package className="w-4 h-4 text-gray-500 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-poppins text-gray-500">Order ID</p>
-                <p className="font-semibold font-assistant text-gray-800 break-all text-sm sm:text-base">
-                  {billingInfo.orderId}
+          {/* Customer & Order Info Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+            {/* Order ID with Copy Button */}
+            <div className="flex items-start gap-2">
+              <Package className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1 flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                    Order ID
+                  </p>
+                  <span className="font-semibold text-gray-800 font-assistant break-all">
+                    {orderInfo.orderId}
+                  </span>
+                </div>
+                {orderInfo.orderId && orderInfo.orderId !== "N/A" && (
+                  <button
+                    onClick={handleCopyOrderId}
+                    className="ml-2 p-1.5 hover:bg-green-100 rounded-lg transition-colors"
+                    title="Copy Order ID"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-gray-600" />
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Customer Name */}
+            <div className="flex items-start gap-2">
+              <User className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                  Customer Name
+                </p>
+                <p className="font-semibold text-gray-800 font-assistant break-words">
+                  {customerInfo?.name || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            {/* Mobile */}
+            <div className="flex items-start gap-2">
+              <Phone className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                  Mobile
+                </p>
+                <p className="font-semibold text-gray-800 font-assistant">
+                  {customerInfo?.mobile || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            {/* Email */}
+            {customerInfo?.email && (
+              <div className="flex items-start gap-2">
+                <Mail className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                    Email
+                  </p>
+                  <p className="font-semibold text-gray-800 font-assistant truncate">
+                    {customerInfo.email}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Package */}
+            <div className="flex items-start gap-2">
+              <ShoppingBag className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                  Package
+                </p>
+                <p className="font-semibold text-gray-800 font-assistant break-words">
+                  {orderInfo.packageTitle}
+                </p>
+              </div>
+            </div>
+
+            {/* Total Amount */}
+            <div className="flex items-start gap-2">
+              <CreditCard className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                  Total Amount
+                </p>
+                <p className="font-bold text-[#0e540b] text-lg sm:text-xl">
+                  ₹{orderInfo.totalAmount.toFixed(2)}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Customer Information */}
-          <div className="mb-4 p-4 bg-white rounded-lg border border-green-200">
-            <p className="font-semibold font-poppins text-gray-700 mb-3 text-sm flex items-center gap-2">
-              <User className="w-4 h-4 text-[#0e540b]" />
-              Customer Information
+          {/* Important Notice */}
+          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs sm:text-sm font-assistant text-yellow-700">
+              <strong>Important:</strong> Please copy your Order ID for tracking. We do not send order confirmations via email.
             </p>
-            <div className="space-y-2.5">
-              {/* Name */}
-              <div className="flex items-start gap-2">
-                <User className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-assistant text-gray-500">Name</p>
-                  <p className="font-medium font-assistant text-gray-800 break-words text-sm">
-                    {customerInfo?.name || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Mobile */}
-              <div className="flex items-start gap-2">
-                <Phone className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-assistant text-gray-500">Mobile</p>
-                  <p className="font-medium font-assistant text-gray-800 text-sm">
-                    {customerInfo?.mobile || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Email */}
-              {customerInfo?.email && (
-                <div className="flex items-start gap-2">
-                  <Mail className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-assistant text-gray-500">Email</p>
-                    <p className="font-medium font-assistant text-gray-800 break-all text-sm">
-                      {customerInfo.email}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Address */}
-              {customerInfo?.address && (
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-assistant text-gray-500">Delivery Address</p>
-                    <p className="text-sm font-assistant text-gray-700 break-words">
-                      {customerInfo.address}
-                      {customerInfo.area && `, ${customerInfo.area}`}
-                      {customerInfo.city && `, ${customerInfo.city}`}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* Selected Package */}
-          {billingInfo.packageTitle && billingInfo.packageTitle !== "N/A" && (
-            <div className="mb-4 p-3 bg-white rounded-lg border border-green-200">
-              <div className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-xs font-assistant text-gray-500">Selected Package</p>
-                  <p className="font-semibold font-assistant text-gray-800 text-sm">
-                    {billingInfo.packageTitle}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Selected Vegetables */}
-          {displayVegetables.length > 0 && (
-            <div className="mb-4 p-4 bg-white rounded-lg border border-green-200">
-              <p className="font-semibold font-poppins text-gray-700 mb-3 flex items-center gap-2 text-sm">
-                <ShoppingBag className="w-4 h-4 text-[#0e540b] flex-shrink-0" />
-                Selected Vegetables ({displayVegetables.length})
-              </p>
-              <div className="space-y-2">
-                {displayVegetables.map((veg) => (
-                  <div
-                    key={veg.key}
-                    className="flex justify-between items-center p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-[#0e540b] rounded-full"></div>
-                      <span className="font-medium font-assistant text-gray-800 text-sm">
-                        {veg.name}
-                      </span>
-                    </div>
-                    <span className="text-sm text-gray-600 font-assistant font-medium">
-                      {veg.weight}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Price Breakdown */}
-          <div className="p-4 bg-white rounded-lg border border-green-200">
-            <p className="font-semibold font-poppins text-gray-700 mb-3 text-sm">
-              Price Summary
-            </p>
+          <div className="mt-4 pt-4 border-t border-green-200">
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center">
                 <span className="font-assistant text-gray-600">Plan Price</span>
-                <span className="font-semibold font-assistant text-gray-800">
-                  ₹{billingInfo.subtotal.toFixed(2)}
+                <span className="font-assistant font-semibold text-gray-800">
+                  ₹{orderInfo.subtotal.toFixed(2)}
                 </span>
               </div>
 
-              {billingInfo.discount > 0 && (
-                <div className="flex justify-between items-center bg-green-50 px-2 py-1.5 rounded-lg">
-                  <span className="font-assistant text-green-700 font-semibold">Coupon Discount</span>
-                  <span className="font-bold font-assistant text-green-700">
-                    -₹{billingInfo.discount.toFixed(2)}
+              {orderInfo.discount > 0 && (
+                <div className="flex justify-between items-center text-green-600">
+                  <span className="font-assistant">Coupon Discount</span>
+                  <span className="font-assistant font-semibold">
+                    -₹{orderInfo.discount.toFixed(2)}
                   </span>
                 </div>
               )}
 
               <div className="flex justify-between items-center">
-                <span className="font-assistant text-gray-600">Delivery Charge</span>
-                <span className="font-semibold font-assistant text-gray-800">
-                  {billingInfo.delivery === 0
+                <span className="font-assistant text-gray-600">
+                  Delivery Charge
+                </span>
+                <span className="font-assistant font-semibold text-gray-800">
+                  {orderInfo.delivery === 0
                     ? "FREE"
-                    : `₹${billingInfo.delivery.toFixed(2)}`}
+                    : `₹${orderInfo.delivery.toFixed(2)}`}
                 </span>
               </div>
 
               <div className="border-t border-green-200 pt-2 mt-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold font-poppins text-gray-800">Total Amount</span>
-                  <span className="font-bold font-amiko text-[#0e540b] text-xl">
-                    ₹{billingInfo.totalAmount.toFixed(2)}
+                  <span className="font-poppins font-bold text-gray-800">
+                    Total
+                  </span>
+                  <span className="font-amiko font-bold text-[#0e540b] text-lg">
+                    ₹{orderInfo.totalAmount.toFixed(2)}
                   </span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Payment Method */}
-        <div className="mb-6 p-4 rounded-xl border-l-4 border-blue-600 bg-blue-50">
-          <div className="flex items-center gap-3">
-            <CreditCard className="w-5 h-5 text-blue-600 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold font-assistant text-gray-800 text-sm sm:text-base">
-                Payment Method:{" "}
-                <span className="text-blue-700">
-                  {billingInfo.paymentMethod === "COD"
-                    ? "Cash on Delivery"
-                    : "Online Payment"}
-                </span>
-              </p>
-              <p className="text-xs sm:text-sm font-assistant text-gray-600 mt-1">
-                Status:{" "}
-                <span className="font-semibold capitalize">
-                  {billingInfo.paymentStatus.replace("_", " ")}
-                </span>
-              </p>
+          {/* Delivery Address - if available */}
+          {customerInfo?.address && (
+            <div className="mt-4 pt-4 border-t border-green-200">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-poppins text-gray-500 mb-1">
+                    Delivery Address
+                  </p>
+                  <p className="text-sm font-assistant text-gray-700 break-words">
+                    {customerInfo.address}
+                    {customerInfo.area && `, ${customerInfo.area}`}
+                    {customerInfo.city && `, ${customerInfo.city}`}
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Selected Vegetables Section */}
+          {displayVegetables.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-green-200">
+              <p className="font-semibold font-poppins text-gray-700 mb-3 flex items-center gap-2 text-sm sm:text-base">
+                <ShoppingBag className="w-4 h-4 text-[#0e540b] flex-shrink-0" />
+                Selected Vegetables ({displayVegetables.length})
+              </p>
+
+              {/* Show simple tags for basket orders */}
+              <div className="flex flex-wrap gap-2">
+                {displayVegetables.map((veg) => (
+                  <span
+                    key={veg.key}
+                    className="bg-green-100 font-assistant text-green-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-poppins font-medium border border-green-200"
+                  >
+                    {veg.name} ({veg.weight})
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Delivery & Call Information */}
-        <div className="mb-6 space-y-3">
-          {/* Delivery Info */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
-            <div className="flex gap-3">
-              <Truck className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-semibold font-assistant text-gray-800 mb-1 text-sm sm:text-base">
-                  Same Day Delivery
+        {/* Order Status Badge */}
+        {orderInfo.paymentStatus && (
+          <div className="mb-6 p-4 rounded-xl border-l-4 border-green-600 bg-green-50">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-gray-800 font-assistant text-sm sm:text-base">
+                  Payment Status:{" "}
+                  <span className="capitalize text-green-700">
+                    {orderInfo.paymentStatus.replace("_", " ")}
+                  </span>
                 </p>
-                <p className="text-gray-700 text-xs sm:text-sm font-assistant">
-                  Your order will be delivered between <strong>4:00 PM - 5:00 PM</strong> today
-                </p>
+                {orderInfo.paymentMethod && (
+                  <p className="text-xs sm:text-sm text-gray-600 font-assistant mt-1">
+                    Payment Method:{" "}
+                    <span className="font-semibold">
+                      {orderInfo.paymentMethod === "COD"
+                        ? "Cash on Delivery"
+                        : "Online Payment"}
+                    </span>
+                  </p>
+                )}
               </div>
             </div>
           </div>
+        )}
 
-          {/* Call Confirmation */}
-          <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
-            <div className="flex gap-3">
-              <Phone className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-semibold font-assistant text-gray-800 mb-1 text-sm sm:text-base">
-                  Confirmation Call
-                </p>
-                <p className="text-gray-700 text-xs sm:text-sm font-assistant">
-                  You will receive a confirmation call on{" "}
-                  <strong className="text-gray-900">
-                    {customerInfo?.mobile || "your registered number"}
-                  </strong>{" "}
-                  within 30 minutes to confirm your order and delivery details.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Trust Badge */}
-        <div className="mb-6 bg-gradient-to-r from-green-100 to-emerald-100 p-4 rounded-xl border border-green-300">
-          <div className="flex items-center justify-center gap-3">
-            <Shield className="w-6 h-6 text-green-700" />
-            <div className="text-center">
-              <p className="font-bold font-poppins text-green-800 text-sm">100% Fresh & Quality Guaranteed</p>
-              <p className="text-xs font-assistant text-green-700">Safe and Secure Delivery</p>
+        {/* Next Steps Card */}
+        <div className="bg-yellow-50 p-4 rounded-xl mb-6 border border-yellow-200">
+          <div className="flex gap-3">
+            <Phone className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-gray-800 font-assistant mb-1 text-sm sm:text-base">
+                Next Steps
+              </p>
+              <p className="text-gray-700 text-xs sm:text-sm font-assistant">
+                Your order has been received and will be processed shortly. You
+                will receive a confirmation call on{" "}
+                <strong className="text-gray-900">
+                  {customerInfo?.mobile || "your registered number"}
+                </strong>{" "}
+                within 30 minutes.
+              </p>
             </div>
           </div>
         </div>

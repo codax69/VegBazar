@@ -190,60 +190,61 @@ const BillingPage = () => {
     generateOrderId,
   ]);
 
-  // Handle COD Order Submission
-  const handleCOD = useCallback(
-    async (e) => {
-      e.preventDefault();
-      window.scrollTo(0, 0);
+const handleCOD = useCallback(
+  async (e) => {
+    e.preventDefault();
+    window.scrollTo(0, 0);
 
-      if (!executeRecaptcha) {
-        setSubmitError("reCAPTCHA not ready. Try again shortly.");
-        return;
-      }
+    if (!executeRecaptcha) {
+      setSubmitError("reCAPTCHA not ready. Try again shortly.");
+      return;
+    }
 
-      if (!orderData) {
-        setSubmitError("Order data not ready. Please wait.");
-        return;
-      }
+    if (!orderData) {
+      setSubmitError("Order data not ready. Please wait.");
+      return;
+    }
 
-      if (isSubmitting) return;
+    if (isSubmitting) return;
 
-      setIsSubmitting(true);
-      setSubmitError(null);
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-      try {
-        const captchaToken = await executeRecaptcha("submit_order");
-        if (!captchaToken) throw new Error("Captcha not generated.");
+    try {
+      const captchaToken = await executeRecaptcha("submit_order");
+      if (!captchaToken) throw new Error("Captcha not generated.");
 
-        const captchaRes = await axios.post(`${API_URL}/api/verify-captcha`, {
-          token: captchaToken,
-          action: "submit_order",
+      const captchaRes = await axios.post(`${API_URL}/api/verify-captcha`, {
+        token: captchaToken,
+        action: "submit_order",
+      });
+
+      if (!captchaRes.data.success)
+        throw new Error("Captcha verification failed.");
+
+      const res = await axios.post(
+        `${API_URL}/api/orders/create-order`,
+        orderData
+      );
+
+      if (res.status >= 200 && res.status < 300) {
+        setIsOrderPlaced(true);
+        // Navigate with order data in state
+        navigate("/order-success", { 
+          state: { orderData: orderData }
         });
-
-        if (!captchaRes.data.success)
-          throw new Error("Captcha verification failed.");
-
-        const res = await axios.post(
-          `${API_URL}/api/orders/create-order`,
-          orderData
-        );
-
-        if (res.status >= 200 && res.status < 300) {
-          setIsOrderPlaced(true);
-          navigate("/order-confirmation");
-        } else {
-          setSubmitError("Order save failed. Try again.");
-        }
-      } catch (err) {
-        console.error("Order submission error:", err);
-        setSubmitError(err?.response?.data?.message || err.message);
-      } finally {
-        setIsSubmitting(false);
+      } else {
+        setSubmitError("Order save failed. Try again.");
       }
-    },
-    [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced, navigate]
-  );
-
+    } catch (err) {
+      console.error("Order submission error:", err);
+      setSubmitError(err?.response?.data?.message || err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  },
+  [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced, navigate]
+);
   // Memoized handlers
   const handleBack = useCallback(() => {
     window.scrollTo(0, 0);
@@ -268,8 +269,8 @@ const BillingPage = () => {
   );
 
   // Loading and Error States
-  if (isSubmitting) return <OrderLoading loadingText="Placing order...." loadingMsg=""/>;
-  if (isLoadingOrderCount) return <OrderLoading loadingText="Loading" loadingMsg="Please wait while we confirm your order..."/>;
+  if (isSubmitting) return <OrderLoading loadingText="Placing order...." loadingMsg="Please wait while we confirm your order..."/>;
+  if (isLoadingOrderCount) return <OrderLoading loadingText="Loading"/>;
   if (submitError)
     return (
       <OrderFailed

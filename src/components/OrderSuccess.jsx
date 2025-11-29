@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   CheckCircle,
   Package,
@@ -8,10 +8,12 @@ import {
   ShoppingBag,
   CreditCard,
   MapPin,
+  Copy,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 import { useBillContext } from "../Context/BillContext";
 import { useOrderContext } from "../Context/OrderContext";
-import CopyOrderButton from "./CopyOrderButton";
 
 const OrderSuccess = ({
   orderData,
@@ -20,6 +22,8 @@ const OrderSuccess = ({
   selectedVegetables,
   onNewOrder,
 }) => {
+  const [copied, setCopied] = useState(false);
+
   // Use BillContext for order calculations and data
   const {
     isCustomOrder,
@@ -103,6 +107,17 @@ const OrderSuccess = ({
     }));
   }, [orderInfo.selectedVegetables, selectedVegetables]);
 
+  // Handle copy order ID
+  const handleCopyOrderId = async () => {
+    try {
+      await navigator.clipboard.writeText(orderInfo.orderId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
   // Handle new order navigation
   const handleNewOrder = () => {
     if (onNewOrder) {
@@ -145,20 +160,37 @@ const OrderSuccess = ({
 
           {/* Customer & Order Info Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
-            {/* Order ID */}
-            <div className="flex items-start gap-2">
+            {/* Order ID with Copy Button */}
+            <div className="flex items-start gap-2 sm:col-span-2">
               <Package className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-              <div className="min-w-0 flex-1 flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-poppins text-gray-500">
-                    Order ID
-                  </p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                  Order ID
+                </p>
+                <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-800 font-assistant break-all">
                     {orderInfo.orderId}
                   </span>
+                  {orderInfo.orderId && orderInfo.orderId !== "N/A" && (
+                    <button
+                      onClick={handleCopyOrderId}
+                      className="p-1.5 hover:bg-green-100 rounded-lg transition-colors flex-shrink-0"
+                      title="Copy Order ID"
+                    >
+                      {copied ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Copy className="w-4 h-4 text-gray-600" />
+                      )}
+                    </button>
+                  )}
                 </div>
-                {orderInfo.orderId && orderInfo.orderId !== "N/A" && (
-                  <CopyOrderButton orderId={orderInfo.orderId} />
+                {/* Copy Note */}
+                {copied && (
+                  <p className="text-xs text-green-600 font-assistant mt-1 flex items-center gap-1">
+                    <Check className="w-3 h-3" />
+                    Order ID copied!
+                  </p>
                 )}
               </div>
             </div>
@@ -190,17 +222,19 @@ const OrderSuccess = ({
             </div>
 
             {/* Email */}
-            <div className="flex items-start gap-2">
-              <Mail className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-poppins text-gray-500">
-                  Email
-                </p>
-                <p className="font-semibold text-gray-800 font-assistant truncate">
-                  {customerInfo?.email || "N/A"}
-                </p>
+            {customerInfo?.email && (
+              <div className="flex items-start gap-2">
+                <Mail className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                    Email
+                  </p>
+                  <p className="font-semibold text-gray-800 font-assistant truncate">
+                    {customerInfo.email}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Package/Order Type */}
             <div className="flex items-start gap-2">
@@ -229,6 +263,14 @@ const OrderSuccess = ({
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Important Notice */}
+          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs sm:text-sm font-assistant text-yellow-700">
+              <strong>Important:</strong> Please copy your Order ID for tracking. We do not send order confirmations via email.
+            </p>
           </div>
 
           {/* Price Breakdown */}

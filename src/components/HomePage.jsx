@@ -858,8 +858,7 @@ const Homepage = () => {
                 <span className="text-xl font-bold">VegBazar</span>
               </div>
               <p className="text-white/70 text-sm">
-                Fresh vegetables from local farms, delivered to your doorstep in
-                10 minutes.
+                Fresh vegetables from local farms, delivered to your doorstep
               </p>
             </div>
 

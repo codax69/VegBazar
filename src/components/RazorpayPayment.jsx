@@ -4,7 +4,12 @@ import axios from "axios";
 import { useOrderContext } from "../Context/OrderContext";
 import { CreditCard, Loader2, AlertCircle } from "lucide-react";
 
-const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder, couponCode }) => {
+const RazorpayPayment = ({
+  orderType,
+  onSuccess,
+  vegetableOrder,
+  couponCode,
+}) => {
   const {
     selectedOffer,
     selectedVegetables,
@@ -75,7 +80,7 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder, couponCode }) =
       const offerPrice = selectedOffer.price || 0;
       const discount = couponCode?.discount || 0;
       const deliveryCharge = 20; // Basket orders always have ₹20 delivery
-      
+
       return Math.max(0, offerPrice - discount) + deliveryCharge;
     }
 
@@ -181,7 +186,8 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder, couponCode }) =
             orderStatus: "placed",
             orderDate: new Date().toISOString(),
             // ✅ ADDED: Pass coupon code (could be string or object with code property)
-            couponCode: typeof couponCode === 'string' ? couponCode : couponCode?.code,
+            couponCode:
+              typeof couponCode === "string" ? couponCode : couponCode?.code,
           };
         }
 
@@ -198,7 +204,8 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder, couponCode }) =
             paymentStatus: "awaiting_payment",
             orderStatus: "placed",
             // ✅ ADDED: Pass coupon code for basket orders
-            couponCode: typeof couponCode === 'string' ? couponCode : couponCode?.code,
+            couponCode:
+              typeof couponCode === "string" ? couponCode : couponCode?.code,
           };
         }
 
@@ -216,7 +223,7 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder, couponCode }) =
       selectedOffer,
       selectedVegetables,
       totalAmount,
-      couponCode, 
+      couponCode,
     ]
   );
 
@@ -292,7 +299,8 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder, couponCode }) =
               razorpay_signature: response.razorpay_signature,
               orderId: orderId,
               // ✅ ADDED: Include coupon code in verification
-              couponCode: typeof couponCode === 'string' ? couponCode : couponCode?.code,
+              couponCode:
+                typeof couponCode === "string" ? couponCode : couponCode?.code,
             };
 
             // Add order-specific data
@@ -329,7 +337,9 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder, couponCode }) =
               if (onSuccess) {
                 onSuccess();
               } else {
-                navigate("/order-confirmation");
+                navigate("/order-success", {
+                  state: { orderData: orderData },
+                });
               }
             } else {
               throw new Error("Payment verification failed");
@@ -464,15 +474,20 @@ const RazorpayPayment = ({ orderType, onSuccess, vegetableOrder, couponCode }) =
           {isCustomOrder && (
             <div className="text-center space-y-1">
               <p className="font-assistant text-xs sm:text-sm text-gray-600">
-                {vegetableOrder?.summary?.deliveryCharges === 0 
-                  ? "Free Delivery (Order above ₹250)" 
+                {vegetableOrder?.summary?.deliveryCharges === 0
+                  ? "Free Delivery (Order above ₹250)"
                   : "Includes ₹20 delivery charge"}
               </p>
-              {couponCode && (typeof couponCode === 'string' || couponCode.code) && (
-                <p className="text-xs text-green-600 font-semibold">
-                  Coupon "{typeof couponCode === 'string' ? couponCode : couponCode.code}" applied ✓
-                </p>
-              )}
+              {couponCode &&
+                (typeof couponCode === "string" || couponCode.code) && (
+                  <p className="text-xs text-green-600 font-semibold">
+                    Coupon "
+                    {typeof couponCode === "string"
+                      ? couponCode
+                      : couponCode.code}
+                    " applied ✓
+                  </p>
+                )}
             </div>
           )}
         </>

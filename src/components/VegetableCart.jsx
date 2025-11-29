@@ -15,7 +15,7 @@ import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
 import RazorpayPayment from "./RazorpayPayment";
 import CouponCodeSection from "./CouponCodeSection";
-
+import OrderLoading from "./OrderLoading";
 const API_URL = import.meta.env.VITE_API_SERVER_URL;
 
 const getOrderItems = (order) => {
@@ -64,8 +64,9 @@ const VegetableCart = () => {
   const [orderCount, setOrderCount] = useState(1);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponDiscount, setCouponDiscount] = useState(0);
-  // ✅ ADDED: Dynamic delivery charge from backend
   const [deliveryCharge, setDeliveryCharge] = useState(20);
+  const [loading, setLoading] = useState(false);
+  const [loadingAction, setLoadingAction] = useState("");
 
   // Memoized items and summary
   const items = useMemo(() => getOrderItems(vegetableOrder), [vegetableOrder]);
@@ -87,7 +88,6 @@ const VegetableCart = () => {
     };
   }, [formData]);
 
-  // ✅ FIXED: Memoized calculations now use dynamic delivery charge
   const subtotal = useMemo(() => {
     if (summary?.subtotal) return summary.subtotal;
     return items.reduce((total, item) => {
@@ -98,9 +98,7 @@ const VegetableCart = () => {
     }, 0);
   }, [items, summary]);
 
-  // ✅ FIXED: Total calculation now uses backend delivery charge
   const total = useMemo(() => {
-    // Use summary from backend if available, otherwise calculate
     if (summary?.totalAmount) {
       return summary.totalAmount;
     }
@@ -130,7 +128,7 @@ const VegetableCart = () => {
     };
   }, []);
 
-  // Load cart from localStorage (only once on mount)
+  // Load cart from localStorage
   useEffect(() => {
     if (items.length === 0) {
       const orderJustPlaced = sessionStorage.getItem("orderJustPlaced");
@@ -150,7 +148,6 @@ const VegetableCart = () => {
               items: normalizedItems,
             });
 
-            // ✅ ADDED: Set delivery charge from saved summary
             if (parsedSummary.summary?.deliveryCharges !== undefined) {
               setDeliveryCharge(parsedSummary.summary.deliveryCharges);
             }
@@ -163,7 +160,7 @@ const VegetableCart = () => {
     }
   }, []);
 
-  // Save cart to localStorage (debounced)
+  // Save cart to localStorage
   useEffect(() => {
     const orderJustPlaced = sessionStorage.getItem("orderJustPlaced");
     if (orderJustPlaced) {
@@ -213,17 +210,16 @@ const VegetableCart = () => {
     return data.data;
   }, []);
 
-  // ✅ FIXED: Coupon handlers now update delivery charge from backend
   const handleApplyCoupon = useCallback(
     async (couponCode) => {
       try {
+       
+        
         const updatedPrices = await calculatePrice(items, couponCode);
 
         if (updatedPrices.coupon && updatedPrices.coupon.applied) {
           setAppliedCoupon(updatedPrices.coupon);
           setCouponDiscount(updatedPrices.coupon.discount || 0);
-
-          // ✅ ADDED: Update delivery charge from backend response
           setDeliveryCharge(updatedPrices.summary.deliveryCharges || 0);
 
           setVegetableOrder({
@@ -247,15 +243,13 @@ const VegetableCart = () => {
     [items, vegetableOrder, calculatePrice, setVegetableOrder]
   );
 
-  // ✅ FIXED: Remove coupon handler recalculates delivery charge
   const handleRemoveCoupon = useCallback(async () => {
     try {
+    
       const updatedPrices = await calculatePrice(items);
 
       setAppliedCoupon(null);
       setCouponDiscount(0);
-
-      // ✅ ADDED: Update delivery charge from backend response
       setDeliveryCharge(updatedPrices.summary.deliveryCharges || 20);
 
       setVegetableOrder({
@@ -266,13 +260,15 @@ const VegetableCart = () => {
       });
     } catch (error) {
       console.error("❌ Failed to remove coupon:", error);
-    }
+    } 
   }, [items, vegetableOrder, calculatePrice, setVegetableOrder]);
 
-  // ✅ FIXED: Update quantity recalculates delivery charge
   const updateQuantity = useCallback(
     async (index, change) => {
       try {
+        setLoading(true);
+        setLoadingAction("Updating quantity...");
+        
         const newQuantity = items[index].quantity + change;
 
         if (newQuantity <= 0) {
@@ -313,7 +309,6 @@ const VegetableCart = () => {
               }
         );
 
-        // ✅ ADDED: Update delivery charge and coupon discount
         if (updatedPrices.coupon?.discount) {
           setCouponDiscount(updatedPrices.coupon.discount);
         }
@@ -321,15 +316,20 @@ const VegetableCart = () => {
       } catch (error) {
         console.error("❌ Failed to update quantity:", error);
         alert("Failed to update quantity. Please try again.");
+      } finally {
+        setLoading(false);
+        setLoadingAction("");
       }
     },
     [items, vegetableOrder, appliedCoupon, calculatePrice, setVegetableOrder]
   );
 
-  // ✅ FIXED: Remove item recalculates delivery charge
   const removeItem = useCallback(
     async (index) => {
       try {
+        setLoading(true);
+        setLoadingAction("Removing item...");
+        
         const updatedItems = items.filter((_, i) => i !== index);
 
         if (updatedItems.length > 0) {
@@ -364,7 +364,6 @@ const VegetableCart = () => {
                 }
           );
 
-          // ✅ ADDED: Update delivery charge and coupon discount
           if (updatedPrices.coupon?.discount) {
             setCouponDiscount(updatedPrices.coupon.discount);
           }
@@ -373,12 +372,15 @@ const VegetableCart = () => {
           setVegetableOrder([]);
           setAppliedCoupon(null);
           setCouponDiscount(0);
-          setDeliveryCharge(20); // ✅ ADDED: Reset to default
+          setDeliveryCharge(20);
           localStorage.removeItem("orderSummary");
         }
       } catch (error) {
         console.error("❌ Failed to remove item:", error);
         alert("Failed to remove item. Please try again.");
+      } finally {
+        setLoading(false);
+        setLoadingAction("");
       }
     },
     [items, vegetableOrder, appliedCoupon, calculatePrice, setVegetableOrder]
@@ -386,6 +388,9 @@ const VegetableCart = () => {
 
   const handleCheckout = useCallback(async () => {
     try {
+      setLoading(true);
+      setLoadingAction("Placing your order...");
+      
       if (!selectedAddress || !paymentMethod) {
         alert("Please select both delivery address and payment method");
         return;
@@ -437,14 +442,13 @@ const VegetableCart = () => {
       );
       const orderId = generateOrderId(orderCount);
 
-      // ✅ CRITICAL: Prepare order data with ALL vegetable details including name
       const orderData = {
         orderId,
         orderType: "custom",
         customerInfo: formData,
         selectedVegetables: uniqueVegetables.map((item) => ({
           vegetable: item.vegetableId || item.id,
-          name: item.name, // ✅ ADDED: Include vegetable name
+          name: item.name,
           weight: item.weight,
           quantity: item.quantity,
           pricePerUnit:
@@ -453,7 +457,7 @@ const VegetableCart = () => {
           isFromBasket: false,
         })),
         couponCode: appliedCoupon?.code || null,
-        couponDiscount: appliedCoupon?.discount || 0, // ✅ ADDED: Include coupon discount
+        couponDiscount: appliedCoupon?.discount || 0,
         vegetablesTotal: priceDetails?.summary?.subtotal || subtotal,
         deliveryCharges:
           priceDetails?.summary?.deliveryCharges || deliveryCharge,
@@ -465,34 +469,22 @@ const VegetableCart = () => {
       };
 
       if (paymentMethod === "COD") {
-        // ✅ STEP 1: Create order via API
         await axios.post(`${API_URL}/api/orders/create-order`, orderData);
 
-        // ✅ STEP 2: Store complete order data in sessionStorage BEFORE clearing cart
         sessionStorage.setItem("lastOrderData", JSON.stringify(orderData));
         sessionStorage.setItem("orderJustPlaced", "true");
 
-        console.log(
-          "✅ Order created and stored in sessionStorage:",
-          orderData
-        );
-
-        // ✅ STEP 3: Clear cart state
         setVegetableOrder([]);
         setAppliedCoupon(null);
         setCouponDiscount(0);
         setDeliveryCharge(20);
 
-        // ✅ STEP 4: Clear localStorage
         setTimeout(() => {
           localStorage.removeItem("orderSummary");
           localStorage.removeItem("vegbazar_cart");
         }, 100);
 
-        // ✅ STEP 5: Set order placed flag BEFORE navigation
         setIsOrderPlaced(true);
-
-        // ✅ STEP 6: Navigate to success page
         window.scrollTo(0, 0);
         navigate("/order-confirmation");
       }
@@ -504,6 +496,9 @@ const VegetableCart = () => {
       if (error.response?.status >= 500) {
         navigate("/order-failed");
       }
+    } finally {
+      setLoading(false);
+      setLoadingAction("");
     }
   }, [
     selectedAddress,
@@ -538,6 +533,10 @@ const VegetableCart = () => {
     [navigate]
   );
 
+  // Show loading overlay when processing
+  if (loading) {
+    return <OrderLoading loadingText={loadingAction} loadingMsg="Please wait..." />;
+  }
   // Render empty cart
   if (items.length === 0) {
     return (
