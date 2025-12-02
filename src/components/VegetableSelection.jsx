@@ -132,6 +132,12 @@ const VegetableSelection = () => {
   // Memoize API URL
   const API_URL = useMemo(() => import.meta.env.VITE_API_SERVER_URL, []);
 
+  // Get effective vegetable limit (treat 0 as 1)
+  const effectiveLimit = useMemo(() => {
+    const limit = selectedOffer?.vegetableLimit || 0;
+    return limit === 0 ? 1 : limit;
+  }, [selectedOffer?.vegetableLimit]);
+
   // Get the price for the offer's specified weight
   const getPriceForOfferWeight = useCallback((prices, marketPrices, offerWeight) => {
     if (!prices || !offerWeight) return null;
@@ -182,7 +188,7 @@ const VegetableSelection = () => {
 
         if (alreadySelected) {
           return prev.filter((v) => v._id !== vegetable._id);
-        } else if (prev.length < selectedOffer?.vegetableLimit) {
+        } else if (prev.length < effectiveLimit) {
           return [
             ...prev,
             {
@@ -198,7 +204,7 @@ const VegetableSelection = () => {
         return prev;
       });
     },
-    [selectedOffer?.vegetableLimit, setSelectedVegetables]
+    [effectiveLimit, setSelectedVegetables]
   );
 
   const handleAllVegetables = useCallback(() => {
@@ -240,13 +246,13 @@ const VegetableSelection = () => {
 
   // Memoized calculations
   const canProceed = useMemo(
-    () => selectedVegetables.length === selectedOffer?.vegetableLimit,
-    [selectedVegetables.length, selectedOffer?.vegetableLimit]
+    () => selectedVegetables.length === effectiveLimit,
+    [selectedVegetables.length, effectiveLimit]
   );
 
   const remainingCount = useMemo(
-    () => (selectedOffer?.vegetableLimit || 0) - selectedVegetables.length,
-    [selectedOffer?.vegetableLimit, selectedVegetables.length]
+    () => effectiveLimit - selectedVegetables.length,
+    [effectiveLimit, selectedVegetables.length]
   );
 
   const handleContinue = useCallback(() => {
@@ -325,7 +331,7 @@ const VegetableSelection = () => {
                   </span>
                   <span className="text-gray-500 mx-1">/</span>
                   <span className="text-gray-700">
-                    {selectedOffer.vegetableLimit}
+                    {effectiveLimit}
                   </span>
                 </span>
                 <span className="text-[10px] sm:text-xs md:text-sm text-gray-600">selected</span>
@@ -344,7 +350,7 @@ const VegetableSelection = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
                 {vegetables.map((vegetable) => {
                   const selected = isSelected(vegetable._id);
-                  const isDisabled = !selected && selectedVegetables.length >= selectedOffer.vegetableLimit;
+                  const isDisabled = !selected && selectedVegetables.length >= effectiveLimit;
 
                   return (
                     <VegetableCard
