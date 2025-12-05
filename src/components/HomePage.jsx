@@ -18,8 +18,10 @@ import Veggies from "../assets/veggies.svg";
 import Store from "../assets/Fruit-Store.svg";
 import vegbazarLogo from "../../public/vegbazar.svg";
 import axios from "axios";
+import { GiBasket } from "react-icons/gi";
 
-// Memoized VegetableCard component to prevent unnecessary re-renders
+
+// Updated VegetableCard component for Homepage with Out of Stock functionality
 const VegetableCard = memo(
   ({
     veg,
@@ -29,6 +31,8 @@ const VegetableCard = memo(
     onWeightChange,
     quantity,
   }) => {
+    const isOutOfStock = veg.outOfStock || veg.stockKg === 0;
+    
     const availableWeights = useMemo(() => {
       if (!veg.prices || typeof veg.prices !== "object") return ["250g"];
       const weights = [];
@@ -53,13 +57,19 @@ const VegetableCard = memo(
     }, [veg, selectedWeight]);
 
     return (
-      <div className="w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 bg-[#] border-gray-300 shadow-md transition-all duration-200 hover:border-[#0e540b] hover:shadow-xl">
+      <div className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${
+        isOutOfStock 
+          ? "bg-gray-100 border-gray-300 opacity-75" 
+          : "bg-[#f0fcf6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
+      }`}>
         {/* Vegetable Image with explicit dimensions */}
         <div className="text-center">
           <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-1.5 sm:mb-2">
             {veg.image ? (
               <img
-                className="w-full h-full object-cover rounded-lg sm:rounded-xl"
+                className={`w-full h-full object-cover rounded-lg sm:rounded-xl ${
+                  isOutOfStock ? "grayscale" : ""
+                }`}
                 src={veg.image}
                 alt={veg.name}
                 loading="lazy"
@@ -68,18 +78,31 @@ const VegetableCard = memo(
                 height="96"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-gray-50 to-[#effdf5] rounded-lg sm:rounded-xl flex items-center justify-center">
-                <Leaf className="w-8 h-8 sm:w-10 sm:h-10 text-[#0e540b]/30" />
+              <div className={`w-full h-full bg-gradient-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${
+                isOutOfStock ? "from-gray-200 to-gray-300" : "from-gray-50 to-[#effdf5]"
+              }`}>
+                <Leaf className={`w-8 h-8 sm:w-10 sm:h-10 ${
+                  isOutOfStock ? "text-gray-400" : "text-[#0e540b]/30"
+                }`} />
+              </div>
+            )}
+            {isOutOfStock && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg sm:rounded-xl">
+                <span className="bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold">
+                  OUT OF STOCK
+                </span>
               </div>
             )}
           </div>
-          <p className="font-medium font-assistant text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1">
+          <p className={`font-medium font-assistant text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${
+            isOutOfStock ? "text-gray-500" : ""
+          }`}>
             {veg.name}
           </p>
         </div>
 
         {/* Weight Selection */}
-        {availableWeights.length > 1 && (
+        {!isOutOfStock && availableWeights.length > 1 && (
           <div className="flex gap-1 mb-2 justify-center flex-wrap">
             {availableWeights.map((weight) => (
               <button
@@ -98,29 +121,35 @@ const VegetableCard = memo(
         )}
 
         {/* Price Display */}
-        <div className="mt-1 sm:mt-2 text-center mb-2">
-          <div className="flex items-center justify-center gap-1 sm:gap-2">
-            <p className="font-assistant text-[#0e540b] font-bold text-sm sm:text-base">
-              ₹{actualPrice.toFixed(2)}
+        {!isOutOfStock && (
+          <div className="mt-1 sm:mt-2 text-center mb-2">
+            <div className="flex items-center justify-center gap-1 sm:gap-2">
+              <p className="font-assistant text-[#0e540b] font-bold text-sm sm:text-base">
+                ₹{actualPrice.toFixed(2)}
+              </p>
+              {marketPrice > actualPrice && (
+                <p className="font-assistant text-gray-400 line-through text-[10px] sm:text-xs">
+                  ₹{marketPrice.toFixed(2)}
+                </p>
+              )}
+            </div>
+            <p className="text-[11px] sm:text-[11px] text-gray-500 font-assistant">
+              per {selectedWeight}
             </p>
-            {marketPrice > actualPrice && (
-              <p className="font-assistant text-gray-400 line-through text-[10px] sm:text-xs">
-                ₹{marketPrice.toFixed(2)}
+            {savings > 0 && (
+              <p className="text-[9px] sm:text-[10px] text-green-600 font-assistant font-semibold mt-0.5">
+                Save ₹{savings.toFixed(2)}
               </p>
             )}
           </div>
-          <p className="text-[11px] sm:text-[11px] text-gray-500 font-assistant">
-            per {selectedWeight}
-          </p>
-          {savings > 0 && (
-            <p className="text-[9px] sm:text-[10px] text-green-600 font-assistant font-semibold mt-0.5">
-              Save ₹{savings.toFixed(2)}
-            </p>
-          )}
-        </div>
+        )}
 
         {/* Add to Cart Button or Quantity Controls */}
-        {quantity === 0 ? (
+        {isOutOfStock ? (
+          <div className="w-full bg-gray-300 text-gray-600 font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm text-center cursor-not-allowed">
+            Unavailable
+          </div>
+        ) : quantity === 0 ? (
           <button
             onClick={() => onAddToCart(veg)}
             className="w-full font-assistant bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 text-xs sm:text-sm"
@@ -853,7 +882,7 @@ const Homepage = () => {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-10 h-10 bg-[#f0fcf6]/10 rounded-xl flex items-center justify-center">
-                  <Leaf className="w-6 h-6 text-white" />
+                  <GiBasket className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-xl font-bold">VegBazar</span>
               </div>
@@ -922,7 +951,7 @@ const Homepage = () => {
                     href="#"
                     className="text-white/70 hover:text-white transition-colors"
                   >
-                    Return Policy
+                    Replace Policy
                   </a>
                 </li>
               </ul>

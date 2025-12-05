@@ -1,45 +1,71 @@
 import React, { useEffect, useState, useCallback, useMemo, memo } from "react";
-import { ArrowLeft, CheckCircle, List } from "lucide-react";
+import { ArrowLeft, CheckCircle, List, XCircle } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
 
-// Memoized VegetableCard component
+// Memoized VegetableCard component with enhanced out-of-stock styling
 const VegetableCard = memo(({ 
   vegetable, 
   isSelected, 
   isDisabled, 
   onToggle 
 }) => {
+  const isOutOfStock = vegetable.outOfStock || vegetable.stockKg === 0;
+  
   return (
     <button
-      onClick={() => !isDisabled && onToggle(vegetable)}
-      disabled={isDisabled}
-      className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 touch-manipulation active:scale-95 ${
-        isSelected
+      onClick={() => !isDisabled && !isOutOfStock && onToggle(vegetable)}
+      disabled={isDisabled || isOutOfStock}
+      className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 touch-manipulation active:scale-95 relative ${
+        isOutOfStock
+          ? "bg-red-50 border-red-300 opacity-90 cursor-not-allowed"
+          : isSelected
           ? "bg-green-100 border-[#0e540b] shadow-lg"
-          : "bg-[#f0fcf6] border-gray-300 shadow-md"
-      } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
-      aria-label={`${isSelected ? "Deselect" : "Select"} ${vegetable.name}`}
+          : "bg-[#f0fcf6] border-gray-300 shadow-md hover:border-green-400"
+      } ${isDisabled && !isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}`}
+      aria-label={`${isOutOfStock ? "Out of stock" : isSelected ? "Deselect" : "Select"} ${vegetable.name}`}
       aria-pressed={isSelected}
+      aria-disabled={isOutOfStock}
     >
       <div className="text-center">
         <div className="relative">
           <img
-            className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-cover mx-auto rounded-lg sm:rounded-xl mb-2"
+            className={`w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-cover mx-auto rounded-lg sm:rounded-xl mb-2 ${
+              isOutOfStock ? "grayscale opacity-50" : ""
+            }`}
             src={vegetable.image}
             alt={vegetable.name}
             loading="lazy"
             decoding="async"
           />
-          {isSelected && (
+          {isSelected && !isOutOfStock && (
             <div className="absolute -top-1 -right-1 bg-[#0e540b] rounded-full p-1">
               <CheckCircle size={16} className="text-white sm:w-5 sm:h-5" />
             </div>
           )}
+          {isOutOfStock && (
+            <>
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg sm:rounded-xl">
+                <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold shadow-lg">
+                  OUT OF STOCK
+                </span>
+              </div>
+              <div className="absolute top-1 right-1 bg-red-600 rounded-full p-0.5">
+                <XCircle size={14} className="text-white" />
+              </div>
+            </>
+          )}
         </div>
-        <p className="font-medium font-assistant text-sm sm:text-base leading-tight px-1">
+        <p className={`font-medium font-assistant text-sm sm:text-base leading-tight px-1 ${
+          isOutOfStock ? "text-red-600 line-through" : "text-gray-800"
+        }`}>
           {vegetable.name}
         </p>
+        {isOutOfStock && (
+          <p className="font-assistant text-[10px] sm:text-xs text-red-500 font-semibold mt-1">
+            Unavailable
+          </p>
+        )}
       </div>
     </button>
   );
@@ -112,7 +138,7 @@ const MobileBottomBar = memo(({
           </div>
           {selectedCount === 0 && (
             <p className="font-assistant text-xs text-gray-500 text-center">
-               Tap on vegetables above to select them
+              Tap on vegetables above to select them
             </p>
           )}
         </div>
@@ -128,10 +154,10 @@ const VegetableSelection = () => {
     useOrderContext();
   const [vegetables, setVegetables] = useState([]);
   const [loading, setLoading] = useState(true);
-
   // Memoize API URL
   const API_URL = useMemo(() => import.meta.env.VITE_API_SERVER_URL, []);
-
+ console.log(selectedOffer)
+ console.log(vegetables)
   // Get effective vegetable limit (treat 0 as 1)
   const effectiveLimit = useMemo(() => {
     const limit = selectedOffer?.vegetableLimit || 0;
@@ -151,7 +177,6 @@ const VegetableSelection = () => {
 
     const key = weightMap[offerWeight];
     if (!key || prices[key] === undefined) {
-      // Fallback to first available price if exact weight not found
       const availableKey = Object.keys(weightMap).find(w => prices[weightMap[w]] !== undefined);
       if (availableKey) {
         return {
@@ -183,6 +208,12 @@ const VegetableSelection = () => {
 
   const handleVegetableToggle = useCallback(
     (vegetable) => {
+      // Strict check: Don't allow selection if out of stock
+      if (vegetable.outOfStock || vegetable.stockKg === 0) {
+        console.log(`${vegetable.name} is out of stock and cannot be selected`);
+        return;
+      }
+
       setSelectedVegetables((prev) => {
         const alreadySelected = prev.some((v) => v._id === vegetable._id);
 
@@ -223,16 +254,16 @@ const VegetableSelection = () => {
           `${API_URL}/api/offers/${selectedOffer._id}`
         );
         const data = response.data.data.vegetables || [];
-        
+        console.log({data})
         const offerWeight = selectedOffer?.weight || selectedOffer?.totalWeight || '500g';
         
         const processedVegetables = data
           .map(v => {
-            const priceForOffer = getPriceForOfferWeight(v.prices, v.marketPrices, offerWeight);
+            const priceForOffer = getPriceForOfferWeight(v.prices, v.marketPrices, offerWeight,v.outOfStock,v.stockKg);
             return priceForOffer ? { ...v, priceForOffer } : null;
           })
           .filter(Boolean);
-        
+        console.log(processedVegetables)
         setVegetables(processedVegetables);
       } catch (error) {
         console.error("Error fetching offer details:", error.message);
@@ -350,7 +381,8 @@ const VegetableSelection = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
                 {vegetables.map((vegetable) => {
                   const selected = isSelected(vegetable._id);
-                  const isDisabled = !selected && selectedVegetables.length >= effectiveLimit;
+                  const isOutOfStock = vegetable.outOfStock || vegetable.stockKg === 0;
+                  const isDisabled = !selected && !isOutOfStock && selectedVegetables.length >= effectiveLimit;
 
                   return (
                     <VegetableCard
@@ -367,7 +399,7 @@ const VegetableSelection = () => {
               {/* Desktop Action Section */}
               <ActionSection
                 canProceed={canProceed}
-                remainingCount={remainingCount}
+                remainingCount={remainingCount} 
                 selectedCount={selectedVegetables.length}
                 onContinue={handleContinue}
               />
