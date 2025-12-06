@@ -293,7 +293,7 @@ const Homepage = () => {
       try {
         const [veggiesRes, offersRes, testimonialsRes] = await Promise.all([
           axios
-            .get(`${import.meta.env.VITE_API_SERVER_URL}/api/vegetables`)
+            .get(`${import.meta.env.VITE_API_SERVER_URL}/api/vegetables/homepage`)
             .catch(() => ({ data: { data: [] } })),
           axios
             .get(
