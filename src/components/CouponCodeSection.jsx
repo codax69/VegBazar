@@ -177,7 +177,7 @@ const CouponCodeSection = ({
           <div className="space-y-1.5">
             <button
               onClick={() => {
-                setCouponCode("FIRST100");
+                setCouponCode("FREEDEL");
                 setError("");
               }}
               className="w-full bg-white hover:bg-green-50 border border-green-200 rounded-lg p-2 text-left transition-colors group"
@@ -185,34 +185,10 @@ const CouponCodeSection = ({
               <div className="flex items-center justify-between">
                 <div>
                   <p className={`font-bold text-green-700 font-assistant ${isMobile ? 'text-xs' : 'text-sm'}`}>
-                    FIRST100
+                    FREEDEL
                   </p>
                   <p className={`text-gray-600 font-assistant ${isMobile ? 'text-[9px]' : 'text-[10px]'}`}>
-                    Get ₹50 off on first order
-                  </p>
-                </div>
-                <div className="bg-green-100 group-hover:bg-green-200 px-2 py-1 rounded-md transition-colors">
-                  <span className={`text-green-700 font-bold font-assistant ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
-                    Apply
-                  </span>
-                </div>
-              </div>
-            </button>
-            
-            <button
-              onClick={() => {
-                setCouponCode("SAVE10");
-                setError("");
-              }}
-              className="w-full bg-white hover:bg-green-50 border border-green-200 rounded-lg p-2 text-left transition-colors group"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`font-bold text-green-700 font-assistant ${isMobile ? 'text-xs' : 'text-sm'}`}>
-                    SAVE10
-                  </p>
-                  <p className={`text-gray-600 font-assistant ${isMobile ? 'text-[9px]' : 'text-[10px]'}`}>
-                    Save 10% on orders above ₹300
+                    Get 15% discount on your First order 
                   </p>
                 </div>
                 <div className="bg-green-100 group-hover:bg-green-200 px-2 py-1 rounded-md transition-colors">
