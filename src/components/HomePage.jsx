@@ -16,9 +16,9 @@ import {
 import { useOrderContext } from "../Context/OrderContext";
 import Veggies from "../assets/veggies.svg";
 import Store from "../assets/Fruit-Store.svg";
-import vegbazarLogo from "../../public/vegbazar.svg";
 import axios from "axios";
 import { GiBasket } from "react-icons/gi";
+import VegBazarBanner from "./VegBazarBanner";
 
 
 // Updated VegetableCard component for Homepage with Out of Stock functionality
@@ -600,27 +600,7 @@ const Homepage = () => {
       )}
 
       {/* Hero Section with fixed dimensions to prevent CLS */}
-      <section className="w-full sm:w-full md:max-w-7xl lg:max-w-7xl mx-auto bg-[#bbf0ae] py-1 sm:py-3 px-1 sm:px-1 rounded-3xl shadow-md shadow-gray-400">
-        <div className="max-w-xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-3 sm:mb-1">
-            <div className="h-10 sm:h-12 w-12 sm:w-12 flex items-center justify-center flex-shrink-0">
-              <img
-                src={vegbazarLogo}
-                className="w-full"
-                alt="VegBazar Logo"
-                width="48"
-                height="48"
-              />
-            </div>
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold trirong text-gray-900 tracking-tight">
-              VegBazar
-            </h1>
-          </div>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
-            Fresh vegetables from local farms
-          </p>
-        </div>
-      </section>
+     <VegBazarBanner/>
 
       {/* Main Content */}
       <div className="w-full sm:w-full md:max-w-7xl lg:max-w-7xl h-full mx-auto px-1 md:py-5">
