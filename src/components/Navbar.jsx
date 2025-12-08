@@ -76,12 +76,12 @@ const Navbar = () => {
   );
 
   const handleLogoClick = useCallback(() => {
-    navigate("/");
     scrollTo(0, 0);
+    navigate("/");
   }, [navigate]);
   const handleShopNow = useCallback(() => {
-    navigate("/vegetables");
     scrollTo(0, 0);
+    navigate("/vegetables");
   }, [navigate]);
 
   return (
@@ -113,8 +113,8 @@ const Navbar = () => {
               <li key={path}>
                 <button
                   onClick={() => {
-                    navigate(path);
                     scrollTo(0, 0);
+                    navigate(path);
                   }}
                   className={`flex items-center font-assistant gap-1 cursor-pointer transition hover:text-green-600 focus:outline-none focus:text-green-600 ${
                     currentPath === path ? "text-green-600 font-semibold" : ""
@@ -179,8 +179,8 @@ const Navbar = () => {
               <button
                 key={path}
                 onClick={() => {
-                  navigate(path);
                   scrollTo(0, 0);
+                  navigate(path);
                 }}
                 className={`flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all duration-300 px-3 py-1 rounded-lg focus:outline-none ${
                   active ? "scale-110" : "scale-100"
