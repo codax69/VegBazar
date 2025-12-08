@@ -75,8 +75,14 @@ const Navbar = () => {
     [navigate]
   );
 
-  const handleLogoClick = useCallback(() => navigate("/"), [navigate]);
-  const handleShopNow = useCallback(() => navigate("/vegetables"), [navigate]);
+  const handleLogoClick = useCallback(() => {
+    navigate("/");
+    scrollTo(0, 0);
+  }, [navigate]);
+  const handleShopNow = useCallback(() => {
+    navigate("/vegetables");
+    scrollTo(0, 0);
+  }, [navigate]);
 
   return (
     <>
@@ -106,7 +112,10 @@ const Navbar = () => {
             {desktopNavItems.map(({ path, icon: Icon, label }) => (
               <li key={path}>
                 <button
-                  onClick={() => navigate(path)}
+                  onClick={() => {
+                    navigate(path);
+                    scrollTo(0, 0);
+                  }}
                   className={`flex items-center font-assistant gap-1 cursor-pointer transition hover:text-green-600 focus:outline-none focus:text-green-600 ${
                     currentPath === path ? "text-green-600 font-semibold" : ""
                   }`}
@@ -169,7 +178,10 @@ const Navbar = () => {
             return (
               <button
                 key={path}
-                onClick={() => navigate(path)}
+                onClick={() => {
+                  navigate(path);
+                  scrollTo(0, 0);
+                }}
                 className={`flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all duration-300 px-3 py-1 rounded-lg focus:outline-none ${
                   active ? "scale-110" : "scale-100"
                 }`}
