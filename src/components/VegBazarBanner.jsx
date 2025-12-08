@@ -29,7 +29,7 @@ export default function VegBazarBanner() {
               height="48"
             />
           </div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-gray-900 tracking-tight font-poppins">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-[#0e540b] tracking-tight trirong">
             VegBazar
           </h1>
         </div>
