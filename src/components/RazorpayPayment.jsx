@@ -330,14 +330,14 @@ const RazorpayPayment = ({
               { timeout: 15000 }
             );
 
-            console.log("✅ Verification response:", verifyResult.data);
+            // console.log("✅ Verification response:", verifyResult.data);
 
             if (verifyResult.data.success) {
               setIsOrderPlaced(true);
               if (onSuccess) {
                 onSuccess();
               } else {
-                navigate("/order-success", {
+                navigate("/order-confirmation", {
                   state: { orderData: orderData },
                 });
               }

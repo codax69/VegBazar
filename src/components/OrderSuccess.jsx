@@ -12,39 +12,34 @@ import {
   Check,
   AlertCircle,
 } from "lucide-react";
-import { useBillContext } from "../Context/BillContext";
 import { useOrderContext } from "../Context/OrderContext";
 
-const OrderSuccess = ({
-  orderData,
-  formData,
-  selectedOffer,
-  selectedVegetables,
-  onNewOrder,
-}) => {
+const OrderSuccess = ({ orderData, onNewOrder }) => {
   const [copied, setCopied] = useState(false);
-
-  // Use BillContext for order calculations and data
-  const {
-    isCustomOrder,
-    isBasketOrder,
-    couponDiscount,
-    deliveryCharge,
-    customCalculations,
-    basketCalculations,
-  } = useBillContext();
-
-  // Use OrderContext for navigation
   const { navigate } = useOrderContext();
 
-  // Helper function to extract vegetable name
+  // Extract customer info from orderData (single source of truth)
+  const customerInfo = useMemo(() => {
+    return orderData?.customerInfo || {};
+  }, [orderData]);
+
+  // Helper function to safely get vegetable name
   const getVegetableName = (veg) => {
+    if (!veg) return "Unknown";
+    
+    // Check if name exists at top level
+    if (veg.name) return veg.name;
+    
+    // Check if vegetable object exists with name
+    if (veg.vegetable && veg.vegetable.name) return veg.vegetable.name;
+    
+    // Check if it's a string
     if (typeof veg === "string") return veg;
-    if (typeof veg === "object" && veg?.name) return veg.name;
+    
     return "Unknown Vegetable";
   };
 
-  // Determine order type and calculate total using orderData from database
+  // Calculate order summary from orderData
   const orderInfo = useMemo(() => {
     if (!orderData) {
       return {
@@ -60,15 +55,17 @@ const OrderSuccess = ({
     }
 
     const {
-      orderId,
-      orderType,
+      orderId = "N/A",
+      orderType = "unknown",
       vegetablesTotal = 0,
-      couponDiscount: orderCouponDiscount = 0,
-      deliveryCharges = 20,
+      couponDiscount = 0,
+      deliveryCharges = 0,
       totalAmount = 0,
-      selectedVegetables: orderSelectedVegetables = [],
+      selectedVegetables = [],
+      selectedOffer = {},
     } = orderData;
 
+    // Determine package title
     const packageTitle =
       orderType === "custom"
         ? "Custom Selection"
@@ -81,31 +78,33 @@ const OrderSuccess = ({
       orderType,
       packageTitle,
       subtotal: vegetablesTotal,
-      discount: orderCouponDiscount,
+      discount: couponDiscount,
       delivery: deliveryCharges,
       totalAmount,
-      selectedVegetables: orderSelectedVegetables,
+      selectedVegetables,
     };
-  }, [orderData, selectedOffer]);
+  }, [orderData]);
 
-  // Format vegetables for display from orderData
+  // Format vegetables for display
   const displayVegetables = useMemo(() => {
-    // Use vegetables from orderData if available, otherwise use selectedVegetables prop
-    const vegsToDisplay = orderInfo.selectedVegetables?.length > 0
-      ? orderInfo.selectedVegetables
-      : selectedVegetables || [];
+    const vegsToDisplay = orderInfo.selectedVegetables || [];
 
     if (!vegsToDisplay || vegsToDisplay.length === 0) return [];
 
-    return vegsToDisplay.map((veg, index) => ({
-      key: index,
-      name: getVegetableName(veg),
-      quantity: veg?.quantity || 1,
-      weight: veg?.weight || "N/A",
-      price: veg?.pricePerUnit || veg?.price || 0,
-      subtotal: (veg?.pricePerUnit || veg?.price || 0) * (veg?.quantity || 1),
-    }));
-  }, [orderInfo.selectedVegetables, selectedVegetables]);
+    return vegsToDisplay.map((veg, index) => {
+      // Handle nested vegetable object structure from API
+      const vegData = veg.vegetable || veg;
+      
+      return {
+        key: `veg-${index}`,
+        name: getVegetableName(veg),
+        quantity: veg?.quantity || 1,
+        weight: veg?.weight || vegData?.weight || "N/A",
+        price: veg?.pricePerUnit || veg?.price || 0,
+        subtotal: veg?.subtotal || (veg?.pricePerUnit || veg?.price || 0) * (veg?.quantity || 1),
+      };
+    });
+  }, [orderInfo.selectedVegetables]);
 
   // Handle copy order ID
   const handleCopyOrderId = async () => {
@@ -118,22 +117,14 @@ const OrderSuccess = ({
     }
   };
 
-  // Handle new order navigation
+  // Handle new order
   const handleNewOrder = () => {
     if (onNewOrder) {
       onNewOrder();
-    } else {
-      navigate("/");
     }
+    navigate("/");
+    window.scrollTo(0, 0);
   };
-
-  // Extract customer info from orderData
-  const customerInfo = useMemo(() => {
-    if (!orderData?.customerInfo) {
-      return formData || {};
-    }
-    return orderData.customerInfo;
-  }, [orderData, formData]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center py-6 px-3 sm:px-4 pt-20">
@@ -176,6 +167,7 @@ const OrderSuccess = ({
                       onClick={handleCopyOrderId}
                       className="p-1.5 hover:bg-green-100 rounded-lg transition-colors flex-shrink-0"
                       title="Copy Order ID"
+                      aria-label="Copy Order ID"
                     >
                       {copied ? (
                         <Check className="w-4 h-4 text-green-600" />
@@ -185,7 +177,6 @@ const OrderSuccess = ({
                     </button>
                   )}
                 </div>
-                {/* Copy Note */}
                 {copied && (
                   <p className="text-xs text-green-600 font-assistant mt-1 flex items-center gap-1">
                     <Check className="w-3 h-3" />
@@ -241,9 +232,7 @@ const OrderSuccess = ({
               <ShoppingBag className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm font-poppins text-gray-500">
-                  {orderInfo.orderType === "custom"
-                    ? "Order Type"
-                    : "Package"}
+                  {orderInfo.orderType === "custom" ? "Order Type" : "Package"}
                 </p>
                 <p className="font-semibold text-gray-800 font-assistant break-words">
                   {orderInfo.packageTitle}
@@ -269,7 +258,8 @@ const OrderSuccess = ({
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
             <p className="text-xs sm:text-sm font-assistant text-yellow-700">
-              <strong>Important:</strong> Please copy your Order ID for tracking. We do not send order confirmations via email.
+              <strong>Important:</strong> Please save your Order ID for tracking. 
+              We do not send order confirmations via email.
             </p>
           </div>
 
@@ -316,7 +306,7 @@ const OrderSuccess = ({
             </div>
           </div>
 
-          {/* Delivery Address - if available */}
+          {/* Delivery Address */}
           {customerInfo?.address && (
             <div className="mt-4 pt-4 border-t border-green-200">
               <div className="flex items-start gap-2">
@@ -343,7 +333,7 @@ const OrderSuccess = ({
                 Selected Vegetables ({displayVegetables.length})
               </p>
 
-              {/* For Custom Orders - Show detailed list */}
+              {/* Custom Orders - Detailed list */}
               {orderInfo.orderType === "custom" ? (
                 <div className="space-y-2">
                   {displayVegetables.map((veg) => (
@@ -355,13 +345,13 @@ const OrderSuccess = ({
                         <span className="font-medium text-gray-800 font-assistant text-sm break-words">
                           {veg.name}
                         </span>
-                        {veg.weight && (
+                        {veg.weight && veg.weight !== "N/A" && (
                           <span className="text-xs text-gray-600 font-assistant ml-2">
                             ({veg.weight})
                           </span>
                         )}
                       </div>
-                      {veg.quantity && veg.price && (
+                      {veg.quantity && veg.price > 0 && (
                         <div className="text-left sm:text-right">
                           <div className="text-xs text-gray-600 font-assistant">
                             ₹{parseFloat(veg.price).toFixed(2)} × {veg.quantity}
@@ -375,14 +365,15 @@ const OrderSuccess = ({
                   ))}
                 </div>
               ) : (
-                // For Basket Orders - Show simple tags
+                /* Basket Orders - Simple tags */
                 <div className="flex flex-wrap gap-2">
                   {displayVegetables.map((veg) => (
                     <span
                       key={veg.key}
                       className="bg-green-100 font-assistant text-green-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-poppins font-medium border border-green-200"
                     >
-                      {veg.name} ({veg.weight})
+                      {veg.name}
+                      {veg.weight && veg.weight !== "N/A" && ` (${veg.weight})`}
                     </span>
                   ))}
                 </div>
@@ -391,7 +382,7 @@ const OrderSuccess = ({
           )}
         </div>
 
-        {/* Order Status Badge */}
+        {/* Payment Status Badge */}
         {orderData?.paymentStatus && (
           <div className="mb-6 p-4 rounded-xl border-l-4 border-green-600 bg-green-50">
             <div className="flex items-center gap-3">
@@ -409,8 +400,15 @@ const OrderSuccess = ({
                     <span className="font-semibold">
                       {orderData.paymentMethod === "COD"
                         ? "Cash on Delivery"
-                        : "Online Payment"}
+                        : orderData.paymentMethod === "ONLINE"
+                        ? "Online Payment"
+                        : orderData.paymentMethod}
                     </span>
+                  </p>
+                )}
+                {orderData.razorpayPaymentId && (
+                  <p className="text-xs text-gray-500 font-assistant mt-1">
+                    Payment ID: {orderData.razorpayPaymentId}
                   </p>
                 )}
               </div>

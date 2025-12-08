@@ -52,37 +52,39 @@ const OrderConfirmation = () => {
   const [savedOrderData, setSavedOrderData] = useState(null);
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  // ✅ CRITICAL: Check for saved order on mount and immediately show success
+  // ✅ Check for saved order on mount
   useEffect(() => {
     const orderDataFromStorage = sessionStorage.getItem("lastOrderData");
-    console.log("🔍 Checking sessionStorage on mount:", orderDataFromStorage);
+    // console.log("🔍 Checking sessionStorage on mount:", orderDataFromStorage);
     
     if (orderDataFromStorage) {
       try {
         const parsedData = JSON.parse(orderDataFromStorage);
-        console.log("✅ Found order data:", parsedData);
-        setSavedOrderData(parsedData);
-        // ✅ Immediately set order as placed to show success page
+        // console.log("✅ Found order data:", parsedData);
+        // Handle both direct data and nested response structure
+        const actualData = parsedData?.data?.data || parsedData?.data || parsedData;
+        // console.log("📦 Actual order data:", actualData);
+        setSavedOrderData(actualData);
         setIsOrderPlaced(true);
       } catch (error) {
         console.error("❌ Error parsing order data:", error);
       }
     } else {
-      console.log("ℹ️ No saved order data found");
+      // console.log("ℹ️ No saved order data found");
     }
-  }, []); // ✅ Run only once on mount
+  }, [setIsOrderPlaced]);
 
   // Redirect if no order type and no saved order data
   useEffect(() => {
     if (!orderType && !savedOrderData && !isOrderPlaced) {
-      console.log("⚠️ No order data, redirecting to home");
+      // console.log("⚠️ No order data, redirecting to home");
       navigate("/");
       window.scrollTo(0, 0);
     }
   }, [orderType, savedOrderData, isOrderPlaced, navigate]);
 
   const handleNewOrder = () => {
-    console.log("🔄 Clearing order data and resetting");
+    // console.log("🔄 Clearing order data and resetting");
     sessionStorage.removeItem("lastOrderData");
     sessionStorage.removeItem("orderJustPlaced");
     localStorage.removeItem("orderSummary");
@@ -100,23 +102,23 @@ const OrderConfirmation = () => {
 
   // Prepare order data
   const orderData = useMemo(() => {
-    // ✅ PRIORITY: Use saved order data from VegetableCart (COD)
+    // ✅ Use saved order data if available
     if (savedOrderData) {
-      console.log("📦 Using saved order data:", savedOrderData);
+      // console.log("📦 Using saved order data:", savedOrderData);
       return savedOrderData;
     }
 
-    // Otherwise, prepare order data for basket orders
     const orderId = generateOrderId(orderCount);
 
+    // Custom order preparation
     if (isCustomOrder && customCalculations) {
-      const items = customCalculations.items;
+      const items = customCalculations.items || [];
 
       return {
         orderId,
         orderType: "custom",
         customerInfo: formData || {},
-        selectedVegetables: (items || []).map((item) => ({
+        selectedVegetables: items.map((item) => ({
           vegetable: item.id || item.vegetableId,
           name: item.name,
           weight: item.weight,
@@ -128,17 +130,18 @@ const OrderConfirmation = () => {
             (item.quantity || 0),
           isFromBasket: false,
         })),
-        vegetablesTotal: customCalculations.vegetablesTotal,
-        deliveryCharges: customCalculations.deliveryCharge,
-        totalAmount: customCalculations.totalAmount,
+        vegetablesTotal: customCalculations.vegetablesTotal || 0,
+        deliveryCharges: customCalculations.deliveryCharge || 0,
+        totalAmount: customCalculations.totalAmount || 0,
         couponDiscount: customCalculations.couponDiscount || 0,
-        paymentMethod,
+        paymentMethod: paymentMethod || "COD",
         paymentStatus: paymentMethod === "COD" ? "pending" : "awaiting_payment",
         orderStatus: "placed",
         orderDate: new Date().toISOString(),
       };
     }
 
+    // Basket order preparation
     if (isBasketOrder) {
       return {
         orderId,
@@ -150,8 +153,8 @@ const OrderConfirmation = () => {
         totalAmount: totalAmount ?? 0,
         couponCode: appliedCoupon?.code || null,
         couponDiscount: couponDiscount || 0,
-        deliveryCharges: deliveryCharge,
-        paymentMethod,
+        deliveryCharges: deliveryCharge || 0,
+        paymentMethod: paymentMethod || "COD",
         paymentStatus: paymentMethod === "COD" ? "pending" : "awaiting_payment",
         orderStatus: "placed",
       };
@@ -175,15 +178,15 @@ const OrderConfirmation = () => {
     generateOrderId,
   ]);
 
-  // Submit Order (for basket orders only - custom COD already created)
+  // Submit Order
   const handleSubmitOrder = useCallback(
     async (e) => {
       e.preventDefault();
       window.scrollTo(0, 0);
 
-      // If order already created (COD from VegetableCart), just show success
+      // If order already exists, just show success
       if (savedOrderData) {
-        console.log("✅ Order already exists, showing success");
+        // console.log("✅ Order already exists, showing success");
         setIsOrderPlaced(true);
         return;
       }
@@ -216,7 +219,10 @@ const OrderConfirmation = () => {
         );
 
         if (res.status >= 200 && res.status < 300) {
-          sessionStorage.setItem("lastOrderData", JSON.stringify(orderData));
+          // ✅ Store the order data from the response (actual created order)
+          const createdOrder = res.data?.data || orderData;
+          // console.log("💾 Storing created order:", createdOrder);
+          sessionStorage.setItem("lastOrderData", JSON.stringify(createdOrder));
           setIsOrderPlaced(true);
         } else {
           setSubmitError("Order save failed. Try again.");
@@ -230,38 +236,30 @@ const OrderConfirmation = () => {
     },
     [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced, savedOrderData]
   );
+  
 
-  // Log state changes
-  useEffect(() => {
-    console.log("🔄 State Update:", {
-      isOrderPlaced,
-      hasSavedData: !!savedOrderData,
-      isSubmitting,
-      hasError: !!submitError,
-    });
-  }, [isOrderPlaced, savedOrderData, isSubmitting, submitError]);
-
-  // ✅ RENDER LOGIC: Show success immediately if order is placed
+  // ✅ Show success if order is placed
   if (isOrderPlaced && orderData) {
-    console.log("✅ Rendering OrderSuccess with data:", orderData);
+    // console.log("✅ Rendering OrderSuccess with data:", orderData);
+    // Extract order data - handle both direct orderData and nested response.data.data
+    const actualOrderData = orderData?.data?.data || orderData?.data || orderData;
+    // console.log("📦 Actual order data being passed:", actualOrderData);
+    
     return (
       <OrderSuccess
-        orderData={orderData}
-        formData={formData}
-        selectedOffer={selectedOffer}
-        selectedVegetables={orderData.selectedVegetables || displayItems}
+        orderData={actualOrderData}
         onNewOrder={handleNewOrder}
       />
     );
   }
 
   if (isSubmitting) {
-    console.log("⏳ Showing loading state");
+    // console.log("⏳ Showing loading state");
     return <OrderLoading />;
   }
   
   if (submitError) {
-    console.log("❌ Showing error:", submitError);
+    // console.log("❌ Showing error:", submitError);
     return (
       <OrderFailed
         errorMessage={submitError}
@@ -274,8 +272,8 @@ const OrderConfirmation = () => {
     );
   }
 
-  // Show confirmation form for basket orders
-  console.log("📋 Showing confirmation form");
+  // Show confirmation form
+  // console.log("📋 Showing confirmation form");
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-4 pt-20">
       <div className="max-w-5xl mx-auto px-4">
@@ -304,16 +302,16 @@ const OrderConfirmation = () => {
           </div>
 
           <div className="p-5">
-            {/* Order details here for basket orders */}
+            {/* Customer & Order Info */}
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200 mb-4">
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
                     <Package className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-xs text-gray-500 font-poppins">Order ID</p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm">
-                        {orderData.orderId}
+                        {orderData?.orderId || "N/A"}
                       </p>
                     </div>
                   </div>
@@ -322,7 +320,7 @@ const OrderConfirmation = () => {
                     <div>
                       <p className="text-xs text-gray-500 font-poppins">Full Name</p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm">
-                        {formData.name}
+                        {formData?.name || "N/A"}
                       </p>
                     </div>
                   </div>
@@ -331,30 +329,32 @@ const OrderConfirmation = () => {
                     <div>
                       <p className="text-xs text-gray-500 font-poppins">Mobile Number</p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm">
-                        {formData.mobile}
+                        {formData?.mobile || "N/A"}
                       </p>
                     </div>
                   </div>
+                  {formData?.email && (
+                    <div className="flex items-start gap-2">
+                      <Mail className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 font-poppins">Email</p>
+                        <p className="font-semibold text-gray-800 font-assistant text-sm truncate">
+                          {formData.email}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
-                    <Mail className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs text-gray-500 font-poppins">Email Address</p>
-                      <p className="font-semibold text-gray-800 font-assistant text-sm truncate">
-                        {formData.email}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
                     <ShoppingBag className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-xs text-gray-500 font-poppins">
-                        {isCustomOrder ? "Order Type" : "Package Selected"}
+                        {isCustomOrder ? "Order Type" : "Package"}
                       </p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm">
-                        {packageName}
+                        {packageName || "N/A"}
                       </p>
                     </div>
                   </div>
@@ -363,14 +363,93 @@ const OrderConfirmation = () => {
                     <div>
                       <p className="text-xs text-gray-500 font-poppins">Total Amount</p>
                       <p className="font-bold text-[#0e540b] text-lg">
-                        ₹{totalAmount.toFixed(2)}
+                        ₹{(totalAmount || 0).toFixed(2)}
                       </p>
                     </div>
                   </div>
+                  {formData?.address && (
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500 font-poppins">Delivery Address</p>
+                        <p className="font-semibold text-gray-800 font-assistant text-sm break-words">
+                          {formData.address}
+                          {formData.area && `, ${formData.area}`}
+                          {formData.city && `, ${formData.city}`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
+            {/* Coupon Info - if applied */}
+            {(orderData?.couponCode || appliedCoupon) && (couponDiscount > 0 || orderData?.couponDiscount > 0) && (
+              <div className="bg-green-50 p-3 rounded-lg border border-green-200 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-600 font-assistant">Coupon Applied</p>
+                    <p className="font-semibold text-green-700 font-assistant text-sm">
+                      {orderData?.couponCode || appliedCoupon?.code || "Discount Applied"}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-600 font-assistant">Discount</p>
+                    <p className="font-bold text-green-700 text-sm">
+                      -₹{(orderData?.couponDiscount || couponDiscount || 0).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Selected Vegetables */}
+            {orderData?.selectedVegetables && orderData.selectedVegetables.length > 0 && (
+              <div className="bg-white p-4 rounded-lg border border-gray-200 mb-4">
+                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2 text-sm">
+                  <ShoppingBag className="w-4 h-4 text-[#0e540b]" />
+                  Selected Items ({orderData.selectedVegetables.length})
+                </h3>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {orderData.selectedVegetables.map((veg, index) => {
+                    // Handle nested vegetable structure from API
+                    const vegName = veg.name || veg.vegetable?.name || "Unknown";
+                    const vegWeight = veg.weight || veg.vegetable?.weight || "";
+                    
+                    return (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center p-2 bg-gray-50 rounded-lg text-sm"
+                      >
+                        <div className="flex-1">
+                          <span className="font-medium text-gray-800 font-assistant">
+                            {vegName}
+                          </span>
+                          {vegWeight && (
+                            <span className="text-xs text-gray-600 ml-2">
+                              ({vegWeight})
+                            </span>
+                          )}
+                        </div>
+                        {veg.quantity && veg.pricePerUnit && (
+                          <div className="text-right">
+                            <div className="text-xs text-gray-600">
+                              ₹{parseFloat(veg.pricePerUnit).toFixed(2)} × {veg.quantity}
+                            </div>
+                            <div className="font-semibold text-green-700">
+                              ₹{(veg.subtotal || 0).toFixed(2)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* reCAPTCHA Notice */}
             <div className="bg-gray-50 p-2 rounded-lg mb-4 border border-gray-200">
               <div className="flex items-center gap-1.5 text-xs text-gray-600 font-assistant">
                 <Shield className="w-3.5 h-3.5 text-green-600" />
