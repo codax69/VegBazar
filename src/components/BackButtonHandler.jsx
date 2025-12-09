@@ -32,7 +32,7 @@ const BackButtonHandler = () => {
         "/customer-info": 
           selectedOffer ? "/select-vegetables" : "/",
         "/track-your-order": "/",
-        "/help": "/",
+        "/support": "/",
       };
 
       return routes[currentPath] || null;

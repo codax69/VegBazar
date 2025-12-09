@@ -45,7 +45,7 @@ const Navbar = () => {
       { path: "/vegetables", icon: RiShoppingBag4Fill, label: "Vegetables" },
       { path: "/veg-bag", icon: FiShoppingCart, label: "Cart" },
       { path: "/track-your-order", icon: MdLocalShipping, label: "Track" },
-      { path: "/help", icon: FiPhone, label: "Contact" },
+      { path: "/support", icon: FiPhone, label: "Support" },
     ],
     []
   );
@@ -61,7 +61,7 @@ const Navbar = () => {
         icon: MdLocalShipping,
         label: "Track Order",
       },
-      { path: "/help", icon: FiPhone, label: "Contact" },
+      { path: "/support", icon: FiPhone, label: "Support" },
     ],
     []
   );

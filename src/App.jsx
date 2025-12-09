@@ -130,7 +130,7 @@ const AppContent = () => {
               "/veg-bag",
               "/vegetables",
               "/track-your-order",
-              "/help",
+              "/support",
               ...(selectedOffer === null ? ["/customer-info"] : []),
             ].includes(location.pathname) && <ProgressIndicator />}
             <Routes>
@@ -152,7 +152,7 @@ const AppContent = () => {
               />
               <Route path="/veg-bag" element={<VegetableCart />} />
               <Route path="/track-your-order" element={<OrderTracking />} />
-              <Route path="/help" element={<Help />} />
+              <Route path="/support" element={<Help />} />
               <Route path="/order-success" element={<BillingSuccess />} />
             </Routes>
           </div>

@@ -908,7 +908,7 @@ const Homepage = () => {
                   <button
                     onClick={() => {
                       window.scrollTo(0, 0);
-                      navigate("/help");
+                      navigate("/support");
                     }}
                     className="text-white/70 hover:text-white transition-colors text-left"
                   >

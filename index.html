@@ -2,448 +2,211 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./src/assets/Fruit-Store.svg" />
+    <!-- Primary site icons (favicons + app icons) -->
+    <link rel="icon" type="image/svg+xml" href="./public/vegbazar.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./public/vegbazar.svg" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./public/vegbazar.svg" />
+    <link rel="shortcut icon" href="./public/vegbazar.svg" />
+    <!-- Safari pinned tab -->
+    <link rel="mask-icon" href="./public/vegbazar.svg" color="#0e540b" />
+    <!-- Apple / iOS -->
+    <link rel="apple-touch-icon" sizes="180x180" href="./public/vegbazar.svg" />
+    <!-- Android / Progressive Web App -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="VegBazar" />
+    <meta name="application-name" content="VegBazar" />
+    <meta name="theme-color" content="#0e540b" />
+    <meta name="msapplication-TileColor" content="#0e540b" />
+    <meta name="msapplication-TileImage" content="/icons/mstile-150x150.png" />
+
+    <!-- Viewport & SEO basics -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="./public/vegbazar.svg" />
-    <!-- ============================================ -->
-    <!-- PRIMARY META TAGS -->
-    <!-- ============================================ -->
-    <title>
-      VegBazar - Fresh Vegetables Online | Farm to Doorstep Same Day Delivery
-    </title>
-    <meta
-      name="title"
-      content="VegBazar - Fresh Vegetables Online | Farm to Doorstep Same Day Delivery"
-    />
+    <title>VegBazar — Farm-Fresh Vegetables Online | Same-Day Delivery</title>
     <meta
       name="description"
-      content="Order farm-fresh vegetables online at VegBazar. Get premium quality veggies, organic produce & vegetable baskets delivered same day. Free delivery above ₹500. Shop now!"
+      content="Order farm-fresh vegetables from VegBazar — handpicked, locally sourced & pesticide-free. Same-day doorstep delivery in Valsad (50km radius). Free delivery above ₹500."
     />
-
-    <!-- FOCUSED KEYWORDS - High Intent Search Terms -->
-    <meta
-      name="keywords"
-      content="fresh vegetables online, vegetable delivery near me, buy vegetables online, farm fresh vegetables delivery, organic vegetables online, vegetable basket delivery, same day vegetable delivery, online vegetable shopping India, doorstep vegetable delivery, VegBazar, vegbazar.store, vegetable home delivery, daily vegetable delivery, seasonal vegetables online, pesticide free vegetables, farm to home vegetables, vegetable subscription box, bulk vegetable order, premium vegetables online, local vegetable delivery service"
-    />
-
+    <meta name="keywords" content="fresh vegetables online, vegetable delivery Valsad, farm fresh vegetables, same day vegetable delivery, vegetable baskets, organic vegetables" />
     <meta name="author" content="VegBazar" />
-    <meta
-      name="robots"
-      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
-    />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
-    <meta name="bingbot" content="index, follow" />
     <link rel="canonical" href="https://vegbazar.store/" />
+    <link rel="alternate" href="https://vegbazar.store/" hreflang="en-IN" />
 
-    <!-- GEO TAGS -->
-    <meta name="geo.region" content="IN-GJ" />
-    <meta name="geo.placename" content="Valsad, Gujarat, India" />
-    <meta name="geo.position" content="20.586472;72.935694" />
-    <meta name="ICBM" content="20.586472, 72.935694" />
-
-    <!-- ============================================ -->
-    <!-- OPEN GRAPH / FACEBOOK -->
-    <!-- ============================================ -->
+    <!-- Open Graph (Facebook / LinkedIn) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="VegBazar" />
-    <meta
-      property="og:title"
-      content="VegBazar - Fresh Farm Vegetables Delivered to Your Doorstep"
-    />
-    <meta
-      property="og:description"
-      content="Get farm-fresh vegetables delivered same day! Premium quality, handpicked veggies from local farms. Order vegetable baskets & organic produce online. Free delivery ₹500+"
-    />
-    <meta
-      property="og:image"
-      content="https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg"
-    />
+    <meta property="og:title" content="VegBazar — Farm-Fresh Vegetables Delivered Same Day" />
+    <meta property="og:description" content="Handpicked, farm-fresh vegetables & curated baskets. Same-day delivery in and around Valsad. Free delivery on orders above ₹500." />
+    <meta property="og:url" content="https://vegbazar.store/" />
+    <meta property="og:image" content="https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg" />
+    <meta property="og:image:alt" content="VegBazar — Fresh Vegetables Online" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta
-      property="og:image:alt"
-      content="VegBazar - Fresh Vegetables Online Delivery"
-    />
-    <meta property="og:url" content="https://vegbazar.store/" />
     <meta property="og:locale" content="en_IN" />
 
-    <!-- ============================================ -->
-    <!-- TWITTER CARD -->
-    <!-- ============================================ -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@VegBazar" />
     <meta name="twitter:creator" content="@VegBazar" />
-    <meta
-      name="twitter:title"
-      content="VegBazar - Fresh Vegetables Online | Same Day Delivery"
-    />
-    <meta
-      name="twitter:description"
-      content="Order farm-fresh vegetables online. Same day delivery, premium quality, organic produce. Get vegetable baskets delivered to your doorstep."
-    />
-    <meta
-      name="twitter:image"
-      content="https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg"
-    />
+    <meta name="twitter:title" content="VegBazar — Farm-Fresh Vegetables Online" />
+    <meta name="twitter:description" content="Order fresh vegetables from local farms. Same-day delivery. Free delivery above ₹500." />
+    <meta name="twitter:image" content="https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg" />
     <meta name="twitter:image:alt" content="VegBazar Fresh Vegetables" />
 
-    <!-- ============================================ -->
-    <!-- SCHEMA MARKUP - ORGANIZATION -->
-    <!-- ============================================ -->
+    <!-- Structured data (Organization + LocalBusiness + Product + FAQ) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "VegBazar",
-        "alternateName": "VegBazar - Fresh Vegetables Online",
-        "url": "https://vegbazar.store/",
-        "logo": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
-        "description": "VegBazar delivers farm-fresh vegetables directly from local farms to your doorstep with same-day delivery across India.",
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "telephone": "+91-8780564115",
-          "contactType": "Customer Service",
-          "email": "info.vegbazar@gmail.com",
-          "areaServed": "IN",
-          "availableLanguage": ["English", "Hindi", "Gujarati"]
-        },
-        "sameAs": [
-          "https://www.facebook.com/vegbazar",
-          "https://www.instagram.com/vegbazar",
-          "https://twitter.com/vegbazar"
-        ]
-      }
-    </script>
-
-    <!-- ============================================ -->
-    <!-- SCHEMA MARKUP - LOCAL BUSINESS -->
-    <!-- ============================================ -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "VegBazar",
-        "image": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
-        "@id": "https://vegbazar.store",
-        "url": "https://vegbazar.store",
-        "telephone": "+91-8780564115",
-        "email": "info.vegbazar@gmail.com",
-        "priceRange": "₹₹",
-        "paymentAccepted": [
-          "Cash",
-          "Credit Card",
-          "Debit Card",
-          "UPI",
-          "Net Banking"
-        ],
-        "currenciesAccepted": "INR",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "Vashiyar Valley",
-          "addressLocality": "Valsad",
-          "addressRegion": "Gujarat",
-          "postalCode": "396007",
-          "addressCountry": "IN"
-        },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": "20.586472",
-          "longitude": "72.935694"
-        },
-        "openingHoursSpecification": [
+        "@graph": [
           {
-            "@type": "OpeningHoursSpecification",
-            "dayOfWeek": [
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday"
+            "@type": "Organization",
+            "@id": "https://vegbazar.store/#org",
+            "name": "VegBazar",
+            "url": "https://vegbazar.store/",
+            "logo": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
+            "sameAs": [
+              "https://www.facebook.com/vegbazar",
+              "https://www.instagram.com/vegbazar",
+              "https://twitter.com/vegbazar"
             ],
-            "opens": "06:00",
-            "closes": "20:00"
-          }
-        ],
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.8",
-          "reviewCount": "500",
-          "bestRating": "5",
-          "worstRating": "1"
-        },
-        "areaServed": {
-          "@type": "GeoCircle",
-          "geoMidpoint": {
-            "@type": "GeoCoordinates",
-            "latitude": "20.586472",
-            "longitude": "72.935694"
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "telephone": "+91-8780564115",
+                "contactType": "Customer Service",
+                "email": "info.vegbazar@gmail.com",
+                "areaServed": "IN",
+                "availableLanguage": ["English", "Hindi", "Gujarati"]
+              }
+            ]
           },
-          "geoRadius": "50000"
-        }
-      }
-    </script>
-
-    <!-- ============================================ -->
-    <!-- SCHEMA MARKUP - ONLINE STORE -->
-    <!-- ============================================ -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "OnlineStore",
-        "name": "VegBazar Online Vegetable Store",
-        "description": "Buy fresh vegetables online at VegBazar. Farm-fresh produce, organic vegetables, and curated vegetable baskets delivered same day to your doorstep.",
-        "url": "https://vegbazar.store/",
-        "image": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
-        "priceRange": "₹50 - ₹500",
-        "paymentAccepted": "Cash, Credit Card, Debit Card, UPI, Net Banking",
-        "currenciesAccepted": "INR",
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Fresh Vegetables & Baskets",
-          "itemListElement": [
-            {
-              "@type": "OfferCatalog",
-              "name": "Vegetable Baskets",
-              "description": "Curated vegetable baskets with seasonal fresh vegetables"
-            },
-            {
-              "@type": "OfferCatalog",
-              "name": "Organic Vegetables",
-              "description": "Certified organic pesticide-free vegetables"
-            },
-            {
-              "@type": "OfferCatalog",
-              "name": "Seasonal Vegetables",
-              "description": "Fresh seasonal vegetables direct from farms"
-            }
-          ]
-        }
-      }
-    </script>
-
-    <!-- ============================================ -->
-    <!-- SCHEMA MARKUP - PRODUCT (VEGETABLE BASKET) -->
-    <!-- ============================================ -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org/",
-        "@type": "Product",
-        "name": "Fresh Vegetable Basket",
-        "image": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
-        "description": "Handpicked farm-fresh vegetable basket with 8-10 varieties of seasonal vegetables. Delivered same day to your doorstep.",
-        "brand": {
-          "@type": "Brand",
-          "name": "VegBazar"
-        },
-        "sku": "VB-BASKET-001",
-        "category": "Grocery & Gourmet Food > Fresh Vegetables",
-        "offers": {
-          "@type": "AggregateOffer",
-          "url": "https://vegbazar.store/offers",
-          "priceCurrency": "INR",
-          "lowPrice": "129",
-          "highPrice": "499",
-          "offerCount": "10",
-          "availability": "https://schema.org/InStock",
-          "priceValidUntil": "2025-12-31",
-          "shippingDetails": {
-            "@type": "OfferShippingDetails",
-            "shippingRate": {
-              "@type": "MonetaryAmount",
-              "value": "0",
-              "currency": "INR"
-            },
-            "shippingDestination": {
-              "@type": "DefinedRegion",
+          {
+            "@type": "LocalBusiness",
+            "@id": "https://vegbazar.store/#business",
+            "name": "VegBazar",
+            "image": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Vashiyar Valley",
+              "addressLocality": "Valsad",
+              "addressRegion": "Gujarat",
+              "postalCode": "396007",
               "addressCountry": "IN"
             },
-            "deliveryTime": {
-              "@type": "ShippingDeliveryTime",
-              "handlingTime": {
-                "@type": "QuantitativeValue",
-                "minValue": 0,
-                "maxValue": 2,
-                "unitCode": "HUR"
+            "telephone": "+91-8780564115",
+            "url": "https://vegbazar.store/",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": 20.586472,
+              "longitude": 72.935694
+            },
+            "priceRange": "₹",
+            "openingHoursSpecification": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "opens": "06:00",
+              "closes": "20:00"
+            },
+            "areaServed": {
+              "@type": "GeoCircle",
+              "geoMidpoint": {
+                "@type": "GeoCoordinates",
+                "latitude": 20.586472,
+                "longitude": 72.935694
               },
-              "transitTime": {
-                "@type": "QuantitativeValue",
-                "minValue": 2,
-                "maxValue": 6,
-                "unitCode": "HUR"
+              "geoRadius": 50000
+            },
+            "paymentAccepted": ["Cash", "Credit Card", "Debit Card", "UPI", "Net Banking"],
+            "currenciesAccepted": "INR",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.8",
+              "reviewCount": "500"
+            }
+          },
+          {
+            "@type": "Product",
+            "name": "Fresh Vegetable Basket",
+            "image": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
+            "description": "Handpicked seasonal vegetable basket (8-10 items) — same day delivery.",
+            "brand": { "@type": "Brand", "name": "VegBazar" },
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "INR",
+              "price": "129",
+              "availability": "https://schema.org/InStock",
+              "url": "https://vegbazar.store/offers"
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Does VegBazar deliver fresh vegetables?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, VegBazar delivers farm-fresh, handpicked vegetables directly to your doorstep with same-day delivery options."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What areas does VegBazar deliver to?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "VegBazar delivers in Valsad Abrama and Tithal Road"
+                }
               }
-            }
-          }
-        },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.8",
-          "reviewCount": "500",
-          "bestRating": "5",
-          "worstRating": "1"
-        },
-        "review": [
-          {
-            "@type": "Review",
-            "reviewRating": {
-              "@type": "Rating",
-              "ratingValue": "5",
-              "bestRating": "5"
-            },
-            "author": {
-              "@type": "Person",
-              "name": "Priya Sharma"
-            },
-            "reviewBody": "Excellent quality vegetables! Fresh and delivered on time. Highly recommend VegBazar."
+            ]
           }
         ]
       }
     </script>
 
-    <!-- ============================================ -->
-    <!-- SCHEMA MARKUP - FAQ PAGE -->
-    <!-- ============================================ -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "Does VegBazar deliver fresh vegetables?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes, VegBazar delivers farm-fresh, handpicked vegetables directly to your doorstep with same-day delivery options. All vegetables are sourced from local farms and delivered within 2-6 hours of ordering."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What areas does VegBazar deliver to?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "VegBazar currently delivers across Valsad, Gujarat and surrounding areas within a 50km radius. We are expanding to more cities across India soon."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Are VegBazar vegetables organic?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "VegBazar offers both conventional and certified organic vegetables. We clearly label organic produce and ensure all vegetables are pesticide-free and chemical-free for health-conscious customers."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What is the minimum order amount for free delivery?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "VegBazar offers free delivery on all orders above ₹500. For orders below ₹500, a nominal delivery charge of ₹20 applies."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "How do vegetable baskets work?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "VegBazar's vegetable baskets are pre-curated collections of 8-10 seasonal vegetables packaged together for convenience. Choose from different basket sizes based on your family needs, with prices ranging from ₹129 to ₹499."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What payment methods does VegBazar accept?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "VegBazar accepts multiple payment methods including Cash on Delivery (COD), Credit/Debit Cards, UPI, Net Banking, and all major digital wallets for your convenience."
-            }
-          }
-        ]
-      }
-    </script>
+    <!-- Performance / Security hints -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
 
-    <!-- ============================================ -->
-    <!-- SCHEMA MARKUP - BREADCRUMB LIST -->
-    <!-- ============================================ -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://vegbazar.store/"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Vegetables",
-            "item": "https://vegbazar.store/vegetables"
-          },
-          {
-            "@type": "ListItem",
-            "position": 3,
-            "name": "Offers",
-            "item": "https://vegbazar.store/offers"
-          }
-        ]
-      }
-    </script>
-
-    <!-- ============================================ -->
-    <!-- SCHEMA MARKUP - WEBSITE SEARCH BOX -->
-    <!-- ============================================ -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "url": "https://vegbazar.store/",
-        "name": "VegBazar",
-        "description": "Fresh vegetables online delivery",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://vegbazar.store/search?q={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
-      }
-    </script>
-
-    <!-- ============================================ -->
-    <!-- ADDITIONAL SEO TAGS -->
-    <!-- ============================================ -->
-    <meta name="theme-color" content="#0e540b" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <meta name="apple-mobile-web-app-title" content="VegBazar" />
-    <meta name="mobile-web-app-capable" content="yes" />
-
-    <!-- Preconnect to External Domains for Performance -->
-    <link rel="preconnect" href="https://www.googletagmanager.com" />
-    <link rel="preconnect" href="https://res.cloudinary.com" />
+    <!-- Optional: OpenSearch (site search integration) -->
+    <link rel="search" type="application/opensearchdescription+xml" title="VegBazar Search" href="/opensearch.xml" />
 
     <link rel="stylesheet" href="/src/index.css" />
-  </head>
+
 
   <body>
-    <!-- Google Tag Manager (gtag.js) -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-M7N6DPZNRF"
-    ></script>
+   
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
       }
       gtag("js", new Date());
-      gtag("config", "G-M7N6DPZNRF");
+      gtag("config", "G-M7N6DPZNRF", { anonymize_ip: true });
     </script>
 
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Optional service worker registration for PWA (enable if service-worker.js exists) -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/service-worker.js")
+          .catch(function (err) {
+            console.warn("Service Worker registration failed:", err);
+          });
+      }
+    </script>
   </body>
 </html>
