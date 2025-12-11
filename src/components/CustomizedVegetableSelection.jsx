@@ -3,42 +3,65 @@ import { ArrowLeft, ShoppingBag, Plus, Minus, Leaf } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
 
-// Updated VegetableCard component for CustomizedVegetableSelection with Out of Stock functionality
+// Updated VegetableCard component supporting both weight and set pricing
 const VegetableCard = memo(
   ({
     veg,
     selectedWeight,
+    selectedSet,
     quantity,
     onWeightChange,
+    onSetChange,
     onAddToCart,
     onRemoveFromCart,
   }) => {
-    const isOutOfStock = veg.outOfStock || veg.stockKg === 0;
+    // Determine pricing model
+    const isSetModel = veg.pricingType === "set" || 
+      veg.setPricing?.enabled === true || 
+      veg.setPricingEnabled === true;
     
-    const availableWeights = useMemo(() => {
-      if (!veg.prices || typeof veg.prices !== "object") {
-        return ["250g"];
+    // Check stock based on model
+    const isOutOfStock = veg.outOfStock || 
+      (isSetModel 
+        ? (veg.stockPieces === 0 || veg.stockPieces == null)
+        : (veg.stockKg === 0 || veg.stockKg == null)
+      );
+    
+    // Get available options based on model
+    const availableOptions = useMemo(() => {
+      if (isSetModel) {
+        const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
+        return sets.map((set, idx) => ({
+          id: idx,
+          label: set.label || `${set.quantity} ${set.unit}`,
+          value: `set${idx}`,
+          price: set.price,
+          marketPrice: set.marketPrice || set.price,
+        }));
+      } else {
+        if (!veg.prices || typeof veg.prices !== "object") {
+          return [{ id: 0, label: "250g", value: "250g", price: 0, marketPrice: 0 }];
+        }
+        const weights = [];
+        if (veg.prices.weight1kg > 0) weights.push({ id: 0, label: "1kg", value: "1kg", price: veg.prices.weight1kg, marketPrice: veg.marketPrices?.weight1kg || veg.prices.weight1kg });
+        if (veg.prices.weight500g > 0) weights.push({ id: 1, label: "500g", value: "500g", price: veg.prices.weight500g, marketPrice: veg.marketPrices?.weight500g || veg.prices.weight500g });
+        if (veg.prices.weight250g > 0) weights.push({ id: 2, label: "250g", value: "250g", price: veg.prices.weight250g, marketPrice: veg.marketPrices?.weight250g || veg.prices.weight250g });
+        return weights.length > 0 ? weights : [{ id: 0, label: "250g", value: "250g", price: veg.price || 0, marketPrice: veg.price || 0 }];
       }
-      const weights = [];
-      if (veg.prices.weight1kg && veg.prices.weight1kg > 0) weights.push("1kg");
-      if (veg.prices.weight500g && veg.prices.weight500g > 0)
-        weights.push("500g");
-      if (veg.prices.weight250g && veg.prices.weight250g > 0)
-        weights.push("250g");
-      return weights.length > 0 ? weights : ["250g"];
-    }, [veg.prices]);
+    }, [veg, isSetModel]);
+
+    const currentOption = isSetModel ? selectedSet : selectedWeight;
+    const selectedOptionData = availableOptions.find(opt => opt.value === currentOption) || availableOptions[0];
 
     const { actualPrice, marketPrice, savings } = useMemo(() => {
-      const weightKey = `weight${selectedWeight}`;
-      const actual = veg.prices?.[weightKey] || veg.price || 0;
-      const market =
-        veg.marketPrices?.[weightKey] || veg.originalPrice || veg.price || 0;
+      const actual = selectedOptionData?.price || 0;
+      const market = selectedOptionData?.marketPrice || actual;
       return {
         actualPrice: actual,
         marketPrice: market,
         savings: market - actual,
       };
-    }, [veg, selectedWeight]);
+    }, [selectedOptionData]);
 
     return (
       <div className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${
@@ -76,27 +99,30 @@ const VegetableCard = memo(
               </div>
             )}
           </div>
-          <p className={`font-medium font-assistant text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${
+          <p className={`font-medium text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${
             isOutOfStock ? "text-gray-500" : ""
           }`}>
             {veg.name}
+            {isSetModel && (
+              <span className="ml-1 text-[10px] text-purple-600">📦</span>
+            )}
           </p>
         </div>
 
-        {/* Weight Selection */}
-        {!isOutOfStock && availableWeights.length > 1 && (
+        {/* Weight/Set Selection */}
+        {!isOutOfStock && availableOptions.length > 1 && (
           <div className="flex gap-1 mb-2 justify-center flex-wrap">
-            {availableWeights.map((weight) => (
+            {availableOptions.map((option) => (
               <button
-                key={weight}
-                onClick={() => onWeightChange(veg._id, weight)}
-                className={`px-2 py-1 text-[10px] font-assistant font-semibold rounded-md transition-all ${
-                  selectedWeight === weight
+                key={option.value}
+                onClick={() => isSetModel ? onSetChange(veg._id, option.value) : onWeightChange(veg._id, option.value)}
+                className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-all ${
+                  currentOption === option.value
                     ? "bg-[#0e540b] text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                {weight}
+                {option.label}
               </button>
             ))}
           </div>
@@ -106,20 +132,20 @@ const VegetableCard = memo(
         {!isOutOfStock && (
           <div className="mt-1 sm:mt-2 text-center mb-2">
             <div className="flex items-center justify-center gap-1 sm:gap-2">
-              <p className="font-assistant text-[#0e540b] font-bold text-sm sm:text-base">
+              <p className="text-[#0e540b] font-bold text-sm sm:text-base">
                 ₹{actualPrice.toFixed(2)}
               </p>
               {marketPrice > actualPrice && (
-                <p className="font-assistant text-gray-400 line-through text-[10px] sm:text-xs">
+                <p className="text-gray-400 line-through text-[10px] sm:text-xs">
                   ₹{marketPrice.toFixed(2)}
                 </p>
               )}
             </div>
-            <p className="text-[11px] sm:text-[11px] text-gray-500 font-assistant">
-              per {selectedWeight}
+            <p className="text-[11px] sm:text-[11px] text-gray-500">
+              per {selectedOptionData?.label}
             </p>
             {savings > 0 && (
-              <p className="text-[9px] sm:text-[10px] text-green-600 font-assistant font-semibold mt-0.5">
+              <p className="text-[9px] sm:text-[10px] text-green-600 font-semibold mt-0.5">
                 Save ₹{savings.toFixed(2)}
               </p>
             )}
@@ -134,7 +160,7 @@ const VegetableCard = memo(
         ) : quantity === 0 ? (
           <button
             onClick={() => onAddToCart(veg)}
-            className="w-full font-assistant bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+            className="w-full bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 text-xs sm:text-sm"
             aria-label={`Add ${veg.name} to cart`}
           >
             <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -148,7 +174,7 @@ const VegetableCard = memo(
             >
               <Minus size={14} className="text-[#0e540b]" />
             </button>
-            <span className="font-assistant font-bold text-white text-sm px-2">
+            <span className="font-bold text-white text-sm px-2">
               {quantity}
             </span>
             <button
@@ -172,9 +198,9 @@ const CustomizedVegetableSelection = () => {
   const [error, setError] = useState("");
   const [cartItems, setCartItems] = useState({});
   const [selectedWeights, setSelectedWeights] = useState({});
+  const [selectedSets, setSelectedSets] = useState({});
   const {
     setVegetableOrder,
-    vegetableOrder,
     navigate,
     setSelectedOffer,
     setSelectedVegetables,
@@ -202,7 +228,7 @@ const CustomizedVegetableSelection = () => {
     }
   }, []);
 
-  // Debounced price calculation to avoid excessive API calls
+  // Calculate prices
   const calculatePrices = useCallback(
     async (cartData) => {
       try {
@@ -252,30 +278,52 @@ const CustomizedVegetableSelection = () => {
     [API_URL]
   );
 
-  // Get price for specific weight - memoized helper
-  const getPriceForWeight = useCallback((veg, weight) => {
-    const weightKey = `weight${weight}`;
-    if (veg.prices && typeof veg.prices === "object") {
-      return veg.prices[weightKey] || 0;
+  // Get price for specific option
+  const getPriceForOption = useCallback((veg, option) => {
+    const isSetModel = veg.pricingType === "set" || veg.setPricing?.enabled || veg.setPricingEnabled;
+    
+    if (isSetModel) {
+      const setIndex = parseInt(option.replace('set', ''));
+      const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
+      return sets[setIndex]?.price || 0;
+    } else {
+      const weightKey = `weight${option}`;
+      if (veg.prices && typeof veg.prices === "object") {
+        return veg.prices[weightKey] || 0;
+      }
+      return veg.price || 0;
     }
-    return veg.price || 0;
   }, []);
 
-  // Get market price for specific weight - memoized helper
-  const getMarketPriceForWeight = useCallback((veg, weight) => {
-    const weightKey = `weight${weight}`;
-    if (veg.marketPrices && typeof veg.marketPrices === "object") {
-      return veg.marketPrices[weightKey] || 0;
+  // Get market price for specific option
+  const getMarketPriceForOption = useCallback((veg, option) => {
+    const isSetModel = veg.pricingType === "set" || veg.setPricing?.enabled || veg.setPricingEnabled;
+    
+    if (isSetModel) {
+      const setIndex = parseInt(option.replace('set', ''));
+      const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
+      return sets[setIndex]?.marketPrice || sets[setIndex]?.price || 0;
+    } else {
+      const weightKey = `weight${option}`;
+      if (veg.marketPrices && typeof veg.marketPrices === "object") {
+        return veg.marketPrices[weightKey] || 0;
+      }
+      return veg.originalPrice || veg.price || 0;
     }
-    return veg.originalPrice || veg.price || 0;
   }, []);
 
-  // Get selected weight for a vegetable
-  const getSelectedWeight = useCallback(
-    (vegId) => {
-      return selectedWeights[vegId] || "250g";
+  // Get selected option for a vegetable
+  const getSelectedOption = useCallback(
+    (veg) => {
+      const isSetModel = veg.pricingType === "set" || veg.setPricing?.enabled || veg.setPricingEnabled;
+      
+      if (isSetModel) {
+        return selectedSets[veg._id] || "set0";
+      } else {
+        return selectedWeights[veg._id] || "250g";
+      }
     },
-    [selectedWeights]
+    [selectedWeights, selectedSets]
   );
 
   // Set selected weight for a vegetable
@@ -286,11 +334,19 @@ const CustomizedVegetableSelection = () => {
     }));
   }, []);
 
-  // Optimized add to cart function
+  // Set selected set for a vegetable
+  const setSelectedSet = useCallback((vegId, set) => {
+    setSelectedSets((prev) => ({
+      ...prev,
+      [vegId]: set,
+    }));
+  }, []);
+
+  // Add to cart function
   const handleAddToCart = useCallback(
     async (veg) => {
-      const weight = getSelectedWeight(veg._id);
-      const cartKey = `${veg._id}-${weight}`;
+      const option = getSelectedOption(veg);
+      const cartKey = `${veg._id}-${option}`;
       const currentQty = cartItems[cartKey] || 0;
       const newQty = currentQty + 1;
 
@@ -304,29 +360,43 @@ const CustomizedVegetableSelection = () => {
 
       const existingItemIndex = cartData.items.findIndex(
         (item) =>
-          (item.id || item.vegetableId) === veg._id && item.weight === weight
+          (item.id || item.vegetableId) === veg._id && item.weight === option
       );
 
-      const priceForWeight = getPriceForWeight(veg, weight);
-      const marketPriceForWeight = getMarketPriceForWeight(veg, weight);
+      const priceForOption = getPriceForOption(veg, option);
+      const marketPriceForOption = getMarketPriceForOption(veg, option);
+      
+      // Get the correct label for the selected option
+      const isSetModel = veg.pricingType === "set" || veg.setPricing?.enabled || veg.setPricingEnabled;
+      let optionLabel = option;
+      
+      if (isSetModel) {
+        const setIndex = parseInt(option.replace('set', ''));
+        const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
+        optionLabel = sets[setIndex]?.label || `${sets[setIndex]?.quantity} ${sets[setIndex]?.unit}`;
+      }
 
       if (existingItemIndex >= 0) {
         cartData.items[existingItemIndex].quantity = newQty;
-        cartData.items[existingItemIndex].pricePerUnit = priceForWeight;
-        cartData.items[existingItemIndex].price = priceForWeight;
-        cartData.items[existingItemIndex].marketPrice = marketPriceForWeight;
+        cartData.items[existingItemIndex].pricePerUnit = priceForOption;
+        cartData.items[existingItemIndex].price = priceForOption;
+        cartData.items[existingItemIndex].marketPrice = marketPriceForOption;
+        cartData.items[existingItemIndex].weight = option;
+        cartData.items[existingItemIndex].weightLabel = optionLabel;
       } else {
         cartData.items.push({
           id: veg._id,
           vegetableId: veg._id,
           name: veg.name,
           image: veg.image || "/placeholder-vegetable.jpg",
-          weight: weight,
+          weight: option,
+          weightLabel: optionLabel,
           quantity: 1,
-          pricePerUnit: priceForWeight,
-          price: priceForWeight,
-          marketPrice: marketPriceForWeight,
-          totalPrice: priceForWeight,
+          pricePerUnit: priceForOption,
+          price: priceForOption,
+          marketPrice: marketPriceForOption,
+          totalPrice: priceForOption,
+          isSetModel,
         });
       }
 
@@ -336,19 +406,19 @@ const CustomizedVegetableSelection = () => {
     },
     [
       cartItems,
-      getSelectedWeight,
-      getPriceForWeight,
-      getMarketPriceForWeight,
+      getSelectedOption,
+      getPriceForOption,
+      getMarketPriceForOption,
       calculatePrices,
       setVegetableOrder,
     ]
   );
 
-  // Optimized remove from cart function
+  // Remove from cart function
   const handleRemoveFromCart = useCallback(
     async (veg) => {
-      const weight = getSelectedWeight(veg._id);
-      const cartKey = `${veg._id}-${weight}`;
+      const option = getSelectedOption(veg);
+      const cartKey = `${veg._id}-${option}`;
       const currentQty = cartItems[cartKey] || 0;
 
       if (currentQty <= 1) {
@@ -363,7 +433,7 @@ const CustomizedVegetableSelection = () => {
             (item) =>
               !(
                 (item.id || item.vegetableId) === veg._id &&
-                item.weight === weight
+                item.weight === option
               )
           );
 
@@ -389,7 +459,7 @@ const CustomizedVegetableSelection = () => {
           const itemIndex = cartData.items.findIndex(
             (item) =>
               (item.id || item.vegetableId) === veg._id &&
-              item.weight === weight
+              item.weight === option
           );
 
           if (itemIndex >= 0) {
@@ -401,14 +471,15 @@ const CustomizedVegetableSelection = () => {
         }
       }
     },
-    [cartItems, getSelectedWeight, calculatePrices, setVegetableOrder]
+    [cartItems, getSelectedOption, calculatePrices, setVegetableOrder]
   );
 
   const getCartQuantity = useCallback(
-    (vegId, weight) => {
-      return cartItems[`${vegId}-${weight}`] || 0;
+    (veg) => {
+      const option = getSelectedOption(veg);
+      return cartItems[`${veg._id}-${option}`] || 0;
     },
-    [cartItems]
+    [cartItems, getSelectedOption]
   );
 
   const handleCheckout = useCallback(async () => {
@@ -433,7 +504,7 @@ const CustomizedVegetableSelection = () => {
     }
   }, [navigate]);
 
-  // Fetch vegetables using axios
+  // Fetch vegetables
   useEffect(() => {
     setSelectedOffer(null);
     setSelectedVegetables([]);
@@ -471,19 +542,19 @@ const CustomizedVegetableSelection = () => {
               navigate("/");
               window.scrollTo(0, 0);
             }}
-            className="flex items-center text-[#0e540b] hover:text-green-700 font-medium transition-colors font-poppins"
+            className="flex items-center text-[#0e540b] hover:text-green-700 font-medium transition-colors"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             Back
           </button>
-          <h2 className="text-2xl text-center sm:text-3xl font-bold text-[#0e540b] font-amiko">
+          <h2 className="text-2xl text-center sm:text-3xl font-bold text-[#0e540b]">
             Select Your Vegetables
           </h2>
           <div className="w-20" />
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded font-assistant">
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
             {error}
           </div>
         )}
@@ -495,7 +566,7 @@ const CustomizedVegetableSelection = () => {
         ) : vegetables.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
             <Leaf className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-            <p className="text-gray-500 font-medium font-assistant">
+            <p className="text-gray-500 font-medium">
               No vegetables available
             </p>
           </div>
@@ -507,12 +578,11 @@ const CustomizedVegetableSelection = () => {
                 <VegetableCard
                   key={veg._id}
                   veg={veg}
-                  selectedWeight={getSelectedWeight(veg._id)}
-                  quantity={getCartQuantity(
-                    veg._id,
-                    getSelectedWeight(veg._id)
-                  )}
+                  selectedWeight={selectedWeights[veg._id] || "250g"}
+                  selectedSet={selectedSets[veg._id] || "set0"}
+                  quantity={getCartQuantity(veg)}
                   onWeightChange={setSelectedWeight}
+                  onSetChange={setSelectedSet}
                   onAddToCart={handleAddToCart}
                   onRemoveFromCart={handleRemoveFromCart}
                 />
@@ -524,16 +594,16 @@ const CustomizedVegetableSelection = () => {
               <div className="fixed bottom-0 left-0 right-0 bg-[#f0fcf6] border-t-2 border-gray-200 shadow-2xl p-4 z-50">
                 <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-3 items-center justify-between">
                   <div className="text-center sm:text-left">
-                    <p className="text-sm text-gray-600 font-assistant">
+                    <p className="text-sm text-gray-600">
                       Total Items
                     </p>
-                    <p className="text-2xl font-bold text-[#0e540b] font-assistant">
+                    <p className="text-2xl font-bold text-[#0e540b]">
                       {totalItems}
                     </p>
                   </div>
                   <button
                     onClick={handleCheckout}
-                    className="w-full sm:w-auto px-8 py-3 rounded-lg font-bold text-white bg-gradient-to-r from-[#0e540b] to-[#063a06] hover:opacity-90 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 font-poppins"
+                    className="w-full sm:w-auto px-8 py-3 rounded-lg font-bold text-white bg-gradient-to-r from-[#0e540b] to-[#063a06] hover:opacity-90 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                   >
                     <ShoppingBag className="w-5 h-5" />
                     Continue to Checkout

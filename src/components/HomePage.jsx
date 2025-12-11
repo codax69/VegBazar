@@ -20,8 +20,7 @@ import axios from "axios";
 import { GiBasket } from "react-icons/gi";
 import VegBazarBanner from "./VegBazarBanner";
 
-
-// Updated VegetableCard component for Homepage with Out of Stock functionality
+// Updated VegetableCard component supporting both weight and set pricing
 const VegetableCard = memo(
   ({
     veg,
@@ -29,40 +28,102 @@ const VegetableCard = memo(
     onRemoveFromCart,
     selectedWeight,
     onWeightChange,
+    selectedSet,
+    onSetChange,
     quantity,
   }) => {
-    const isOutOfStock = veg.outOfStock || veg.stockKg === 0;
-    
-    const availableWeights = useMemo(() => {
-      if (!veg.prices || typeof veg.prices !== "object") return ["250g"];
-      const weights = [];
-      if (veg.prices.weight1kg && veg.prices.weight1kg > 0) weights.push("1kg");
-      if (veg.prices.weight500g && veg.prices.weight500g > 0)
-        weights.push("500g");
-      if (veg.prices.weight250g && veg.prices.weight250g > 0)
-        weights.push("250g");
-      return weights.length > 0 ? weights : ["250g"];
-    }, [veg.prices]);
+    // Determine pricing model
+    const isSetModel =
+      veg.pricingType === "set" ||
+      veg.setPricing?.enabled === true ||
+      veg.setPricingEnabled === true;
+
+    // Check stock based on model
+    const isOutOfStock =
+      veg.outOfStock ||
+      (isSetModel
+        ? veg.stockPieces === 0 || veg.stockPieces == null
+        : veg.stockKg === 0 || veg.stockKg == null);
+
+    // Get available options based on model
+    const availableOptions = useMemo(() => {
+      if (isSetModel) {
+        const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
+        return sets.map((set, idx) => ({
+          id: idx,
+          label: set.label || `${set.quantity} ${set.unit}`,
+          value: `set${idx}`,
+          price: set.price,
+          marketPrice: set.marketPrice || set.price,
+        }));
+      } else {
+        if (!veg.prices || typeof veg.prices !== "object")
+          return [
+            { id: 0, label: "250g", value: "250g", price: 0, marketPrice: 0 },
+          ];
+        const weights = [];
+        if (veg.prices.weight1kg > 0)
+          weights.push({
+            id: 0,
+            label: "1kg",
+            value: "1kg",
+            price: veg.prices.weight1kg,
+            marketPrice: veg.marketPrices?.weight1kg || veg.prices.weight1kg,
+          });
+        if (veg.prices.weight500g > 0)
+          weights.push({
+            id: 1,
+            label: "500g",
+            value: "500g",
+            price: veg.prices.weight500g,
+            marketPrice: veg.marketPrices?.weight500g || veg.prices.weight500g,
+          });
+        if (veg.prices.weight250g > 0)
+          weights.push({
+            id: 2,
+            label: "250g",
+            value: "250g",
+            price: veg.prices.weight250g,
+            marketPrice: veg.marketPrices?.weight250g || veg.prices.weight250g,
+          });
+        return weights.length > 0
+          ? weights
+          : [
+              {
+                id: 0,
+                label: "250g",
+                value: "250g",
+                price: veg.price || 0,
+                marketPrice: veg.price || 0,
+              },
+            ];
+      }
+    }, [veg, isSetModel]);
+
+    const currentOption = isSetModel ? selectedSet : selectedWeight;
+    const selectedOptionData =
+      availableOptions.find((opt) => opt.value === currentOption) ||
+      availableOptions[0];
 
     const { actualPrice, marketPrice, savings } = useMemo(() => {
-      const weightKey = `weight${selectedWeight}`;
-      const actual = veg.prices?.[weightKey] || veg.price || 0;
-      const market =
-        veg.marketPrices?.[weightKey] || veg.originalPrice || actual;
+      const actual = selectedOptionData?.price || 0;
+      const market = selectedOptionData?.marketPrice || actual;
       return {
         actualPrice: actual,
         marketPrice: market,
         savings: market - actual,
       };
-    }, [veg, selectedWeight]);
+    }, [selectedOptionData]);
 
     return (
-      <div className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${
-        isOutOfStock 
-          ? "bg-gray-100 border-gray-300 opacity-75" 
-          : "bg-[#f0fcf6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
-      }`}>
-        {/* Vegetable Image with explicit dimensions */}
+      <div
+        className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${
+          isOutOfStock
+            ? "bg-gray-100 border-gray-300 opacity-75"
+            : "bg-[#f0fcf6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
+        }`}
+      >
+        {/* Vegetable Image */}
         <div className="text-center">
           <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-1.5 sm:mb-2">
             {veg.image ? (
@@ -78,12 +139,18 @@ const VegetableCard = memo(
                 height="96"
               />
             ) : (
-              <div className={`w-full h-full bg-gradient-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${
-                isOutOfStock ? "from-gray-200 to-gray-300" : "from-gray-50 to-[#effdf5]"
-              }`}>
-                <Leaf className={`w-8 h-8 sm:w-10 sm:h-10 ${
-                  isOutOfStock ? "text-gray-400" : "text-[#0e540b]/30"
-                }`} />
+              <div
+                className={`w-full h-full bg-gradient-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${
+                  isOutOfStock
+                    ? "from-gray-200 to-gray-300"
+                    : "from-gray-50 to-[#effdf5]"
+                }`}
+              >
+                <Leaf
+                  className={`w-8 h-8 sm:w-10 sm:h-10 ${
+                    isOutOfStock ? "text-gray-400" : "text-[#0e540b]/30"
+                  }`}
+                />
               </div>
             )}
             {isOutOfStock && (
@@ -94,29 +161,43 @@ const VegetableCard = memo(
               </div>
             )}
           </div>
-          <p className={`font-medium font-assistant text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${
-            isOutOfStock ? "text-gray-500" : ""
-          }`}>
+          <p
+            className={`font-medium text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${
+              isOutOfStock ? "text-gray-500" : ""
+            }`}
+          >
             {veg.name}
+            {isSetModel && (
+              <span className="ml-1 text-[10px] text-purple-600">📦</span>
+            )}
           </p>
         </div>
 
-        {/* Weight Selection */}
-        {!isOutOfStock && availableWeights.length > 1 && (
-          <div className="flex gap-1 mb-2 justify-center flex-wrap">
-            {availableWeights.map((weight) => (
-              <button
-                key={weight}
-                onClick={() => onWeightChange(veg._id, weight)}
-                className={`px-2 py-1 text-[10px] font-assistant font-semibold rounded-md transition-all ${
-                  selectedWeight === weight
-                    ? "bg-[#0e540b] text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                {weight}
-              </button>
-            ))}
+        {/* Weight/Set Selection */}
+        {!isOutOfStock && availableOptions.length > 1 && (
+          <div className="flex gap-2 mb-3 justify-center flex-wrap">
+            {availableOptions.map((option) => {
+              const isActive = currentOption === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  onClick={() =>
+                    isSetModel
+                      ? onSetChange(veg._id, option.value)
+                      : onWeightChange(veg._id, option.value)
+                  }
+                  className={`px-3 py-1.5 text-[11px] font-medium rounded-lg transition-all duration-300
+            ${
+              isActive
+                ? "bg-[#0e540b] text-white shadow-md scale-[1.02]"
+                : "bg-[#f1f5f1] text-gray-700 hover:bg-[#e8f2e8] hover:text-[#0e540b] shadow-sm"
+            }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -124,20 +205,20 @@ const VegetableCard = memo(
         {!isOutOfStock && (
           <div className="mt-1 sm:mt-2 text-center mb-2">
             <div className="flex items-center justify-center gap-1 sm:gap-2">
-              <p className="font-assistant text-[#0e540b] font-bold text-sm sm:text-base">
+              <p className="text-[#0e540b] font-bold text-sm sm:text-base">
                 ₹{actualPrice.toFixed(2)}
               </p>
               {marketPrice > actualPrice && (
-                <p className="font-assistant text-gray-400 line-through text-[10px] sm:text-xs">
+                <p className="text-gray-400 line-through text-[10px] sm:text-xs">
                   ₹{marketPrice.toFixed(2)}
                 </p>
               )}
             </div>
-            <p className="text-[11px] sm:text-[11px] text-gray-500 font-assistant">
-              per {selectedWeight}
+            <p className="text-[11px] sm:text-[11px] text-gray-500">
+              per {selectedOptionData?.label}
             </p>
             {savings > 0 && (
-              <p className="text-[9px] sm:text-[10px] text-green-600 font-assistant font-semibold mt-0.5">
+              <p className="text-[9px] sm:text-[10px] text-green-600 font-semibold mt-0.5">
                 Save ₹{savings.toFixed(2)}
               </p>
             )}
@@ -152,7 +233,7 @@ const VegetableCard = memo(
         ) : quantity === 0 ? (
           <button
             onClick={() => onAddToCart(veg)}
-            className="w-full font-assistant bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+            className="w-full bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 text-xs sm:text-sm"
             aria-label={`Add ${veg.name} to cart`}
           >
             <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -167,7 +248,7 @@ const VegetableCard = memo(
             >
               <Minus size={14} className="text-[#0e540b]" />
             </button>
-            <span className="font-assistant font-bold text-white text-sm px-2">
+            <span className="font-bold text-white text-sm px-2">
               {quantity}
             </span>
             <button
@@ -183,7 +264,6 @@ const VegetableCard = memo(
     );
   }
 );
-
 VegetableCard.displayName = "VegetableCard";
 
 // Memoized OfferCard component
@@ -284,16 +364,28 @@ const Homepage = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [cartItems, setCartItems] = useState({});
   const [selectedWeights, setSelectedWeights] = useState({});
+  const [selectedSets, setSelectedSets] = useState({});
   const { setVegetableOrder, navigate } = useOrderContext();
   const [topSellingVegetables, setTopSellingVegetables] = useState([]);
   const [suggestedVegetables, setSuggestedVegetables] = useState([]);
+
+  // ✅ Log orderSummary on mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem("orderSummary");
+    console.log(
+      "📦 HomePage - Initial orderSummary from localStorage:",
+      savedCart ? JSON.parse(savedCart) : null
+    );
+  }, []);
 
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         const [veggiesRes, offersRes, testimonialsRes] = await Promise.all([
           axios
-            .get(`${import.meta.env.VITE_API_SERVER_URL}/api/vegetables/home/veg`)
+            .get(
+              `${import.meta.env.VITE_API_SERVER_URL}/api/vegetables/home/veg`
+            )
             .catch(() => ({ data: { data: [] } })),
           axios
             .get(
@@ -313,15 +405,8 @@ const Homepage = () => {
 
         const allVegetables = veggiesRes.data?.data || [];
         setVegetables(allVegetables);
-
-        // Split vegetables into two different sections
-        // Top 10 Selling - first 10 vegetables
         setTopSellingVegetables(allVegetables.slice(0, 10));
-
-        // Suggested for session - next 6 vegetables (from index 10 to 16)
-        // If there aren't enough vegetables, it will show whatever is available
         setSuggestedVegetables(allVegetables.slice(10, 16));
-
         setTopOffers(offersRes.data?.data || []);
 
         const apiData = testimonialsRes.data?.data?.testimonials || [];
@@ -335,7 +420,7 @@ const Homepage = () => {
           setTestimonials(formatted);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("❌ Error fetching data:", error);
       } finally {
         setVegLoading(false);
         setLoading(false);
@@ -345,38 +430,73 @@ const Homepage = () => {
 
     fetchAllData();
   }, []);
-  // Memoized helper functions
-  const getPriceForWeight = useCallback((veg, weight) => {
-    const weightKey = `weight${weight}`;
-    if (veg.prices && typeof veg.prices === "object") {
-      return veg.prices[weightKey] || 0;
+
+  const getPriceForOption = useCallback((veg, option) => {
+    const isSetModel =
+      veg.pricingType === "set" ||
+      veg.setPricing?.enabled ||
+      veg.setPricingEnabled;
+
+    if (isSetModel) {
+      const setIndex = parseInt(option.replace("set", ""));
+      const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
+      return sets[setIndex]?.price || 0;
+    } else {
+      const weightKey = `weight${option}`;
+      return veg.prices?.[weightKey] || veg.price || 0;
     }
-    return veg.price || 0;
   }, []);
 
-  const getMarketPriceForWeight = useCallback((veg, weight) => {
-    const weightKey = `weight${weight}`;
-    if (veg.marketPrices && typeof veg.marketPrices === "object") {
-      return veg.marketPrices[weightKey] || 0;
+  const getMarketPriceForOption = useCallback((veg, option) => {
+    const isSetModel =
+      veg.pricingType === "set" ||
+      veg.setPricing?.enabled ||
+      veg.setPricingEnabled;
+
+    if (isSetModel) {
+      const setIndex = parseInt(option.replace("set", ""));
+      const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
+      return sets[setIndex]?.marketPrice || sets[setIndex]?.price || 0;
+    } else {
+      const weightKey = `weight${option}`;
+      return (
+        veg.marketPrices?.[weightKey] || veg.originalPrice || veg.price || 0
+      );
     }
-    return veg.originalPrice || veg.price || 0;
   }, []);
 
-  const getSelectedWeight = useCallback(
-    (vegId) => {
-      return selectedWeights[vegId] || "250g";
+  const getSelectedOption = useCallback(
+    (veg) => {
+      const isSetModel =
+        veg.pricingType === "set" ||
+        veg.setPricing?.enabled ||
+        veg.setPricingEnabled;
+
+      if (isSetModel) {
+        return selectedSets[veg._id] || "set0";
+      } else {
+        return selectedWeights[veg._id] || "250g";
+      }
     },
-    [selectedWeights]
+    [selectedWeights, selectedSets]
   );
 
   const setSelectedWeight = useCallback((vegId, weight) => {
+    console.log(`⚖️ Weight changed for ${vegId}: ${weight}`);
     setSelectedWeights((prev) => ({
       ...prev,
       [vegId]: weight,
     }));
   }, []);
 
-  // Debounced price calculation to reduce API calls
+  const setSelectedSet = useCallback((vegId, set) => {
+    console.log(`📦 Set changed for ${vegId}: ${set}`);
+    setSelectedSets((prev) => ({
+      ...prev,
+      [vegId]: set,
+    }));
+  }, []);
+
   const calculatePrices = useCallback(async (cartData) => {
     try {
       const normalizedItems = cartData.items.map((item) => ({
@@ -385,12 +505,15 @@ const Homepage = () => {
         quantity: item.quantity,
       }));
 
+      console.log("💰 Calculating prices for items:", normalizedItems);
+
       const response = await axios.post(
         `${import.meta.env.VITE_API_SERVER_URL}/api/orders/calculate-price`,
         { items: normalizedItems }
       );
 
       const updatedPrices = response.data.data;
+      console.log("✅ Prices calculated:", updatedPrices);
 
       cartData.items = cartData.items.map((item) => {
         const calculatedItem = updatedPrices.items.find(
@@ -416,17 +539,21 @@ const Homepage = () => {
 
       return cartData;
     } catch (error) {
-      console.error("Error calculating prices:", error);
+      console.error("❌ Error calculating prices:", error);
       return cartData;
     }
   }, []);
 
   const handleAddToCart = useCallback(
     async (veg) => {
-      const weight = getSelectedWeight(veg._id);
-      const cartKey = `${veg._id}-${weight}`;
+      const option = getSelectedOption(veg);
+      const cartKey = `${veg._id}-${option}`;
       const currentQty = cartItems[cartKey] || 0;
       const newQty = currentQty + 1;
+
+      console.log(
+        `➕ Adding to cart: ${veg.name} (${option}) - Qty: ${newQty}`
+      );
 
       setCartItems((prev) => ({
         ...prev,
@@ -436,43 +563,82 @@ const Homepage = () => {
       const savedCart = localStorage.getItem("orderSummary");
       let cartData = savedCart ? JSON.parse(savedCart) : { items: [] };
 
+      console.log("📦 Current cart data:", cartData);
+
       const existingItemIndex = cartData.items.findIndex(
         (item) =>
-          (item.id || item.vegetableId) === veg._id && item.weight === weight
+          (item.id || item.vegetableId) === veg._id && item.weight === option
       );
 
-      const priceForWeight = getPriceForWeight(veg, weight);
-      const marketPriceForWeight = getMarketPriceForWeight(veg, weight);
+      const priceForOption = getPriceForOption(veg, option);
+      const marketPriceForOption = getMarketPriceForOption(veg, option);
+
+      // ✅ Get the correct label for the selected option
+      const isSetModel =
+        veg.pricingType === "set" ||
+        veg.setPricing?.enabled ||
+        veg.setPricingEnabled;
+      let optionLabel = option;
+
+      if (isSetModel) {
+        const setIndex = parseInt(option.replace("set", ""));
+        const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
+        optionLabel = sets[setIndex]?.label || option;
+      }
+
+      console.log(
+        `💵 Price for option ${option}: ₹${priceForOption}, Market: ₹${marketPriceForOption}, Label: ${optionLabel}`
+      );
 
       if (existingItemIndex >= 0) {
+        console.log(`📝 Updating existing item at index ${existingItemIndex}`);
         cartData.items[existingItemIndex].quantity = newQty;
-        cartData.items[existingItemIndex].pricePerUnit = priceForWeight;
-        cartData.items[existingItemIndex].price = priceForWeight;
-        cartData.items[existingItemIndex].marketPrice = marketPriceForWeight;
+        cartData.items[existingItemIndex].pricePerUnit = priceForOption;
+        cartData.items[existingItemIndex].price = priceForOption;
+        cartData.items[existingItemIndex].marketPrice = marketPriceForOption;
+        cartData.items[existingItemIndex].weight = option;
+        cartData.items[existingItemIndex].weightLabel = optionLabel;
       } else {
+        console.log(`🆕 Adding new item to cart`);
         cartData.items.push({
           id: veg._id,
           vegetableId: veg._id,
           name: veg.name,
           image: veg.image || "/placeholder-vegetable.jpg",
-          weight: weight,
+          weight: option,
+          weightLabel: optionLabel,
           quantity: 1,
-          pricePerUnit: priceForWeight,
-          price: priceForWeight,
-          marketPrice: marketPriceForWeight,
-          totalPrice: priceForWeight,
+          pricePerUnit: priceForOption,
+          price: priceForOption,
+          marketPrice: marketPriceForOption,
+          totalPrice: priceForOption,
+          isSetModel,
         });
       }
 
       cartData = await calculatePrices(cartData);
+
+      console.log("💾 Final cart data before saving:", cartData);
+      console.log("📊 Total items in cart:", cartData.items.length);
+      console.log("💰 Cart summary:", cartData.summary);
+
+      // ✅ Log each item's price
+      cartData.items.forEach((item, idx) => {
+        console.log(
+          `  Item ${idx}: ${item.name} (${item.weightLabel}) - ₹${item.pricePerUnit} x ${item.quantity} = ₹${item.totalPrice}`
+        );
+      });
+
       localStorage.setItem("orderSummary", JSON.stringify(cartData));
       setVegetableOrder(cartData);
+
+      console.log("✅ OrderSummary updated:", cartData);
     },
     [
       cartItems,
-      getSelectedWeight,
-      getPriceForWeight,
-      getMarketPriceForWeight,
+      getSelectedOption,
+      getPriceForOption,
+      getMarketPriceForOption,
       calculatePrices,
       setVegetableOrder,
     ]
@@ -480,11 +646,16 @@ const Homepage = () => {
 
   const handleRemoveFromCart = useCallback(
     async (veg) => {
-      const weight = getSelectedWeight(veg._id);
-      const cartKey = `${veg._id}-${weight}`;
+      const option = getSelectedOption(veg);
+      const cartKey = `${veg._id}-${option}`;
       const currentQty = cartItems[cartKey] || 0;
 
+      console.log(
+        `➖ Removing from cart: ${veg.name} (${option}) - Current Qty: ${currentQty}`
+      );
+
       if (currentQty <= 1) {
+        console.log("🗑️ Removing item completely from cart");
         const newCartItems = { ...cartItems };
         delete newCartItems[cartKey];
         setCartItems(newCartItems);
@@ -496,21 +667,26 @@ const Homepage = () => {
             (item) =>
               !(
                 (item.id || item.vegetableId) === veg._id &&
-                item.weight === weight
+                item.weight === option
               )
           );
+
+          console.log("📦 Cart after removal:", cartData);
 
           if (cartData.items.length > 0) {
             cartData = await calculatePrices(cartData);
             localStorage.setItem("orderSummary", JSON.stringify(cartData));
             setVegetableOrder(cartData);
+            console.log("✅ Cart updated after removal:", cartData);
           } else {
+            console.log("🧹 Cart is now empty");
             localStorage.removeItem("orderSummary");
             setVegetableOrder([]);
           }
         }
       } else {
         const newQty = currentQty - 1;
+        console.log(`📉 Decreasing quantity to ${newQty}`);
         setCartItems((prev) => ({
           ...prev,
           [cartKey]: newQty,
@@ -522,7 +698,7 @@ const Homepage = () => {
           const itemIndex = cartData.items.findIndex(
             (item) =>
               (item.id || item.vegetableId) === veg._id &&
-              item.weight === weight
+              item.weight === option
           );
 
           if (itemIndex >= 0) {
@@ -530,18 +706,20 @@ const Homepage = () => {
             cartData = await calculatePrices(cartData);
             localStorage.setItem("orderSummary", JSON.stringify(cartData));
             setVegetableOrder(cartData);
+            console.log("✅ Cart quantity updated:", cartData);
           }
         }
       }
     },
-    [cartItems, getSelectedWeight, calculatePrices, setVegetableOrder]
+    [cartItems, getSelectedOption, calculatePrices, setVegetableOrder]
   );
 
   const getCartQuantity = useCallback(
-    (vegId, weight) => {
-      return cartItems[`${vegId}-${weight}`] || 0;
+    (veg) => {
+      const option = getSelectedOption(veg);
+      return cartItems[`${veg._id}-${option}`] || 0;
     },
-    [cartItems]
+    [cartItems, getSelectedOption]
   );
 
   const features = useMemo(
@@ -575,12 +753,32 @@ const Homepage = () => {
     [cartItems]
   );
 
+  useEffect(() => {
+    console.log("🛒 Total cart items changed:", totalCartItems);
+  }, [totalCartItems]);
+
   const handleNavigateToOffers = useCallback(() => {
     window.scrollTo(0, 0);
     navigate("/offers");
   }, [navigate]);
 
   const handleNavigateToVegBag = useCallback(() => {
+    console.log("🔗 Navigating to veg-bag");
+    const savedCart = localStorage.getItem("orderSummary");
+    const cartData = savedCart ? JSON.parse(savedCart) : null;
+    console.log("📦 OrderSummary at navigation:", cartData);
+
+    // ✅ Log each item with correct price
+    if (cartData?.items) {
+      cartData.items.forEach((item, idx) => {
+        console.log(
+          `  Item ${idx}: ${item.name} (${
+            item.weightLabel || item.weight
+          }) - ₹${item.pricePerUnit} x ${item.quantity} = ₹${item.totalPrice}`
+        );
+      });
+    }
+
     window.scrollTo(0, 0);
     navigate("/veg-bag");
   }, [navigate]);
@@ -599,8 +797,8 @@ const Homepage = () => {
         </button>
       )}
 
-      {/* Hero Section with fixed dimensions to prevent CLS */}
-     <VegBazarBanner/>
+      {/* Hero Section */}
+      <VegBazarBanner />
 
       {/* Main Content */}
       <div className="w-full sm:w-full md:max-w-7xl lg:max-w-7xl h-full mx-auto px-1 md:py-5">
@@ -626,12 +824,11 @@ const Homepage = () => {
                     veg={veg}
                     onAddToCart={handleAddToCart}
                     onRemoveFromCart={handleRemoveFromCart}
-                    selectedWeight={getSelectedWeight(veg._id)}
+                    selectedWeight={selectedWeights[veg._id] || "250g"}
                     onWeightChange={setSelectedWeight}
-                    quantity={getCartQuantity(
-                      veg._id,
-                      getSelectedWeight(veg._id)
-                    )}
+                    selectedSet={selectedSets[veg._id] || "set0"}
+                    onSetChange={setSelectedSet}
+                    quantity={getCartQuantity(veg)}
                   />
                 ))}
               </div>
@@ -663,12 +860,11 @@ const Homepage = () => {
                     veg={veg}
                     onAddToCart={handleAddToCart}
                     onRemoveFromCart={handleRemoveFromCart}
-                    selectedWeight={getSelectedWeight(veg._id)}
+                    selectedWeight={selectedWeights[veg._id] || "250g"}
                     onWeightChange={setSelectedWeight}
-                    quantity={getCartQuantity(
-                      veg._id,
-                      getSelectedWeight(veg._id)
-                    )}
+                    selectedSet={selectedSets[veg._id] || "set0"}
+                    onSetChange={setSelectedSet}
+                    quantity={getCartQuantity(veg)}
                   />
                 ))}
               </div>
@@ -676,284 +872,176 @@ const Homepage = () => {
           </div>
         </div>
 
-        {/* Poster with fixed dimensions */}
-        <div className="w-full my-6 mx-auto min-h-[256px] bg-[#0e540b] rounded-3xl flex flex-col md:flex-row lg:flex-row items-center shadow-2xl shadow-gray-400 overflow-hidden">
-          <div className="lg:w-1/3 md:w-1/3 h-64 md:h-full bg-[#0e540b] flex items-center justify-center">
-            <img
-              src={Store}
-              alt="Fruit store illustration"
-              width="300"
-              height="300"
-              loading="lazy"
-            />
-          </div>
-          <h3 className="text-4xl font-bold md:text-2xl md:text-left lg:text-4xl text-white text-center py-8 lg:py-0 lg:text-left px-6 flex-1">
-            Buy Crispy and Fresh Vegetables to Energize Your Day!
-          </h3>
-          <div className="lg:w-1/3 md:w-1/3 h-64 md:h-full bg-[#0e540b] lg:flex md:flex hidden items-center justify-center">
-            <img
-              src={Veggies}
-              alt="Vegetables illustration"
-              width="300"
-              height="300"
-              loading="lazy"
-            />
+        {/* Offers Section */}
+        <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
+          <div className="md:p-6 lg:p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Top Offers</h3>
+              <button
+                onClick={handleNavigateToOffers}
+                className="text-sm text-[#0e540b] font-semibold hover:underline"
+              >
+                View all offers →
+              </button>
+            </div>
+
+            {topOffers.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">No offers available</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {topOffers.map((offer) => (
+                  <OfferCard
+                    key={offer._id || offer.id}
+                    offer={offer}
+                    onNavigate={() => {
+                      navigate(`/offers/${offer._id || offer.id}`);
+                      window.scrollTo(0, 0);
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Top Offers Section */}
-        <div className="w-full mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-                Special Baskets
-              </h2>
-              <p className="text-sm text-gray-500">
-                Curated combos at unbeatable prices
-              </p>
+        {/* Testimonials */}
+        <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
+          <div className="md:p-6 lg:p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">
+                What Customers Say
+              </h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() =>
+                    setCurrentTestimonial((c) =>
+                      c === 0 ? testimonials.length - 1 : c - 1
+                    )
+                  }
+                  className="p-2 rounded-md bg-white shadow-sm hover:bg-gray-50"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={() =>
+                    setCurrentTestimonial((c) =>
+                      c === testimonials.length - 1 ? 0 : c + 1
+                    )
+                  }
+                  className="p-2 rounded-md bg-white shadow-sm hover:bg-gray-50"
+                >
+                  ›
+                </button>
+              </div>
             </div>
-            <button
-              onClick={handleNavigateToOffers}
-              className="flex items-center gap-1 text-[#0e540b] font-semibold text-sm hover:gap-2 transition-all"
-            >
-              View all
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
 
-          {loading ? (
-            <div className="flex justify-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#0e540b]"></div>
-            </div>
-          ) : topOffers.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
-              <Package className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-              <p className="text-gray-500 font-medium">
-                No baskets available right now
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
-              {topOffers.map((offer) => (
-                <OfferCard
-                  key={offer._id}
-                  offer={offer}
-                  onNavigate={handleNavigateToOffers}
-                />
+            {testimonialsLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#0e540b]"></div>
+              </div>
+            ) : testimonials.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">No testimonials available</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                <div className="md:col-span-2">
+                  <div className="bg-white rounded-lg p-6 shadow-sm h-full flex flex-col justify-between">
+                    <div>
+                      <p className="text-lg font-semibold text-gray-900 mb-2">
+                        "{testimonials[currentTestimonial].comment}"
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        — {testimonials[currentTestimonial].name}
+                      </p>
+                    </div>
+                    <div className="mt-4 flex items-center gap-2">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-4 h-4 ${
+                            i < testimonials[currentTestimonial].rating
+                              ? "text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="hidden md:block">
+                  <div className="bg-white rounded-lg p-6 shadow-sm h-full flex flex-col justify-center items-center">
+                    <div className="w-16 h-16 rounded-full bg-[#0e540b] flex items-center justify-center text-white text-xl font-bold">
+                      {testimonials[currentTestimonial].initial}
+                    </div>
+                    <p className="mt-3 text-sm text-gray-600 text-center">
+                      {testimonials[currentTestimonial].comment.slice(0, 120)}
+                      ...
+                    </p>
+                    <p className="mt-2 text-xs text-gray-500">
+                      Rating: {testimonials[currentTestimonial].rating}/5
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Features / Why choose us */}
+        <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
+          <div className="md:p-6 lg:p-6">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">
+              Why VegBazar
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {features.map((f, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-lg p-4 flex flex-col items-center text-center shadow-sm"
+                >
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#0e540b]/10 mb-3">
+                    <f.icon className="w-5 h-5 text-[#0e540b]" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900">{f.title}</h4>
+                  <p className="text-sm text-gray-600 mt-2">{f.desc}</p>
+                </div>
               ))}
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Features Section */}
-        <section className="w-full py-12 px-2 bg-[#f0fcf6]">
-          <div className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {features.map((feature, idx) => {
-                const Icon = feature.icon;
-                return (
-                  <div
-                    key={idx}
-                    className="text-center p-6 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all"
-                  >
-                    <div className="w-14 h-14 bg-[#effdf5] rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-[#0e540b]/10">
-                      <Icon className="w-7 h-7 text-[#0e540b]" />
-                    </div>
-                    <h3 className="font-bold text-gray-900 mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-sm text-gray-600">{feature.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        {!testimonialsLoading && testimonials.length > 0 && (
-          <div className="w-full mb-12">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                What Our Customers Say
-              </h2>
-              <p className="text-sm text-gray-500">
-                Loved by thousands across India
+        {/* Footer CTA */}
+        <div className="w-full mt-8 pb-12">
+          <div className="max-w-4xl mx-auto bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-bold">
+                Ready to order fresh vegetables?
+              </h3>
+              <p className="text-sm opacity-90">
+                Fast delivery · Farm fresh · Great prices
               </p>
             </div>
-
-            <div className="max-w-3xl mx-auto">
-              <div className="bg-gradient-to-br from-[#effdf5] to-white rounded-3xl p-8 shadow-xl border-2 border-[#0e540b]/10">
-                <div className="flex gap-2 mb-6 justify-center">
-                  {[
-                    ...Array(testimonials[currentTestimonial]?.rating || 5),
-                  ].map((_, k) => (
-                    <Star
-                      key={k}
-                      className="w-6 h-6 fill-[#f54a00] text-[#f54a00]"
-                    />
-                  ))}
-                </div>
-
-                <p className="text-gray-700 text-lg md:text-xl leading-relaxed mb-6 text-center italic">
-                  "{testimonials[currentTestimonial]?.comment}"
-                </p>
-
-                <div className="flex items-center gap-4 justify-center">
-                  <div className="w-14 h-14 bg-gradient-to-br from-[#0e540b] to-[#0a3d08] rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                    {testimonials[currentTestimonial]?.initial}
-                  </div>
-                  <div className="text-left">
-                    <div className="font-bold text-gray-900 text-lg">
-                      {testimonials[currentTestimonial]?.name}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      Verified Customer
-                    </div>
-                  </div>
-                </div>
-
-                {testimonials.length > 1 && (
-                  <div className="flex justify-center gap-2 mt-6">
-                    {testimonials.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentTestimonial(index)}
-                        className={`transition-all duration-300 rounded-full ${
-                          index === currentTestimonial
-                            ? "w-8 h-3 bg-[#0e540b]"
-                            : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
-                        }`}
-                        aria-label={`View testimonial ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleNavigateToVegBag}
+                className="px-4 py-2 bg-white text-[#0e540b] rounded-md font-semibold hover:brightness-95 transition"
+              >
+                View Cart
+              </button>
+              <button
+                onClick={() => navigate("/vegetables")}
+                className="px-4 py-2 border border-white rounded-md hover:bg-white/10 transition"
+              >
+                Browse Vegetables
+              </button>
             </div>
           </div>
-        )}
-
-        {/* CTA Section */}
-        <div className="w-full bg-gradient-to-r from-[#0e540b] via-[#0a3d08] to-[#0e540b] rounded-3xl p-12 text-center text-white shadow-2xl">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Ready for Farm Fresh Vegetables?
-          </h2>
-          <p className="text-lg mb-8 text-white/90">
-            Start your healthy journey today
-          </p>
-          <button
-            onClick={() => {
-              window.scrollTo(0, 0);
-              navigate("/vegetables");
-            }}
-            className="bg-[#f0fcf6] text-[#0e540b] px-10 py-4 rounded-xl font-bold text-lg hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
-          >
-            Shop Now
-            <ArrowRight className="w-5 h-5" />
-          </button>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="w-full bg-[#0e540b] text-white py-12 mt-12 rounded-3xl">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-[#f0fcf6]/10 rounded-xl flex items-center justify-center">
-                  <GiBasket className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xl font-bold">VegBazar</span>
-              </div>
-              <p className="text-white/70 text-sm">
-                Fresh vegetables from local farms, delivered to your doorstep
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-white mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a
-                    href="#"
-                    className="text-white/70 hover:text-white transition-colors"
-                  >
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-white/70 hover:text-white transition-colors"
-                  >
-                    Our Farmers
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-white/70 hover:text-white transition-colors"
-                  >
-                    Delivery Areas
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-white mb-4">Support</h3>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <button
-                    onClick={() => {
-                      window.scrollTo(0, 0);
-                      navigate("/support");
-                    }}
-                    className="text-white/70 hover:text-white transition-colors text-left"
-                  >
-                    Contact Us
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => {
-                      window.scrollTo(0, 0);
-                      navigate("/track-your-order");
-                    }}
-                    className="text-white/70 hover:text-white transition-colors text-left"
-                  >
-                    Track Order
-                  </button>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-white/70 hover:text-white transition-colors"
-                  >
-                    Replace Policy
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-white mb-4">Contact</h3>
-              <ul className="space-y-2 text-sm text-white/70">
-                <li>info.vegbazar@gmail.com</li>
-                <li>+91 87805 64115</li>
-                <li>Valsad, Gujarat</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-white/20 pt-6 text-center">
-            <p className="text-sm text-white/70">
-              © 2025 VegBazar — Made with 💚 for farmers & families
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

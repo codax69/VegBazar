@@ -262,7 +262,7 @@ const handleCOD = useCallback(
   const trustBadges = useMemo(
     () => [
       { icon: FiCheckCircle, title: "Fresh", desc: "Quality Guaranteed" },
-      { icon: FiTruck, title: "Same Day Delivery", desc: "4–5 PM" },
+      { icon: FiTruck, title: "Same Day Delivery", desc: "7 to 10 AM" },
       { icon: FiShield, title: "Safe Payment", desc: "Encrypted & Secure" },
     ],
     []
