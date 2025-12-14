@@ -22,6 +22,31 @@ import VegBazarBanner from "./VegBazarBanner";
 import TestimonialsCarousel from "./TestimonialsCarousel ";
 
 // Updated VegetableCard component supporting both weight and set pricing
+const hasEnoughStock = (veg, option, isSetModel) => {
+  if (isSetModel) {
+    const setIndex = parseInt(option.replace("set", ""));
+    const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
+    const selectedSet = sets[setIndex];
+
+    if (!selectedSet) return false;
+
+    const stockPieces = veg.stockPieces || 0;
+    const requiredPieces = selectedSet.quantity || 1;
+
+    return stockPieces >= requiredPieces;
+  } else {
+    const stockKg = veg.stockKg || 0;
+
+    // Convert weight string to kg
+    let requiredKg = 0;
+    if (option === "1kg") requiredKg = 1;
+    else if (option === "500g") requiredKg = 0.5;
+    else if (option === "250g") requiredKg = 0.25;
+
+    return stockKg >= requiredKg;
+  }
+};
+
 const VegetableCard = memo(
   ({
     veg,
@@ -39,54 +64,81 @@ const VegetableCard = memo(
       veg.setPricing?.enabled === true ||
       veg.setPricingEnabled === true;
 
-    // Check stock based on model
-    const isOutOfStock =
+    // Check if completely out of stock
+    const isCompletelyOutOfStock =
       veg.outOfStock ||
       (isSetModel
         ? veg.stockPieces === 0 || veg.stockPieces == null
         : veg.stockKg === 0 || veg.stockKg == null);
 
-    // Get available options based on model
+    // Get available options based on model and stock
     const availableOptions = useMemo(() => {
       if (isSetModel) {
         const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
-        return sets.map((set, idx) => ({
-          id: idx,
-          label: set.label || `${set.quantity} ${set.unit}`,
-          value: `set${idx}`,
-          price: set.price,
-          marketPrice: set.marketPrice || set.price,
-        }));
+        return sets.map((set, idx) => {
+          const optionValue = `set${idx}`;
+          const inStock = hasEnoughStock(veg, optionValue, true);
+
+          return {
+            id: idx,
+            label: set.label || `${set.quantity} ${set.unit}`,
+            value: optionValue,
+            price: set.price,
+            marketPrice: set.marketPrice || set.price,
+            inStock,
+            pieces: set.quantity || 1,
+          };
+        });
       } else {
-        if (!veg.prices || typeof veg.prices !== "object")
+        if (!veg.prices || typeof veg.prices !== "object") {
           return [
-            { id: 0, label: "250g", value: "250g", price: 0, marketPrice: 0 },
+            {
+              id: 0,
+              label: "250g",
+              value: "250g",
+              price: 0,
+              marketPrice: 0,
+              inStock: hasEnoughStock(veg, "250g", false),
+              kg: 0.25,
+            },
           ];
+        }
+
         const weights = [];
-        if (veg.prices.weight1kg > 0)
+        if (veg.prices.weight1kg > 0) {
           weights.push({
             id: 0,
             label: "1kg",
             value: "1kg",
             price: veg.prices.weight1kg,
             marketPrice: veg.marketPrices?.weight1kg || veg.prices.weight1kg,
+            inStock: hasEnoughStock(veg, "1kg", false),
+            kg: 1,
           });
-        if (veg.prices.weight500g > 0)
+        }
+        if (veg.prices.weight500g > 0) {
           weights.push({
             id: 1,
             label: "500g",
             value: "500g",
             price: veg.prices.weight500g,
             marketPrice: veg.marketPrices?.weight500g || veg.prices.weight500g,
+            inStock: hasEnoughStock(veg, "500g", false),
+            kg: 0.5,
           });
-        if (veg.prices.weight250g > 0)
+        }
+        if (veg.prices.weight250g > 0) {
           weights.push({
             id: 2,
             label: "250g",
             value: "250g",
             price: veg.prices.weight250g,
             marketPrice: veg.marketPrices?.weight250g || veg.prices.weight250g,
+            inStock: hasEnoughStock(veg, "250g", false),
+            kg: 0.25,
           });
+        }
+
         return weights.length > 0
           ? weights
           : [
@@ -96,6 +148,8 @@ const VegetableCard = memo(
                 value: "250g",
                 price: veg.price || 0,
                 marketPrice: veg.price || 0,
+                inStock: hasEnoughStock(veg, "250g", false),
+                kg: 0.25,
               },
             ];
       }
@@ -105,6 +159,9 @@ const VegetableCard = memo(
     const selectedOptionData =
       availableOptions.find((opt) => opt.value === currentOption) ||
       availableOptions[0];
+
+    // Check if current selection is out of stock
+    const isCurrentOptionOutOfStock = !selectedOptionData?.inStock;
 
     const { actualPrice, marketPrice, savings } = useMemo(() => {
       const actual = selectedOptionData?.price || 0;
@@ -116,10 +173,41 @@ const VegetableCard = memo(
       };
     }, [selectedOptionData]);
 
+    // Get stock warning message
+    const stockWarning = useMemo(() => {
+      if (isCompletelyOutOfStock || !isCurrentOptionOutOfStock) return null;
+
+      const availableOptions = availableOptions.filter((opt) => opt.inStock);
+
+      if (availableOptions.length === 0) return null;
+
+      if (isSetModel) {
+        const stockPieces = veg.stockPieces || 0;
+        return {
+          message: `Only ${stockPieces} piece${
+            stockPieces !== 1 ? "s" : ""
+          } left`,
+          alternatives: availableOptions.map((opt) => opt.label).join(", "),
+        };
+      } else {
+        const stockKg = veg.stockKg || 0;
+        return {
+          message: `Only ${stockKg}kg available`,
+          alternatives: availableOptions.map((opt) => opt.label).join(", "),
+        };
+      }
+    }, [
+      veg,
+      isSetModel,
+      isCurrentOptionOutOfStock,
+      isCompletelyOutOfStock,
+      availableOptions,
+    ]);
+
     return (
       <div
         className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${
-          isOutOfStock
+          isCompletelyOutOfStock
             ? "bg-gray-100 border-gray-300 opacity-75"
             : "bg-[#f0fcf6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
         }`}
@@ -130,7 +218,7 @@ const VegetableCard = memo(
             {veg.image ? (
               <img
                 className={`w-full h-full object-cover rounded-lg sm:rounded-xl ${
-                  isOutOfStock ? "grayscale" : ""
+                  isCompletelyOutOfStock ? "grayscale" : ""
                 }`}
                 src={veg.image}
                 alt={veg.name}
@@ -142,29 +230,31 @@ const VegetableCard = memo(
             ) : (
               <div
                 className={`w-full h-full bg-gradient-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${
-                  isOutOfStock
+                  isCompletelyOutOfStock
                     ? "from-gray-200 to-gray-300"
                     : "from-gray-50 to-[#effdf5]"
                 }`}
               >
                 <Leaf
                   className={`w-8 h-8 sm:w-10 sm:h-10 ${
-                    isOutOfStock ? "text-gray-400" : "text-[#0e540b]/30"
+                    isCompletelyOutOfStock
+                      ? "text-gray-400"
+                      : "text-[#0e540b]/30"
                   }`}
                 />
               </div>
             )}
-            {isOutOfStock && (
+            {isCompletelyOutOfStock && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg sm:rounded-xl">
                 <span className="bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-                  OUT OF STOCK
+                  SOLD OUT
                 </span>
               </div>
             )}
           </div>
           <p
             className={`font-medium text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${
-              isOutOfStock ? "text-gray-500" : ""
+              isCompletelyOutOfStock ? "text-gray-500" : ""
             }`}
           >
             {veg.name}
@@ -174,28 +264,51 @@ const VegetableCard = memo(
           </p>
         </div>
 
+        {/* Stock Warning Banner */}
+        {stockWarning && (
+          <div className="mb-2 px-2 py-1.5 bg-orange-50 border border-orange-200 rounded-lg">
+            <p className="text-[10px] sm:text-[11px] text-orange-700 font-medium text-center">
+              ⚠️ {stockWarning.message}
+            </p>
+            <p className="text-[9px] sm:text-[10px] text-orange-600 text-center mt-0.5">
+              Try: {stockWarning.alternatives}
+            </p>
+          </div>
+        )}
+
         {/* Weight/Set Selection */}
-        {!isOutOfStock && availableOptions.length > 1 && (
+        {!isCompletelyOutOfStock && availableOptions.length > 1 && (
           <div className="flex gap-2 mb-3 justify-center flex-wrap">
             {availableOptions.map((option) => {
               const isActive = currentOption === option.value;
+              const disabled = !option.inStock;
 
               return (
                 <button
                   key={option.value}
-                  onClick={() =>
-                    isSetModel
-                      ? onSetChange(veg._id, option.value)
-                      : onWeightChange(veg._id, option.value)
-                  }
-                  className={`px-3 py-1.5 text-[11px] font-medium rounded-lg transition-all duration-300
+                  onClick={() => {
+                    if (option.inStock) {
+                      isSetModel
+                        ? onSetChange(veg._id, option.value)
+                        : onWeightChange(veg._id, option.value);
+                    }
+                  }}
+                  disabled={disabled}
+                  className={`px-3 py-1.5 text-[11px] font-medium rounded-lg transition-all duration-300 relative
             ${
-              isActive
+              disabled
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 line-through"
+                : isActive
                 ? "bg-[#0e540b] text-white shadow-md scale-[1.02]"
                 : "bg-[#f1f5f1] text-gray-700 hover:bg-[#e8f2e8] hover:text-[#0e540b] shadow-sm"
             }`}
                 >
                   {option.label}
+                  {disabled && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-[8px] text-white flex items-center justify-center">
+                      ✕
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -203,7 +316,7 @@ const VegetableCard = memo(
         )}
 
         {/* Price Display */}
-        {!isOutOfStock && (
+        {!isCompletelyOutOfStock && !isCurrentOptionOutOfStock && (
           <div className="mt-1 sm:mt-2 text-center mb-2">
             <div className="flex items-center justify-center gap-1 sm:gap-2">
               <p className="text-[#0e540b] font-bold text-sm sm:text-base">
@@ -227,9 +340,13 @@ const VegetableCard = memo(
         )}
 
         {/* Add to Cart Button or Quantity Controls */}
-        {isOutOfStock ? (
+        {isCompletelyOutOfStock ? (
           <div className="w-full bg-gray-300 text-gray-600 font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm text-center cursor-not-allowed">
             Unavailable
+          </div>
+        ) : isCurrentOptionOutOfStock ? (
+          <div className="w-full bg-orange-100 text-orange-700 font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm text-center cursor-not-allowed">
+            Out of Stock
           </div>
         ) : quantity === 0 ? (
           <button
@@ -371,13 +488,13 @@ const Homepage = () => {
   const [suggestedVegetables, setSuggestedVegetables] = useState([]);
 
   // ✅ Log orderSummary on mount
-  useEffect(() => {
-    const savedCart = localStorage.getItem("orderSummary");
-    console.log(
-      "📦 HomePage - Initial orderSummary from localStorage:",
-      savedCart ? JSON.parse(savedCart) : null
-    );
-  }, []);
+  // useEffect(() => {
+  //   const savedCart = localStorage.getItem("orderSummary");
+  //   console.log(
+  //     "📦 HomePage - Initial orderSummary from localStorage:",
+  //     savedCart ? JSON.parse(savedCart) : null
+  //   );
+  // }, []);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -483,7 +600,7 @@ const Homepage = () => {
   );
 
   const setSelectedWeight = useCallback((vegId, weight) => {
-    console.log(`⚖️ Weight changed for ${vegId}: ${weight}`);
+    // console.log(`⚖️ Weight changed for ${vegId}: ${weight}`);
     setSelectedWeights((prev) => ({
       ...prev,
       [vegId]: weight,
@@ -491,7 +608,7 @@ const Homepage = () => {
   }, []);
 
   const setSelectedSet = useCallback((vegId, set) => {
-    console.log(`📦 Set changed for ${vegId}: ${set}`);
+    // console.log(`📦 Set changed for ${vegId}: ${set}`);
     setSelectedSets((prev) => ({
       ...prev,
       [vegId]: set,
@@ -506,7 +623,7 @@ const Homepage = () => {
         quantity: item.quantity,
       }));
 
-      console.log("💰 Calculating prices for items:", normalizedItems);
+      // console.log("💰 Calculating prices for items:", normalizedItems);
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_SERVER_URL}/api/orders/calculate-price`,
@@ -514,7 +631,7 @@ const Homepage = () => {
       );
 
       const updatedPrices = response.data.data;
-      console.log("✅ Prices calculated:", updatedPrices);
+      // console.log("✅ Prices calculated:", updatedPrices);
 
       cartData.items = cartData.items.map((item) => {
         const calculatedItem = updatedPrices.items.find(
@@ -552,9 +669,9 @@ const Homepage = () => {
       const currentQty = cartItems[cartKey] || 0;
       const newQty = currentQty + 1;
 
-      console.log(
-        `➕ Adding to cart: ${veg.name} (${option}) - Qty: ${newQty}`
-      );
+      // console.log(
+      //   `➕ Adding to cart: ${veg.name} (${option}) - Qty: ${newQty}`
+      // );
 
       setCartItems((prev) => ({
         ...prev,
@@ -564,7 +681,7 @@ const Homepage = () => {
       const savedCart = localStorage.getItem("orderSummary");
       let cartData = savedCart ? JSON.parse(savedCart) : { items: [] };
 
-      console.log("📦 Current cart data:", cartData);
+      // console.log("📦 Current cart data:", cartData);
 
       const existingItemIndex = cartData.items.findIndex(
         (item) =>
@@ -587,12 +704,12 @@ const Homepage = () => {
         optionLabel = sets[setIndex]?.label || option;
       }
 
-      console.log(
-        `💵 Price for option ${option}: ₹${priceForOption}, Market: ₹${marketPriceForOption}, Label: ${optionLabel}`
-      );
+      // console.log(
+      //   `💵 Price for option ${option}: ₹${priceForOption}, Market: ₹${marketPriceForOption}, Label: ${optionLabel}`
+      // );
 
       if (existingItemIndex >= 0) {
-        console.log(`📝 Updating existing item at index ${existingItemIndex}`);
+        // console.log(`📝 Updating existing item at index ${existingItemIndex}`);
         cartData.items[existingItemIndex].quantity = newQty;
         cartData.items[existingItemIndex].pricePerUnit = priceForOption;
         cartData.items[existingItemIndex].price = priceForOption;
@@ -600,7 +717,7 @@ const Homepage = () => {
         cartData.items[existingItemIndex].weight = option;
         cartData.items[existingItemIndex].weightLabel = optionLabel;
       } else {
-        console.log(`🆕 Adding new item to cart`);
+        // console.log(`🆕 Adding new item to cart`);
         cartData.items.push({
           id: veg._id,
           vegetableId: veg._id,
@@ -619,21 +736,21 @@ const Homepage = () => {
 
       cartData = await calculatePrices(cartData);
 
-      console.log("💾 Final cart data before saving:", cartData);
-      console.log("📊 Total items in cart:", cartData.items.length);
-      console.log("💰 Cart summary:", cartData.summary);
+      // console.log("💾 Final cart data before saving:", cartData);
+      // console.log("📊 Total items in cart:", cartData.items.length);
+      // console.log("💰 Cart summary:", cartData.summary);
 
       // ✅ Log each item's price
-      cartData.items.forEach((item, idx) => {
-        console.log(
-          `  Item ${idx}: ${item.name} (${item.weightLabel}) - ₹${item.pricePerUnit} x ${item.quantity} = ₹${item.totalPrice}`
-        );
-      });
+      // cartData.items.forEach((item, idx) => {
+      //   console.log(
+      //     `  Item ${idx}: ${item.name} (${item.weightLabel}) - ₹${item.pricePerUnit} x ${item.quantity} = ₹${item.totalPrice}`
+      //   );
+      // });
 
       localStorage.setItem("orderSummary", JSON.stringify(cartData));
       setVegetableOrder(cartData);
 
-      console.log("✅ OrderSummary updated:", cartData);
+      // console.log("✅ OrderSummary updated:", cartData);
     },
     [
       cartItems,
@@ -651,12 +768,12 @@ const Homepage = () => {
       const cartKey = `${veg._id}-${option}`;
       const currentQty = cartItems[cartKey] || 0;
 
-      console.log(
-        `➖ Removing from cart: ${veg.name} (${option}) - Current Qty: ${currentQty}`
-      );
+      // console.log(
+      //   `➖ Removing from cart: ${veg.name} (${option}) - Current Qty: ${currentQty}`
+      // );
 
       if (currentQty <= 1) {
-        console.log("🗑️ Removing item completely from cart");
+        // console.log("🗑️ Removing item completely from cart");
         const newCartItems = { ...cartItems };
         delete newCartItems[cartKey];
         setCartItems(newCartItems);
@@ -672,22 +789,22 @@ const Homepage = () => {
               )
           );
 
-          console.log("📦 Cart after removal:", cartData);
+          // console.log("📦 Cart after removal:", cartData);
 
           if (cartData.items.length > 0) {
             cartData = await calculatePrices(cartData);
             localStorage.setItem("orderSummary", JSON.stringify(cartData));
             setVegetableOrder(cartData);
-            console.log("✅ Cart updated after removal:", cartData);
+            // console.log("✅ Cart updated after removal:", cartData);
           } else {
-            console.log("🧹 Cart is now empty");
+            // console.log("🧹 Cart is now empty");
             localStorage.removeItem("orderSummary");
             setVegetableOrder([]);
           }
         }
       } else {
         const newQty = currentQty - 1;
-        console.log(`📉 Decreasing quantity to ${newQty}`);
+        // console.log(`📉 Decreasing quantity to ${newQty}`);
         setCartItems((prev) => ({
           ...prev,
           [cartKey]: newQty,
@@ -707,7 +824,7 @@ const Homepage = () => {
             cartData = await calculatePrices(cartData);
             localStorage.setItem("orderSummary", JSON.stringify(cartData));
             setVegetableOrder(cartData);
-            console.log("✅ Cart quantity updated:", cartData);
+            // console.log("✅ Cart quantity updated:", cartData);
           }
         }
       }
@@ -754,9 +871,9 @@ const Homepage = () => {
     [cartItems]
   );
 
-  useEffect(() => {
-    console.log("🛒 Total cart items changed:", totalCartItems);
-  }, [totalCartItems]);
+  // useEffect(() => {
+  //   console.log("🛒 Total cart items changed:", totalCartItems);
+  // }, [totalCartItems]);
 
   const handleNavigateToOffers = useCallback(() => {
     window.scrollTo(0, 0);
@@ -764,20 +881,14 @@ const Homepage = () => {
   }, [navigate]);
 
   const handleNavigateToVegBag = useCallback(() => {
-    console.log("🔗 Navigating to veg-bag");
+    // console.log("🔗 Navigating to veg-bag");
     const savedCart = localStorage.getItem("orderSummary");
     const cartData = savedCart ? JSON.parse(savedCart) : null;
-    console.log("📦 OrderSummary at navigation:", cartData);
+    // console.log("📦 OrderSummary at navigation:", cartData);
 
     // ✅ Log each item with correct price
     if (cartData?.items) {
-      cartData.items.forEach((item, idx) => {
-        console.log(
-          `  Item ${idx}: ${item.name} (${
-            item.weightLabel || item.weight
-          }) - ₹${item.pricePerUnit} x ${item.quantity} = ₹${item.totalPrice}`
-        );
-      });
+      cartData.items.forEach((item, idx) => {});
     }
 
     window.scrollTo(0, 0);
@@ -908,7 +1019,7 @@ const Homepage = () => {
         </div>
 
         {/* Testimonials */}
-        <TestimonialsCarousel testimonials={testimonials}/>
+        <TestimonialsCarousel testimonials={testimonials} />
 
         {/* Features / Why choose us */}
         <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">

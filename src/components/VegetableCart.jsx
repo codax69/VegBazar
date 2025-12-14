@@ -107,6 +107,13 @@ const VegetableCart = () => {
 
   const isCheckoutDisabled = !selectedAddress || !paymentMethod;
 
+  // ✅ AUTO-SELECT ADDRESS when user has saved address
+  useEffect(() => {
+    if (userSavedAddress && !selectedAddress) {
+      setSelectedAddress("saved");
+    }
+  }, [userSavedAddress, selectedAddress]);
+
   // Fetch order count on mount
   useEffect(() => {
     let isMounted = true;
@@ -213,8 +220,6 @@ const VegetableCart = () => {
   const handleApplyCoupon = useCallback(
     async (couponCode) => {
       try {
-       
-        
         const updatedPrices = await calculatePrice(items, couponCode);
 
         if (updatedPrices.coupon && updatedPrices.coupon.applied) {
@@ -245,7 +250,6 @@ const VegetableCart = () => {
 
   const handleRemoveCoupon = useCallback(async () => {
     try {
-    
       const updatedPrices = await calculatePrice(items);
 
       setAppliedCoupon(null);
@@ -260,7 +264,7 @@ const VegetableCart = () => {
       });
     } catch (error) {
       console.error("❌ Failed to remove coupon:", error);
-    } 
+    }
   }, [items, vegetableOrder, calculatePrice, setVegetableOrder]);
 
   const updateQuantity = useCallback(
@@ -268,7 +272,7 @@ const VegetableCart = () => {
       try {
         setLoading(true);
         setLoadingAction("Updating quantity...");
-        
+
         const newQuantity = items[index].quantity + change;
 
         if (newQuantity <= 0) {
@@ -329,7 +333,7 @@ const VegetableCart = () => {
       try {
         setLoading(true);
         setLoadingAction("Removing item...");
-        
+
         const updatedItems = items.filter((_, i) => i !== index);
 
         if (updatedItems.length > 0) {
@@ -390,7 +394,7 @@ const VegetableCart = () => {
     try {
       setLoading(true);
       setLoadingAction("Placing your order...");
-      
+
       if (!selectedAddress || !paymentMethod) {
         alert("Please select both delivery address and payment method");
         return;
@@ -535,8 +539,11 @@ const VegetableCart = () => {
 
   // Show loading overlay when processing
   if (loading) {
-    return <OrderLoading loadingText={loadingAction} loadingMsg="Please wait..." />;
+    return (
+      <OrderLoading loadingText={loadingAction} loadingMsg="Please wait..." />
+    );
   }
+
   // Render empty cart
   if (items.length === 0) {
     return (
@@ -625,7 +632,6 @@ const VegetableCart = () => {
                   </span>
                 </div>
 
-                {/* Coupon Discount */}
                 {couponDiscount > 0 && (
                   <div className="flex justify-between items-center text-green-600">
                     <span className="font-assistant">Coupon Discount</span>
@@ -639,7 +645,6 @@ const VegetableCart = () => {
                   <span className="font-assistant text-gray-600">
                     Delivery Charge
                   </span>
-                  {/* ✅ FIXED: Display delivery charge from backend */}
                   <span className="font-assistant font-semibold text-gray-800">
                     {deliveryCharge === 0
                       ? "FREE"
@@ -693,7 +698,7 @@ const VegetableCart = () => {
           {/* Right Side - Desktop Price Summary */}
           <PriceSummary
             subtotal={subtotal}
-            deliveryCharge={deliveryCharge} // ✅ FIXED: Pass dynamic delivery charge
+            deliveryCharge={deliveryCharge}
             total={total}
             isCheckoutDisabled={isCheckoutDisabled}
             paymentMethod={paymentMethod}
@@ -801,7 +806,6 @@ const AddressSection = React.memo(
     </div>
   )
 );
-
 const CartItems = React.memo(({ items, updateQuantity, removeItem }) => (
   <div className="bg-[#f0fcf6] p-3 md:p-2.5 rounded-lg shadow-md">
     <h3 className="font-poppins text-base md:text-sm font-bold text-gray-800 mb-2 md:mb-1.5 border-b pb-1.5 md:pb-1">

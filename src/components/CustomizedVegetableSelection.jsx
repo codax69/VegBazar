@@ -3,7 +3,33 @@ import { ArrowLeft, ShoppingBag, Plus, Minus, Leaf } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
 
-// Updated VegetableCard component supporting both weight and set pricing
+// Helper function to check if specific option has enough stock
+const hasEnoughStock = (veg, option, isSetModel) => {
+  if (isSetModel) {
+    const setIndex = parseInt(option.replace('set', ''));
+    const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
+    const selectedSet = sets[setIndex];
+    
+    if (!selectedSet) return false;
+    
+    const stockPieces = veg.stockPieces || 0;
+    const requiredPieces = selectedSet.quantity || 1;
+    
+    return stockPieces >= requiredPieces;
+  } else {
+    const stockKg = veg.stockKg || 0;
+    
+    // Convert weight string to kg
+    let requiredKg = 0;
+    if (option === "1kg") requiredKg = 1;
+    else if (option === "500g") requiredKg = 0.5;
+    else if (option === "250g") requiredKg = 0.25;
+    
+    return stockKg >= requiredKg;
+  }
+};
+
+// Updated VegetableCard component with stock-aware options
 const VegetableCard = memo(
   ({
     veg,
@@ -20,38 +46,90 @@ const VegetableCard = memo(
       veg.setPricing?.enabled === true || 
       veg.setPricingEnabled === true;
     
-    // Check stock based on model
-    const isOutOfStock = veg.outOfStock || 
+    // Check if completely out of stock
+    const isCompletelyOutOfStock = veg.outOfStock || 
       (isSetModel 
         ? (veg.stockPieces === 0 || veg.stockPieces == null)
         : (veg.stockKg === 0 || veg.stockKg == null)
       );
     
-    // Get available options based on model
+    // Get available options based on model and stock
     const availableOptions = useMemo(() => {
       if (isSetModel) {
         const sets = veg.setPricing?.sets || veg.sets || veg.setOptions || [];
-        return sets.map((set, idx) => ({
-          id: idx,
-          label: set.label || `${set.quantity} ${set.unit}`,
-          value: `set${idx}`,
-          price: set.price,
-          marketPrice: set.marketPrice || set.price,
-        }));
+        return sets.map((set, idx) => {
+          const optionValue = `set${idx}`;
+          const inStock = hasEnoughStock(veg, optionValue, true);
+          
+          return {
+            id: idx,
+            label: set.label || `${set.quantity} ${set.unit}`,
+            value: optionValue,
+            price: set.price,
+            marketPrice: set.marketPrice || set.price,
+            inStock,
+          };
+        });
       } else {
         if (!veg.prices || typeof veg.prices !== "object") {
-          return [{ id: 0, label: "250g", value: "250g", price: 0, marketPrice: 0 }];
+          return [{ 
+            id: 0, 
+            label: "250g", 
+            value: "250g", 
+            price: 0, 
+            marketPrice: 0,
+            inStock: hasEnoughStock(veg, "250g", false)
+          }];
         }
+        
         const weights = [];
-        if (veg.prices.weight1kg > 0) weights.push({ id: 0, label: "1kg", value: "1kg", price: veg.prices.weight1kg, marketPrice: veg.marketPrices?.weight1kg || veg.prices.weight1kg });
-        if (veg.prices.weight500g > 0) weights.push({ id: 1, label: "500g", value: "500g", price: veg.prices.weight500g, marketPrice: veg.marketPrices?.weight500g || veg.prices.weight500g });
-        if (veg.prices.weight250g > 0) weights.push({ id: 2, label: "250g", value: "250g", price: veg.prices.weight250g, marketPrice: veg.marketPrices?.weight250g || veg.prices.weight250g });
-        return weights.length > 0 ? weights : [{ id: 0, label: "250g", value: "250g", price: veg.price || 0, marketPrice: veg.price || 0 }];
+        if (veg.prices.weight1kg > 0) {
+          weights.push({ 
+            id: 0, 
+            label: "1kg", 
+            value: "1kg", 
+            price: veg.prices.weight1kg, 
+            marketPrice: veg.marketPrices?.weight1kg || veg.prices.weight1kg,
+            inStock: hasEnoughStock(veg, "1kg", false)
+          });
+        }
+        if (veg.prices.weight500g > 0) {
+          weights.push({ 
+            id: 1, 
+            label: "500g", 
+            value: "500g", 
+            price: veg.prices.weight500g, 
+            marketPrice: veg.marketPrices?.weight500g || veg.prices.weight500g,
+            inStock: hasEnoughStock(veg, "500g", false)
+          });
+        }
+        if (veg.prices.weight250g > 0) {
+          weights.push({ 
+            id: 2, 
+            label: "250g", 
+            value: "250g", 
+            price: veg.prices.weight250g, 
+            marketPrice: veg.marketPrices?.weight250g || veg.prices.weight250g,
+            inStock: hasEnoughStock(veg, "250g", false)
+          });
+        }
+        
+        return weights.length > 0 ? weights : [{ 
+          id: 0, 
+          label: "250g", 
+          value: "250g", 
+          price: veg.price || 0, 
+          marketPrice: veg.price || 0,
+          inStock: hasEnoughStock(veg, "250g", false)
+        }];
       }
     }, [veg, isSetModel]);
 
     const currentOption = isSetModel ? selectedSet : selectedWeight;
     const selectedOptionData = availableOptions.find(opt => opt.value === currentOption) || availableOptions[0];
+    
+    // Check if current selection is out of stock
+    const isCurrentOptionOutOfStock = !selectedOptionData?.inStock;
 
     const { actualPrice, marketPrice, savings } = useMemo(() => {
       const actual = selectedOptionData?.price || 0;
@@ -65,7 +143,7 @@ const VegetableCard = memo(
 
     return (
       <div className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${
-        isOutOfStock
+        isCompletelyOutOfStock
           ? "bg-gray-100 border-gray-300 opacity-75"
           : "bg-[#f0fcf6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
       }`}>
@@ -75,7 +153,7 @@ const VegetableCard = memo(
             {veg.image ? (
               <img
                 className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover mx-auto rounded-lg sm:rounded-xl mb-1.5 sm:mb-2 ${
-                  isOutOfStock ? "grayscale" : ""
+                  isCompletelyOutOfStock ? "grayscale" : ""
                 }`}
                 src={veg.image}
                 alt={veg.name}
@@ -84,40 +162,61 @@ const VegetableCard = memo(
               />
             ) : (
               <div className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br rounded-lg sm:rounded-xl mb-1.5 sm:mb-2 flex items-center justify-center mx-auto ${
-                isOutOfStock ? "from-gray-200 to-gray-300" : "from-gray-50 to-[#effdf5]"
+                isCompletelyOutOfStock ? "from-gray-200 to-gray-300" : "from-gray-50 to-[#effdf5]"
               }`}>
                 <Leaf className={`w-8 h-8 sm:w-10 sm:h-10 ${
-                  isOutOfStock ? "text-gray-400" : "text-[#0e540b]/30"
+                  isCompletelyOutOfStock ? "text-gray-400" : "text-[#0e540b]/30"
                 }`} />
               </div>
             )}
-            {isOutOfStock && (
+            {isCompletelyOutOfStock && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg sm:rounded-xl">
                 <span className="bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-                  OUT OF STOCK
+                  SOLD OUT
                 </span>
               </div>
             )}
           </div>
           <p className={`font-medium text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${
-            isOutOfStock ? "text-gray-500" : ""
+            isCompletelyOutOfStock ? "text-gray-500" : ""
           }`}>
             {veg.name}
             {isSetModel && (
               <span className="ml-1 text-[10px] text-purple-600">📦</span>
             )}
           </p>
+          
+          {/* Stock indicator for set model
+          {!isCompletelyOutOfStock && isSetModel && (
+            <p className="text-[9px] text-gray-500 mb-1">
+              {veg.stockPieces || 0} pieces available
+            </p>
+          )} */}
+          
+          {/* Stock indicator for weight model
+          {!isCompletelyOutOfStock && !isSetModel && (
+            <p className="text-[9px] text-gray-500 mb-1">
+              {(veg.stockKg || 0).toFixed(2)} kg available
+            </p>
+          )} */}
         </div>
 
         {/* Weight/Set Selection */}
-        {!isOutOfStock && availableOptions.length > 1 && (
+        {!isCompletelyOutOfStock && availableOptions.length > 1 && (
           <div className="flex gap-1 mb-2 justify-center flex-wrap">
             {availableOptions.map((option) => (
               <button
                 key={option.value}
-                onClick={() => isSetModel ? onSetChange(veg._id, option.value) : onWeightChange(veg._id, option.value)}
+                onClick={() => {
+                  if (option.inStock) {
+                    isSetModel ? onSetChange(veg._id, option.value) : onWeightChange(veg._id, option.value);
+                  }
+                }}
+                disabled={!option.inStock}
                 className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-all ${
-                  currentOption === option.value
+                  !option.inStock
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed line-through"
+                    : currentOption === option.value
                     ? "bg-[#0e540b] text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
@@ -129,7 +228,7 @@ const VegetableCard = memo(
         )}
 
         {/* Price Display */}
-        {!isOutOfStock && (
+        {!isCompletelyOutOfStock && !isCurrentOptionOutOfStock && (
           <div className="mt-1 sm:mt-2 text-center mb-2">
             <div className="flex items-center justify-center gap-1 sm:gap-2">
               <p className="text-[#0e540b] font-bold text-sm sm:text-base">
@@ -153,9 +252,13 @@ const VegetableCard = memo(
         )}
 
         {/* Add to Cart Button or Quantity Controls */}
-        {isOutOfStock ? (
+        {isCompletelyOutOfStock ? (
           <div className="w-full bg-gray-300 text-gray-600 font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm text-center cursor-not-allowed">
             Unavailable
+          </div>
+        ) : isCurrentOptionOutOfStock ? (
+          <div className="w-full bg-orange-100 text-orange-700 font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm text-center">
+            Out of Stock
           </div>
         ) : quantity === 0 ? (
           <button
@@ -346,6 +449,15 @@ const CustomizedVegetableSelection = () => {
   const handleAddToCart = useCallback(
     async (veg) => {
       const option = getSelectedOption(veg);
+      const isSetModel = veg.pricingType === "set" || veg.setPricing?.enabled || veg.setPricingEnabled;
+      
+      // Check if option has enough stock
+      if (!hasEnoughStock(veg, option, isSetModel)) {
+        setError("Selected option is out of stock");
+        setTimeout(() => setError(""), 3000);
+        return;
+      }
+      
       const cartKey = `${veg._id}-${option}`;
       const currentQty = cartItems[cartKey] || 0;
       const newQty = currentQty + 1;
@@ -367,7 +479,6 @@ const CustomizedVegetableSelection = () => {
       const marketPriceForOption = getMarketPriceForOption(veg, option);
       
       // Get the correct label for the selected option
-      const isSetModel = veg.pricingType === "set" || veg.setPricing?.enabled || veg.setPricingEnabled;
       let optionLabel = option;
       
       if (isSetModel) {
