@@ -19,6 +19,7 @@ import Store from "../assets/Fruit-Store.svg";
 import axios from "axios";
 import { GiBasket } from "react-icons/gi";
 import VegBazarBanner from "./VegBazarBanner";
+import TestimonialsCarousel from "./TestimonialsCarousel ";
 
 // Updated VegetableCard component supporting both weight and set pricing
 const VegetableCard = memo(
@@ -907,89 +908,7 @@ const Homepage = () => {
         </div>
 
         {/* Testimonials */}
-        <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
-          <div className="md:p-6 lg:p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">
-                What Customers Say
-              </h3>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() =>
-                    setCurrentTestimonial((c) =>
-                      c === 0 ? testimonials.length - 1 : c - 1
-                    )
-                  }
-                  className="p-2 rounded-md bg-white shadow-sm hover:bg-gray-50"
-                >
-                  ‹
-                </button>
-                <button
-                  onClick={() =>
-                    setCurrentTestimonial((c) =>
-                      c === testimonials.length - 1 ? 0 : c + 1
-                    )
-                  }
-                  className="p-2 rounded-md bg-white shadow-sm hover:bg-gray-50"
-                >
-                  ›
-                </button>
-              </div>
-            </div>
-
-            {testimonialsLoading ? (
-              <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#0e540b]"></div>
-              </div>
-            ) : testimonials.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No testimonials available</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-                <div className="md:col-span-2">
-                  <div className="bg-white rounded-lg p-6 shadow-sm h-full flex flex-col justify-between">
-                    <div>
-                      <p className="text-lg font-semibold text-gray-900 mb-2">
-                        "{testimonials[currentTestimonial].comment}"
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        — {testimonials[currentTestimonial].name}
-                      </p>
-                    </div>
-                    <div className="mt-4 flex items-center gap-2">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < testimonials[currentTestimonial].rating
-                              ? "text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="hidden md:block">
-                  <div className="bg-white rounded-lg p-6 shadow-sm h-full flex flex-col justify-center items-center">
-                    <div className="w-16 h-16 rounded-full bg-[#0e540b] flex items-center justify-center text-white text-xl font-bold">
-                      {testimonials[currentTestimonial].initial}
-                    </div>
-                    <p className="mt-3 text-sm text-gray-600 text-center">
-                      {testimonials[currentTestimonial].comment.slice(0, 120)}
-                      ...
-                    </p>
-                    <p className="mt-2 text-xs text-gray-500">
-                      Rating: {testimonials[currentTestimonial].rating}/5
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <TestimonialsCarousel testimonials={testimonials}/>
 
         {/* Features / Why choose us */}
         <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
