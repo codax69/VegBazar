@@ -285,7 +285,7 @@ const OfferCard = memo(({ offer, onNavigate }) => {
           </h3>
           <div className="flex font-assistant items-center justify-center gap-1 text-gray-600 text-xs">
             <Leaf className="w-3 h-3" />
-            <span>{offer.vegetables?.length / 2 || 0} vegetables</span>
+            {/* <span>{offer.vegetables?.length / 2 || 0} vegetables</span> */}
           </div>
         </div>
       </div>
