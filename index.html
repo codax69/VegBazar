@@ -19,6 +19,7 @@
     <meta name="theme-color" content="#0e540b" />
     <meta name="msapplication-TileColor" content="#0e540b" />
     <meta name="msapplication-TileImage" content="/icons/mstile-150x150.png" />
+    <link rel="manifest" href="/public/site.webmanifest" />
 
     <!-- Viewport & SEO basics -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -204,7 +205,7 @@
   if ("serviceWorker" in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker
-        .register("/service-worker.js")
+        .register("/public/service-worker.js")
         .then(reg => {
           console.log('✅ Service Worker registered:', reg.scope);
           
