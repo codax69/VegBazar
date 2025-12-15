@@ -25,7 +25,7 @@
     <title>VegBazar — Farm-Fresh Vegetables Online | Next Morning Delivery</title>
     <meta
       name="description"
-      content="Order farm-fresh vegetables from VegBazar — handpicked, locally sourced & pesticide-free. Next Morning delivery in Valsad Abrama and Tithal Raod. Free delivery above ₹200."
+      content="Order farm-fresh vegetables from VegBazar — handpicked, locally sourced & pesticide-free. Next Morning delivery in Valsad Abrama and Tithal Raod. Free delivery above ₹250."
     />
     <meta name="keywords" content="fresh vegetables online, vegetable delivery Valsad, farm fresh vegetables, Next Morning  vegetable delivery, vegetable baskets, organic vegetables" />
     <meta name="author" content="VegBazar" />
@@ -51,7 +51,7 @@
     <meta name="twitter:site" content="@VegBazar" />
     <meta name="twitter:creator" content="@VegBazar" />
     <meta name="twitter:title" content="VegBazar — Farm-Fresh Vegetables Online" />
-    <meta name="twitter:description" content="Order fresh vegetables from local farms. Next Morning  delivery. Free delivery above ₹500." />
+    <meta name="twitter:description" content="Order fresh vegetables from local farms. Next Morning  delivery. Free delivery above ₹250." />
     <meta name="twitter:image" content="https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg" />
     <meta name="twitter:image:alt" content="VegBazar Fresh Vegetables" />
 
@@ -199,14 +199,39 @@
     <script type="module" src="/src/main.jsx"></script>
 
     <!-- Optional service worker registration for PWA (enable if service-worker.js exists) -->
-    <script>
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-          .register("/service-worker.js")
-          .catch(function (err) {
-            console.warn("Service Worker registration failed:", err);
+    <!-- Service Worker for PWA -->
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then(reg => {
+          console.log('✅ Service Worker registered:', reg.scope);
+          
+          // Check for updates
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New update available
+                if (confirm('New version available! Reload to update?')) {
+                  window.location.reload();
+                }
+              }
+            });
           });
-      }
-    </script>
+        })
+        .catch(err => console.warn("❌ Service Worker registration failed:", err));
+    });
+
+    // Handle service worker updates
+    let refreshing;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+  }
+</script>
   </body>
 </html>
