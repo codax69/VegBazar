@@ -131,13 +131,24 @@ self.addEventListener('push', (event) => {
   console.log('[Service Worker] Push received');
   
   let data = {};
+  let title = 'VegBazar';
+  let body = 'You have a new notification';
+  
   if (event.data) {
-    data = event.data.json();
+    try {
+      // Try to parse as JSON first
+      data = event.data.json();
+      title = data.title || title;
+      body = data.body || body;
+    } catch (e) {
+      // If not JSON, treat as plain text
+      console.log('[Service Worker] Push data is plain text');
+      body = event.data.text();
+    }
   }
 
-  const title = data.title || 'VegBazar';
   const options = {
-    body: data.body || 'You have a new notification',
+    body: body,
     icon: '/icons/icon-192.png',
     badge: '/icons/icon-192.png',
     vibrate: [200, 100, 200],
