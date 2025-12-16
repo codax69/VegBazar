@@ -1,0 +1,15 @@
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "/public/service-worker.js"
+  [headers.values]
+    Content-Type = "application/javascript"
+
+# Optional: Apply to all JS files
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Content-Type = "application/javascript"
