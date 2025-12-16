@@ -35,7 +35,7 @@ const VegetableOffers = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pt-8 px-3 sm:py-8 sm:px-4 md:pt-20 lg:py-20">
+    <div className="min-h-screen bg-[#ffffff] pt-8 px-3 sm:py-8 sm:px-4 md:pt-20 lg:py-20">
       <div className="w-full max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="mb-4 sm:mb-6">

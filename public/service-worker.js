@@ -1,4 +1,3 @@
-// service-worker.js for VegBazar
 const CACHE_NAME = 'vegbazar-v1';
 const RUNTIME_CACHE = 'vegbazar-runtime';
 
@@ -7,8 +6,7 @@ const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/offline.html',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/vegbazar.svg'
 ];
 
 // Install event - cache static assets
@@ -149,8 +147,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: body,
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    icon: '/vegbazar.svg',
+    badge: '/vegbazar.svg',
     vibrate: [200, 100, 200],
     tag: data.tag || 'vegbazar-notification',
     requireInteraction: false,
@@ -162,7 +160,7 @@ self.addEventListener('push', (event) => {
       {
         action: 'view',
         title: 'View',
-        icon: '/icons/icon-192.png'
+        icon: '/vegbazar.svg'
       },
       {
         action: 'close',

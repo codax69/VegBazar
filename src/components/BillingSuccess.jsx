@@ -108,7 +108,7 @@ const BillingSuccess = ({ onNewOrder }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center py-6 px-3 sm:px-4 pt-20">
+    <div className="min-h-screen bg-[#ffffff] flex items-center justify-center py-6 px-3 sm:px-4 pt-20">
       <div className="max-w-2xl w-full bg-[#f0fcf6] p-4 sm:p-6 md:p-8 rounded-2xl shadow-xl">
         {/* Success Header */}
         <div className="text-center mb-6">

@@ -69,7 +69,7 @@ const TestimonialsCarousel = ({testimonials}) => {
   };
 
   return (
-    <div className="w-full bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg rounded-xl mt-8 pb-6">
+    <div className="w-full bg-[#ffffff] shadow-lg rounded-xl mt-8 pb-6">
       <div className="md:p-6 lg:p-6 p-4">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-bold text-gray-900">

@@ -275,7 +275,7 @@ const OrderConfirmation = () => {
   // Show confirmation form
   // console.log("📋 Showing confirmation form");
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-4 pt-20">
+    <div className="min-h-screen bg-[#ffffff] py-4 pt-20">
       <div className="max-w-5xl mx-auto px-4">
         <button
           onClick={() => {

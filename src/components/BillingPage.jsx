@@ -284,7 +284,7 @@ const handleCOD = useCallback(
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pt-8 md:pt-20 pb-20 lg:pb-0">
+    <div className="min-h-screen bg-[#ffffff] pt-8 md:pt-20 pb-20 lg:pb-0">
       <div className="max-w-6xl mx-auto px-4">
         {/* Back Button */}
         <button

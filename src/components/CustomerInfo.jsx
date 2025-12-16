@@ -83,7 +83,7 @@ const CustomerInfo = () => {
   };
 
   return (
-    <div className="min-h-fit bg-gradient-to-br from-green-50 to-emerald-50 pt-10 md:pt-20 md:px-4 flex items-center justify-center">
+    <div className="min-h-fit bg-[#ffffff] pt-10 md:pt-20 md:px-4 flex items-center justify-center">
       <div className="w-full md:max-w-5xl">
         <div className="bg-[#f0fcf6] rounded-xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
           {/* Left Side */}
