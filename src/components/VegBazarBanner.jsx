@@ -117,8 +117,8 @@ export default function VegBazarBanner() {
         <div className="mt-1.5 bg-white/50 backdrop-blur-sm rounded-full py-1 px-2 overflow-hidden sm:mt-2 sm:py-1.5 sm:px-3">
           <div className="whitespace-nowrap text-[9px] font-semibold text-black/70 animate-marquee font-assistant sm:text-[10px] md:text-xs">
             🌿 PRE-ORDER TODAY • 🚚 NEXT DAY DELIVERY • 🥬 FARM FRESH • ⭐
-            PREMIUM QUALITY • 🌿 PRE-ORDER TODAY • 🚚 NEXT DAY DELIVERY • 🥬
-            FARM FRESH • ⭐ PREMIUM QUALITY
+              🌿 PRE-ORDER TODAY • 🚚 NEXT DAY DELIVERY • 🥬
+            FARM FRESH 
           </div>
         </div>
       </div>
