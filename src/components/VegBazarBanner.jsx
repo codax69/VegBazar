@@ -107,7 +107,7 @@ export default function VegBazarBanner() {
                 Quality
               </h3>
               <p className="text-[9px] text-black/60 font-assistant sm:text-[10px] md:text-xs">
-                Premium pick
+                Hand pick
               </p>
             </div>
           </div>
