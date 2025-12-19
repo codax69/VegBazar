@@ -150,11 +150,6 @@ const BillingPage = () => {
     }
   }, [isBasketOrder, selectedOffer, selectedVegetables, navigate]);
 
-  // Redirect if no offer selected
-  if (!selectedOffer || selectedVegetables.length === 0) {
-    return null;
-  }
-
   const calculations = basketCalculations;
 
   // Order Data - Memoized with all dependencies
@@ -190,61 +185,62 @@ const BillingPage = () => {
     generateOrderId,
   ]);
 
-const handleCOD = useCallback(
-  async (e) => {
-    e.preventDefault();
-    window.scrollTo(0, 0);
+  const handleCOD = useCallback(
+    async (e) => {
+      e.preventDefault();
+      window.scrollTo(0, 0);
 
-    if (!executeRecaptcha) {
-      setSubmitError("reCAPTCHA not ready. Try again shortly.");
-      return;
-    }
-
-    if (!orderData) {
-      setSubmitError("Order data not ready. Please wait.");
-      return;
-    }
-
-    if (isSubmitting) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      const captchaToken = await executeRecaptcha("submit_order");
-      if (!captchaToken) throw new Error("Captcha not generated.");
-
-      const captchaRes = await axios.post(`${API_URL}/api/verify-captcha`, {
-        token: captchaToken,
-        action: "submit_order",
-      });
-
-      if (!captchaRes.data.success)
-        throw new Error("Captcha verification failed.");
-
-      const res = await axios.post(
-        `${API_URL}/api/orders/create-order`,
-        orderData
-      );
-
-      if (res.status >= 200 && res.status < 300) {
-        setIsOrderPlaced(true);
-        // Navigate with order data in state
-        navigate("/order-success", { 
-          state: { orderData: orderData }
-        });
-      } else {
-        setSubmitError("Order save failed. Try again.");
+      if (!executeRecaptcha) {
+        setSubmitError("reCAPTCHA not ready. Try again shortly.");
+        return;
       }
-    } catch (err) {
-      console.error("Order submission error:", err);
-      setSubmitError(err?.response?.data?.message || err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  },
-  [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced, navigate]
-);
+
+      if (!orderData) {
+        setSubmitError("Order data not ready. Please wait.");
+        return;
+      }
+
+      if (isSubmitting) return;
+
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      try {
+        const captchaToken = await executeRecaptcha("submit_order");
+        if (!captchaToken) throw new Error("Captcha not generated.");
+
+        const captchaRes = await axios.post(`${API_URL}/api/verify-captcha`, {
+          token: captchaToken,
+          action: "submit_order",
+        });
+
+        if (!captchaRes.data.success)
+          throw new Error("Captcha verification failed.");
+
+        const res = await axios.post(
+          `${API_URL}/api/orders/create-order`,
+          orderData
+        );
+
+        if (res.status >= 200 && res.status < 300) {
+          setIsOrderPlaced(true);
+          // Navigate with order data in state
+          navigate("/order-success", { 
+            state: { orderData: orderData }
+          });
+        } else {
+          setSubmitError("Order save failed. Try again.");
+        }
+      } catch (err) {
+        console.error("Order submission error:", err);
+        setSubmitError(err?.response?.data?.message || err.message);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced, navigate]
+  );
+
   // Memoized handlers
   const handleBack = useCallback(() => {
     window.scrollTo(0, 0);
@@ -267,6 +263,11 @@ const handleCOD = useCallback(
     ],
     []
   );
+
+  // Redirect if no offer selected
+  if (!selectedOffer || selectedVegetables.length === 0) {
+    return null;
+  }
 
   // Loading and Error States
   if (isSubmitting) return <OrderLoading loadingText="Placing order...." loadingMsg="Please wait while we confirm your order..."/>;

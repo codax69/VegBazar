@@ -82,6 +82,30 @@ const AppContent = () => {
     fetchVegetables();
   }, []);
 
+  // Offline detection
+  useEffect(() => {
+    const handleOffline = () => {
+      window.location.href = '/offline.html';
+    };
+
+    const handleOnline = () => {
+      // Optionally handle online state
+    };
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    // Check initial online status
+    if (!navigator.onLine) {
+      handleOffline();
+    }
+
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
+
   const resetOrder = () => {
     navigate("/");
     setFormData({

@@ -138,7 +138,7 @@ self.addEventListener('push', (event) => {
       data = event.data.json();
       title = data.title || title;
       body = data.body || body;
-    } catch (e) {
+    } catch {
       // If not JSON, treat as plain text
       console.log('[Service Worker] Push data is plain text');
       body = event.data.text();
