@@ -146,7 +146,7 @@ const AppContent = () => {
       <OrderContext.Provider value={contextValue}>
         <BillProvider>
         <BackButtonHandler />
-        <div className="min-h-screen bg-[#f0fcf6] flex flex-col">
+        <div className="min-h-screen bg-[#ffffff] flex flex-col">
           <Navbar />
           <div className="pt-16 flex-1 container max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
             {![

@@ -273,7 +273,7 @@ const VegetableCard = memo(
           <div className="flex items-center justify-between bg-[#0e540b] rounded-lg px-2 py-1.5">
             <button
               onClick={() => onRemoveFromCart(veg)}
-              className="w-7 h-7 flex items-center justify-center bg-[#f0fcf6] rounded-md hover:bg-gray-100 transition"
+              className="w-7 h-7 flex items-center justify-center bg-[#ffffff] rounded-md hover:bg-gray-100 transition"
             >
               <Minus size={14} className="text-[#0e540b]" />
             </button>
@@ -282,7 +282,7 @@ const VegetableCard = memo(
             </span>
             <button
               onClick={() => onAddToCart(veg)}
-              className="w-7 h-7 flex items-center justify-center bg-[#f0fcf6] rounded-md hover:bg-gray-100 transition"
+              className="w-7 h-7 flex items-center justify-center bg-[#ffffff] rounded-md hover:bg-gray-100 transition"
             >
               <Plus size={14} className="text-[#0e540b]" />
             </button>
@@ -644,8 +644,8 @@ const CustomizedVegetableSelection = () => {
   }, [cartItems]);
 
   return (
-    <div className="min-h-screen bg-[#f0fcf6] pb-20 md:pb-32">
-      <div className="w-full max-w-7xl mx-auto mt-5 bg-[#f0fcf6] p-4 sm:p-1 md:p-8">
+    <div className="min-h-screen bg-[#ffffff] pb-20 md:pb-32">
+      <div className="w-full max-w-7xl mx-auto mt-5 bg-[#ffffff] p-4 sm:p-1 md:p-8">
         {/* Header */}
         <div className="flex items-center md:justify-between gap-10 mb-8 pb-4 border-b-2 border-gray-100">
           <button
@@ -702,7 +702,7 @@ const CustomizedVegetableSelection = () => {
 
             {/* Footer */}
             {totalItems > 0 && (
-              <div className="fixed bottom-0 left-0 right-0 bg-[#f0fcf6] border-t-2 border-gray-200 shadow-2xl p-4 z-50">
+              <div className="fixed bottom-0 left-0 right-0 bg-[#ffffff] border-t-2 border-gray-200 shadow-2xl p-4 z-50">
                 <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-3 items-center justify-between">
                   <div className="text-center sm:text-left">
                     <p className="text-sm text-gray-600">

@@ -209,7 +209,7 @@ const VegetableCard = memo(
         className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${
           isCompletelyOutOfStock
             ? "bg-gray-100 border-gray-300 opacity-75"
-            : "bg-[#f0fcf6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
+            : "bg-[#ffffff] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
         }`}
       >
         {/* Vegetable Image */}
@@ -232,7 +232,7 @@ const VegetableCard = memo(
                 className={`w-full h-full bg-gradient-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${
                   isCompletelyOutOfStock
                     ? "from-gray-200 to-gray-300"
-                    : "from-gray-50 to-[#effdf5]"
+                    : "from-gray-50 to-[#ffffff]"
                 }`}
               >
                 <Leaf
@@ -300,7 +300,7 @@ const VegetableCard = memo(
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 line-through"
                 : isActive
                 ? "bg-[#0e540b] text-white shadow-md scale-[1.02]"
-                : "bg-[#f1f5f1] text-gray-700 hover:bg-[#e8f2e8] hover:text-[#0e540b] shadow-sm"
+                : "bg-[#ffffff] text-gray-700 hover:bg-[#e8f2e8] hover:text-[#0e540b] shadow-sm"
             }`}
                 >
                   {option.label}
@@ -361,7 +361,7 @@ const VegetableCard = memo(
           <div className="flex items-center justify-between bg-[#0e540b] rounded-lg px-2 py-1.5">
             <button
               onClick={() => onRemoveFromCart(veg)}
-              className="w-7 h-7 flex items-center justify-center bg-[#f0fcf6] rounded-md hover:bg-gray-100 transition"
+              className="w-7 h-7 flex items-center justify-center bg-[#ffffff] rounded-md hover:bg-gray-100 transition"
               aria-label="Decrease quantity"
             >
               <Minus size={14} className="text-[#0e540b]" />
@@ -371,7 +371,7 @@ const VegetableCard = memo(
             </span>
             <button
               onClick={() => onAddToCart(veg)}
-              className="w-7 h-7 flex items-center justify-center bg-[#f0fcf6] rounded-md hover:bg-gray-100 transition"
+              className="w-7 h-7 flex items-center justify-center bg-[#ffffff] rounded-md hover:bg-gray-100 transition"
               aria-label="Increase quantity"
             >
               <Plus size={14} className="text-[#0e540b]" />
@@ -389,12 +389,12 @@ const OfferCard = memo(({ offer, onNavigate }) => {
   return (
     <div
       onClick={onNavigate}
-      className="group relative bg-[#f0fcf6] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] active:scale-95 sm:hover:-translate-y-1 sm:hover:scale-[1.02] overflow-hidden flex flex-col"
+      className="group relative bg-[#ffffff] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] active:scale-95 sm:hover:-translate-y-1 sm:hover:scale-[1.02] overflow-hidden flex flex-col"
     >
       <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-3 sm:p-4 text-center relative overflow-hidden flex-shrink-0">
         <div className="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 bg-[#0e540b] opacity-10 rounded-bl-full"></div>
         <div className="relative z-10">
-          <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#f0fcf6] rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
+          <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#ffffff] rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
             <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-[#0e540b]" />
           </div>
           <h3 className="text-base font-poppins sm:text-lg font-bold text-gray-800 mb-1">
@@ -845,13 +845,13 @@ const Homepage = () => {
       {
         icon: Clock,
         title: "Delivery",
-        desc: "fast delivery to your doorstep",
+        desc: "Next Morning Delivery Available 8 AM - 10 AM",
       },
-      {
-        icon: Leaf,
-        title: "Farm Fresh",
-        desc: "Directly sourced from local farmers",
-      },
+      // {
+      //   icon: Leaf,
+      //   title: "Farm Fresh",
+      //   desc: "Directly sourced from local farmers",
+      // },
       {
         icon: Star,
         title: "Quality Promise",
@@ -896,7 +896,7 @@ const Homepage = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[#f0fcf6] md:pt-10">
+    <div className="min-h-screen bg-[#ffffff] md:pt-10">
       {/* Floating Cart Button */}
       {totalCartItems > 0 && (
         <button
@@ -915,7 +915,7 @@ const Homepage = () => {
       {/* Main Content */}
       <div className="w-full sm:w-full md:max-w-7xl lg:max-w-7xl h-full mx-auto px-1 md:py-5">
         {/* Top 10 Selling Vegetables Section */}
-        <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
+        <div className="w-full bg-[#ffffff] shadow-lg rounded-xl mt-8 pb-6">
           <div className="md:p-6 lg:p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Top 10 Selling Vegetables
@@ -949,7 +949,7 @@ const Homepage = () => {
         </div>
 
         {/* Top 6 Suggest Vegetables for this Session */}
-        <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
+        <div className="w-full bg-[#ffffff] shadow-lg rounded-xl mt-8 pb-6">
           <div className="md:p-6 lg:p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Top 6 Suggested Vegetables for this Session
@@ -985,7 +985,7 @@ const Homepage = () => {
         </div>
 
         {/* Offers Section */}
-        <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
+        <div className="w-full bg-[#ffffff] shadow-lg rounded-xl mt-8 pb-6">
           <div className="md:p-6 lg:p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Top Offers</h3>
@@ -1022,7 +1022,7 @@ const Homepage = () => {
         <TestimonialsCarousel testimonials={testimonials} />
 
         {/* Features / Why choose us */}
-        <div className="w-full bg-[#f0fcf6] shadow-lg rounded-xl mt-8 pb-6">
+        <div className="w-full bg-[#ffffff] shadow-lg rounded-xl mt-8 pb-6">
           <div className="md:p-6 lg:p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Why VegBazar

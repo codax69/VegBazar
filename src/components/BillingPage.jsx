@@ -421,7 +421,7 @@ const BillingPage = () => {
                   {selectedOffer.title}
                 </span>
               </div>
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+              <div className="bg-[#ffff] rounded-lg p-3 border border-green-200">
                 <div className="flex justify-between items-center">
                   <p className="text-gray-600 text-xs">Plan Value</p>
                   <p className="text-xl font-bold font-assistant text-[#0e540b]">
@@ -432,7 +432,7 @@ const BillingPage = () => {
             </div>
 
             {/* Vegetables */}
-            <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+            <div className="bg-[#f5f5f5] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-base font-poppins font-bold text-gray-800 flex items-center gap-1.5">
                   <BiLeaf className="size-4 text-[#0e540b]" />
@@ -454,7 +454,7 @@ const BillingPage = () => {
             </div>
 
             {/* Payment Method */}
-            <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+            <div className="bg-[#ffffff] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
               <h2 className="text-base font-poppins font-bold text-gray-800 mb-2 flex items-center gap-1.5">
                 <FiCreditCard className="size-4 text-[#0e540b]" />
                 Payment Method
@@ -486,7 +486,7 @@ const BillingPage = () => {
 
           {/* Right Section - Desktop Sidebar */}
           <div className="lg:col-span-1 hidden lg:block">
-            <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100 lg:sticky lg:top-4 space-y-3">
+            <div className="bg-[#ffffff] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100 lg:sticky lg:top-4 space-y-3">
               {/* Coupon Section - Desktop (Top of sidebar) */}
               <CouponCodeSection
                 onApplyCoupon={handleApplyCoupon}
@@ -585,7 +585,7 @@ const BillingPage = () => {
         </div>
 
         {/* Trust Badges */}
-        <div className="mt-4 bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+        <div className="mt-4 bg-[#ffffff] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
           <div className="grid grid-cols-3 gap-3 text-center">
             {trustBadges.map((badge, i) => (
               <TrustBadge
@@ -600,7 +600,7 @@ const BillingPage = () => {
       </div>
 
       {/* Mobile Sticky Payment Button */}
-      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[#f0fcf6] border-t border-gray-200 shadow-2xl z-50">
+      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[#ffffff] border-t border-gray-200 shadow-2xl z-50">
         <div className="px-4 py-3">
           {/* Bill Summary - Compact */}
           <div className="space-y-1 mb-2">

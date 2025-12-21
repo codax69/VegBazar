@@ -124,7 +124,7 @@ const BillingSuccess = ({ onNewOrder }) => {
         </div>
 
         {/* Order Summary Card */}
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 sm:p-6 rounded-xl mb-6 border border-green-200">
+        <div className="bg-[#ffffff] p-4 sm:p-6 rounded-xl mb-6 border border-green-200">
           <h3 className="font-bold text-base font-poppins sm:text-lg mb-4 text-[#0e540b] flex items-center gap-2">
             <Package className="w-5 h-5 flex-shrink-0" />
             Order Summary

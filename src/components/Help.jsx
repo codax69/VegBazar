@@ -38,7 +38,7 @@ const Help = () => {
   };
 
   return (
-    <div className="min-h-screen md:pt-20 pb-10 px-3 bg-[#f7faf7]">
+    <div className="min-h-screen md:pt-20 pb-10 px-3 bg-[#ffffff]">
       <div className="max-w-2xl mx-auto space-y-6 md:space-y-8">
         {/* Header */}
         <div className="text-center mb-4">
@@ -102,7 +102,7 @@ const Help = () => {
         </div>
 
         {/* Feedback Form */}
-        <div className="bg-[#f0fcf6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
+        <div className="bg-[#ffffff] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl font-poppins font-semibold mb-3 text-[#0e540b]">
             Quick Feedback
           </h2>
@@ -193,7 +193,7 @@ const Help = () => {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-[#f0fcf6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
+        <div className="bg-[#ffffff] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl font-poppins font-semibold mb-3 text-[#0e540b]">
             FAQs
           </h2>

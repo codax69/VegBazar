@@ -123,7 +123,7 @@ const CustomerInfo = () => {
                 // eslint-disable-next-line no-unused-vars
               ].map(({ icon: Icon, title, desc }, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-[#f0fcf6] bg-opacity-20 rounded-lg flex items-center justify-center">
+                  <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-[#ffffff] bg-opacity-20 rounded-lg flex items-center justify-center">
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#0e540b]" />
                   </div>
                   <div>
@@ -140,7 +140,7 @@ const CustomerInfo = () => {
           </div>
 
           {/* Right Side - Form */}
-          <div className="w-full lg:w-3/5 bg-[#f0fcf6] p-6 sm:p-8">
+          <div className="w-full lg:w-3/5 bg-[#ffffff] p-6 sm:p-8">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Name */}
               <div>
@@ -180,7 +180,7 @@ const CustomerInfo = () => {
                   rows="2"
                   className={`w-full font-assistant px-3 py-2 text-sm border ${
                     errors.address ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] resize-none bg-[#f0fcf6]`}
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] resize-none bg-[#ffffff]`}
                   placeholder="House no., Street name, Landmark..."
                   {...register("address", { required: "Address is required." })}
                 />
@@ -268,7 +268,7 @@ const CustomerInfo = () => {
                   type="tel"
                   className={`w-full font-assistant px-3 py-2 text-sm border ${
                     errors.mobile ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] bg-[#f0fcf6]`}
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0e540b] bg-[#ffffff]`}
                   placeholder="10-digit mobile number"
                   {...register("mobile", {
                     required: "Mobile number is required.",
@@ -324,7 +324,7 @@ const CustomerInfo = () => {
                 Continue
                 <FiArrowRight className="w-4 h-4" />
               </button>
-              <div className="fixed md:hidden lg:hidden bottom-0 left-0 right-0 bg-[#f0fcf6] border-t border-gray-200 shadow-lg z-50">
+              <div className="fixed md:hidden lg:hidden bottom-0 left-0 right-0 bg-[#ffffff] border-t border-gray-200 shadow-lg z-50">
                 <div className="w-full md:max-w-5xl mx-auto px-4 py-3 md:py-4">
                   <button
                     type="submit"
