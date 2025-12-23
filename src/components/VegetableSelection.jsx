@@ -47,7 +47,7 @@ const VegetableCard = memo(({
             <>
               <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg sm:rounded-xl">
                 <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold shadow-lg">
-                  OUT OF STOCK
+                  SOLD OUT
                 </span>
               </div>
               <div className="absolute top-1 right-1 bg-red-600 rounded-full p-0.5">
@@ -100,7 +100,7 @@ const ActionSection = memo(({
         </div>
         {selectedCount === 0 && (
           <p className="font-assistant text-xs sm:text-sm text-gray-500 px-2">
-            👆 Tap on vegetables above to select them
+            Tap on vegetables above to select them
           </p>
         )}
       </div>
