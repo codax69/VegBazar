@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import { useOrderContext } from "../Context/OrderContext";
@@ -25,7 +24,7 @@ const RazorpayPayment = ({
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState(null);
 
-  // Helper functions for order items
+  // Helper functions
   const getOrderItems = (order) => {
     if (!order) return [];
     if (Array.isArray(order)) return order;
@@ -39,7 +38,6 @@ const RazorpayPayment = ({
     return null;
   };
 
-  // Determine if custom or basket order
   const isCustomOrder = useMemo(() => {
     return orderType === "custom" || getOrderItems(vegetableOrder).length > 0;
   }, [orderType, vegetableOrder]);
@@ -51,18 +49,16 @@ const RazorpayPayment = ({
     );
   }, [orderType, selectedOffer, selectedVegetables]);
 
-  // ✅ FIXED: Calculate total amount considering coupon discount
+  // ✅ FIXED: Calculate total amount with proper coupon handling
   const totalAmount = useMemo(() => {
     if (isCustomOrder && vegetableOrder) {
       const items = getOrderItems(vegetableOrder);
       const summary = getOrderSummary(vegetableOrder);
 
-      // Use summary total if available (includes coupon discount and delivery)
       if (summary?.totalAmount && summary.totalAmount > 0) {
         return summary.totalAmount;
       }
 
-      // Fallback calculation
       const subtotal = items.reduce((acc, item) => {
         const price =
           parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
@@ -75,22 +71,17 @@ const RazorpayPayment = ({
     }
 
     if (isBasketOrder && selectedOffer) {
-      // ✅ FIXED: For basket orders, check if coupon is applied
-      // If couponCode is passed as object with discount info, use it
       const offerPrice = selectedOffer.price || 0;
       const discount = couponCode?.discount || 0;
-      const deliveryCharge = 20; // Basket orders always have ₹20 delivery
-
+      const deliveryCharge = 20;
       return Math.max(0, offerPrice - discount) + deliveryCharge;
     }
 
     return 0;
   }, [isCustomOrder, isBasketOrder, vegetableOrder, selectedOffer, couponCode]);
 
-  // Load Razorpay script dynamically
   const loadScript = useCallback((src) => {
     return new Promise((resolve) => {
-      // Check if already loaded
       if (window.Razorpay) {
         setScriptLoaded(true);
         resolve(true);
@@ -115,14 +106,12 @@ const RazorpayPayment = ({
     });
   }, []);
 
-  // Pre-load Razorpay script when component mounts or payment method changes
   useEffect(() => {
     if (paymentMethod === "ONLINE") {
       loadScript("https://checkout.razorpay.com/v1/checkout.js");
     }
   }, [paymentMethod, loadScript]);
 
-  // Fetch daily order count
   useEffect(() => {
     const fetchOrderCount = async () => {
       try {
@@ -133,14 +122,13 @@ const RazorpayPayment = ({
         setOrderCount(response.data.data.count + 1);
       } catch (error) {
         console.error("Error fetching order count:", error);
-        setOrderCount(1); // Fallback to 1
+        setOrderCount(1);
       }
     };
 
     fetchOrderCount();
   }, []);
 
-  // Generate unique order ID
   const generateOrderId = useCallback((count = 1) => {
     const now = new Date();
     const year = now.getFullYear();
@@ -150,7 +138,7 @@ const RazorpayPayment = ({
     return `ORD${year}${month}${day}${orderNum}`;
   }, []);
 
-  // ✅ FIXED: Build order data with coupon code
+  // ✅ FIXED: Improved order data building with better error handling
   const buildOrderData = useCallback(
     (orderId) => {
       try {
@@ -158,7 +146,13 @@ const RazorpayPayment = ({
           const items = getOrderItems(vegetableOrder);
           const summary = getOrderSummary(vegetableOrder);
 
-          return {
+          // Extract coupon code properly
+          const extractedCouponCode = 
+            typeof couponCode === "string" 
+              ? couponCode 
+              : couponCode?.code || null;
+
+          const orderData = {
             orderId,
             orderType: "custom",
             customerInfo: formData || {},
@@ -185,14 +179,21 @@ const RazorpayPayment = ({
             paymentStatus: "awaiting_payment",
             orderStatus: "placed",
             orderDate: new Date().toISOString(),
-            // ✅ ADDED: Pass coupon code (could be string or object with code property)
-            couponCode:
-              typeof couponCode === "string" ? couponCode : couponCode?.code,
+            couponCode: extractedCouponCode,
+            couponDiscount: couponCode?.discount || 0,
           };
+
+          console.log("📦 Built custom order data:", orderData);
+          return orderData;
         }
 
         if (isBasketOrder) {
-          return {
+          const extractedCouponCode = 
+            typeof couponCode === "string" 
+              ? couponCode 
+              : couponCode?.code || null;
+
+          const orderData = {
             orderId,
             orderType: "basket",
             customerInfo: formData || {},
@@ -203,15 +204,17 @@ const RazorpayPayment = ({
             paymentMethod: "ONLINE",
             paymentStatus: "awaiting_payment",
             orderStatus: "placed",
-            // ✅ ADDED: Pass coupon code for basket orders
-            couponCode:
-              typeof couponCode === "string" ? couponCode : couponCode?.code,
+            couponCode: extractedCouponCode,
+            couponDiscount: couponCode?.discount || 0,
           };
+
+          console.log("📦 Built basket order data:", orderData);
+          return orderData;
         }
 
         throw new Error("Invalid order type");
       } catch (error) {
-        console.error("Error building order data:", error);
+        console.error("❌ Error building order data:", error);
         throw error;
       }
     },
@@ -227,7 +230,7 @@ const RazorpayPayment = ({
     ]
   );
 
-  // Create order and initiate payment
+  // ✅ FIXED: Improved payment handler with better error handling
   const createOrder = async () => {
     if (isLoading) return;
 
@@ -260,6 +263,8 @@ const RazorpayPayment = ({
       setCurrentOrderId(orderId);
       const orderData = buildOrderData(orderId);
 
+      console.log("🚀 Creating order in backend:", orderData);
+
       // Create order in backend
       const result = await axios.post(
         `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
@@ -267,15 +272,19 @@ const RazorpayPayment = ({
         { timeout: 15000 }
       );
 
+      console.log("✅ Backend order creation response:", result.data);
+
       if (!result?.data?.data?.razorpayOrder?.id) {
         throw new Error("Failed to create order. Please try again.");
       }
 
       const razorpayOrderId = result.data.data.razorpayOrder.id;
-      const amount = Math.round(totalAmount * 100); // Convert to paise
+      const amount = Math.round(totalAmount * 100);
       const currency = "INR";
 
-      // Get order description
+      // ✅ FIXED: Store order data in sessionStorage for recovery
+      sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
+
       let description = "";
       if (isCustomOrder) {
         description = "Custom Vegetable Order";
@@ -292,13 +301,14 @@ const RazorpayPayment = ({
         order_id: razorpayOrderId,
         handler: async function (response) {
           try {
-            // ✅ FIXED: Build verification data with coupon code
+            console.log("💳 Payment successful, verifying...", response);
+
+            // Build verification data
             const verifyData = {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
               orderId: orderId,
-              // ✅ ADDED: Include coupon code in verification
               couponCode:
                 typeof couponCode === "string" ? couponCode : couponCode?.code,
             };
@@ -315,12 +325,16 @@ const RazorpayPayment = ({
                 pricePerUnit:
                   parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
               }));
+              verifyData.totalAmount = totalAmount;
             } else if (isBasketOrder) {
               verifyData.orderType = "basket";
               verifyData.customerInfo = formData;
               verifyData.selectedOffer = selectedOffer;
               verifyData.selectedVegetables = selectedVegetables;
+              verifyData.totalAmount = totalAmount;
             }
+
+            console.log("🔐 Sending verification data:", verifyData);
 
             const verifyResult = await axios.post(
               `${
@@ -330,9 +344,12 @@ const RazorpayPayment = ({
               { timeout: 15000 }
             );
 
-            // console.log("✅ Verification response:", verifyResult.data);
+            console.log("✅ Verification response:", verifyResult.data);
 
             if (verifyResult.data.success) {
+              // Clear pending order data
+              sessionStorage.removeItem('pendingOrderData');
+              
               setIsOrderPlaced(true);
               if (onSuccess) {
                 onSuccess();
@@ -347,10 +364,10 @@ const RazorpayPayment = ({
           } catch (err) {
             console.error("❌ Payment verification error:", err);
             console.error("Error details:", err.response?.data);
+            
+            // ✅ IMPORTANT: Show user-friendly error message
             setError(
-              err.response?.data?.message ||
-                "Payment verification failed. Please contact support with your payment ID: " +
-                  response.razorpay_payment_id
+              `Payment received but verification failed. Your payment ID: ${response.razorpay_payment_id}. Please contact support or try again.`
             );
           } finally {
             setIsLoading(false);
@@ -365,12 +382,17 @@ const RazorpayPayment = ({
           address: formData?.address || "",
           area: formData?.area || "",
           city: formData?.city || "",
+          orderId: orderId,
         },
         theme: { color: "#0e540b" },
         modal: {
           ondismiss: function () {
+            console.log("❌ Payment modal dismissed by user");
             setIsLoading(false);
             setError("Payment cancelled. Please try again when ready.");
+            
+            // Clear pending order data
+            sessionStorage.removeItem('pendingOrderData');
           },
         },
       };
@@ -396,7 +418,6 @@ const RazorpayPayment = ({
     }
   };
 
-  // Display error if any
   if (error) {
     return (
       <div className="space-y-3">
@@ -451,7 +472,6 @@ const RazorpayPayment = ({
             </p>
           )}
 
-          {/* ✅ FIXED: Show coupon discount info if applied */}
           {isBasketOrder && selectedOffer && (
             <div className="text-center space-y-1">
               <p className="font-assistant text-xs sm:text-sm text-gray-600">
