@@ -97,7 +97,37 @@ self.addEventListener('fetch', (event) => {
           .catch(() => {
             // Show offline page for navigation requests
             if (request.destination === 'document') {
-              return caches.match('/offline.html');
+              return caches.match('/offline.html').then((offlineResponse) => {
+                // Inject script to monitor online status
+                return offlineResponse.text().then((html) => {
+                  const modifiedHtml = html.replace('</body>', `
+                    <script>
+                      // Monitor online status
+                      window.addEventListener('online', () => {
+                        console.log('Back online! Redirecting to home...');
+                        window.location.href = '/';
+                      });
+                      
+                      // Check periodically in case the event doesn't fire
+                      setInterval(() => {
+                        if (navigator.onLine) {
+                          fetch('/', { method: 'HEAD', cache: 'no-cache' })
+                            .then(() => {
+                              window.location.href = '/';
+                            })
+                            .catch(() => {
+                              console.log('Still offline');
+                            });
+                        }
+                      }, 3000);
+                    </script>
+                  </body>`);
+                  
+                  return new Response(modifiedHtml, {
+                    headers: { 'Content-Type': 'text/html' }
+                  });
+                });
+              });
             }
           });
       })
@@ -221,5 +251,16 @@ self.addEventListener('message', (event) => {
         event.ports[0].postMessage({ success: true });
       })
     );
+  }
+  
+  // Handle online status check from offline page
+  if (event.data && event.data.type === 'CHECK_ONLINE') {
+    fetch('/', { method: 'HEAD', cache: 'no-cache' })
+      .then(() => {
+        event.ports[0].postMessage({ online: true });
+      })
+      .catch(() => {
+        event.ports[0].postMessage({ online: false });
+      });
   }
 });

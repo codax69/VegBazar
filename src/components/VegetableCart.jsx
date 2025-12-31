@@ -395,23 +395,30 @@ const VegetableCart = () => {
       setLoading(true);
       setLoadingAction("Placing your order...");
 
+      // Validation checks
       if (!selectedAddress || !paymentMethod) {
         alert("Please select both delivery address and payment method");
+        setLoading(false);
+        setLoadingAction("");
         return;
       }
 
       if (!formData.name || !formData.mobile || !formData.address) {
         alert("Please complete your customer information first");
+        setLoading(false);
+        setLoadingAction("");
         navigate("/customer-info");
         return;
       }
 
+      // Normalize items
       const normalizedItems = items.map((item) => ({
         ...item,
         vegetableId: item.vegetableId || item.id,
         id: item.id || item.vegetableId,
       }));
 
+      // Remove duplicates and merge quantities
       const uniqueVegetables = normalizedItems.reduce((acc, item) => {
         const vegetableId = item.vegetableId || item.id;
         if (!vegetableId) return acc;
@@ -432,6 +439,7 @@ const VegetableCart = () => {
         return acc;
       }, []);
 
+      // Update state if duplicates were found
       if (uniqueVegetables.length !== normalizedItems.length) {
         setVegetableOrder(
           Array.isArray(vegetableOrder)
@@ -440,12 +448,14 @@ const VegetableCart = () => {
         );
       }
 
+      // Calculate price details
       const priceDetails = await calculatePrice(
         uniqueVegetables,
         appliedCoupon?.code
       );
       const orderId = generateOrderId(orderCount);
 
+      // Prepare order data
       const orderData = {
         orderId,
         orderType: "custom",
@@ -472,23 +482,29 @@ const VegetableCart = () => {
         orderDate: new Date().toISOString(),
       };
 
+      // Handle COD payment
       if (paymentMethod === "COD") {
+        // Create order in backend
         await axios.post(`${API_URL}/api/orders/create-order`, orderData);
 
+        // Save order data to sessionStorage for confirmation page
         sessionStorage.setItem("lastOrderData", JSON.stringify(orderData));
         sessionStorage.setItem("orderJustPlaced", "true");
 
+        // Clear state
         setVegetableOrder([]);
         setAppliedCoupon(null);
         setCouponDiscount(0);
         setDeliveryCharge(20);
 
-        setTimeout(() => {
-          localStorage.removeItem("orderSummary");
-          localStorage.removeItem("vegbazar_cart");
-        }, 100);
+        // Clear localStorage BEFORE navigation
+        localStorage.removeItem("orderSummary");
+        localStorage.removeItem("vegbazar_cart");
 
+        // Update order placed state
         setIsOrderPlaced(true);
+
+        // Navigate to confirmation page
         window.scrollTo(0, 0);
         navigate("/order-confirmation");
       }
@@ -497,6 +513,7 @@ const VegetableCart = () => {
       const errorMessage = error.response?.data?.message || error.message;
       alert(`Failed to create order: ${errorMessage}`);
 
+      // Navigate to error page for server errors
       if (error.response?.status >= 500) {
         navigate("/order-failed");
       }
@@ -511,17 +528,18 @@ const VegetableCart = () => {
     items,
     vegetableOrder,
     orderCount,
-    summary,
     subtotal,
     total,
     appliedCoupon,
     deliveryCharge,
     calculatePrice,
     setVegetableOrder,
+    setAppliedCoupon,
+    setCouponDiscount,
+    setDeliveryCharge,
     setIsOrderPlaced,
     navigate,
   ]);
-
   // Memoized navigation handlers
   const handleContinueShopping = useCallback(() => navigate("/"), [navigate]);
   const handleBrowseVegetables = useCallback(() => {
