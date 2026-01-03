@@ -167,40 +167,6 @@ const CouponCodeSection = ({
           </div>
         </div>
       )}
-
-      {/* Popular Coupons - Optional */}
-      {!appliedCoupon && (
-        <div className={`${isMobile ? 'mt-2' : 'mt-3'} pt-3 border-t border-green-200`}>
-          <p className={`text-gray-600 font-assistant font-semibold mb-2 ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
-            Available Offers:
-          </p>
-          <div className="space-y-1.5">
-            <button
-              onClick={() => {
-                setCouponCode("FREEDEL");
-                setError("");
-              }}
-              className="w-full bg-white hover:bg-green-50 border border-green-200 rounded-lg p-2 text-left transition-colors group"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`font-bold text-green-700 font-assistant ${isMobile ? 'text-xs' : 'text-sm'}`}>
-                    FREEDEL
-                  </p>
-                  <p className={`text-gray-600 font-assistant ${isMobile ? 'text-[9px]' : 'text-[10px]'}`}>
-                    Get 15% discount on your First order 
-                  </p>
-                </div>
-                <div className="bg-green-100 group-hover:bg-green-200 px-2 py-1 rounded-md transition-colors">
-                  <span className={`text-green-700 font-bold font-assistant ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
-                    Apply
-                  </span>
-                </div>
-              </div>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

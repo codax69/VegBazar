@@ -15,7 +15,6 @@ export default function VegBazarNewYear() {
 
   return (
     <section className="relative w-full mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-[#f0fcf6] via-[#e8faf2] to-[#d9f7eb] px-3 py-3 sm:px-4 sm:py-4 md:max-w-6xl">
-      
       {/* Soft background accents */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute top-4 left-4 h-12 w-12 rounded-full border border-[#0e540b]/30 animate-spin" />
@@ -28,7 +27,10 @@ export default function VegBazarNewYear() {
           <img src={vegbazarLogo} className="w-8 sm:w-10" alt="VegBazar" />
           <h1
             className="font-extrabold text-[#0e540b]"
-            style={{ fontFamily: "Trirong, serif", fontSize: "clamp(1.2rem,3.5vw,2rem)" }}
+            style={{
+              fontFamily: "Trirong, serif",
+              fontSize: "clamp(1.2rem,3.5vw,2rem)",
+            }}
           >
             VegBazar
           </h1>
@@ -39,7 +41,10 @@ export default function VegBazarNewYear() {
           <Sparkles className="h-4 w-4 text-[#f54a00]" />
           <h2
             className="font-bold text-[#0e540b]"
-            style={{ fontFamily: "Poppins, sans-serif", fontSize: "clamp(1rem,3vw,1.4rem)" }}
+            style={{
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "clamp(1rem,3vw,1.4rem)",
+            }}
           >
             Happy New Year
           </h2>
@@ -47,51 +52,61 @@ export default function VegBazarNewYear() {
         </div>
 
         {/* Year Animation (unchanged, just shorter container) */}
-       <div className="relative h-32 md:h-40 flex items-center justify-center overflow-hidden mb-4">
-            <div className="relative">
-              {/* 202 - static part */}
-              <span 
-                className="text-7xl md:text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0e540b] to-[#166d12]"
+        <div className="relative h-32 md:h-40 flex items-center justify-center overflow-hidden mb-4">
+          <div className="relative">
+            {/* 202 - static part */}
+            <span
+              className="text-7xl md:text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0e540b] to-[#166d12]"
+              style={{ fontFamily: "Trirong, serif" }}
+            >
+              202
+            </span>
+
+            {/* Animated 5 and 6 */}
+            <span className="relative inline-block w-16 md:w-24 align-baseline">
+              {/* Number 5 - swipes up */}
+              <span
+                className={`absolute left-0 text-7xl md:text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#f54a00] to-[#ff6b2c] transition-all duration-1000 ease-out ${
+                  animationComplete
+                    ? "-translate-y-full opacity-0"
+                    : "translate-y-0 opacity-100"
+                }`}
                 style={{ fontFamily: "Trirong, serif" }}
               >
-                202
+                5
               </span>
-              
-              {/* Animated 5 and 6 */}
-              <span className="relative inline-block w-16 md:w-24 align-baseline">
-                {/* Number 5 - swipes up */}
-                <span 
-                  className={`absolute left-0 text-7xl md:text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#f54a00] to-[#ff6b2c] transition-all duration-1000 ease-out ${
-                    animationComplete ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
-                  }`}
-                  style={{ fontFamily: "Trirong, serif" }}
-                >
-                  5
-                </span>
-                
-                {/* Number 6 - swipes in from below */}
-                <span 
-                  className={`absolute left-0 text-7xl md:text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#f54a00] to-[#ff6b2c] transition-all duration-1000 ease-out ${
-                    animationComplete ? '-translate-y-14 md:-translate-y-25 opacity-100' : 'translate-y-full opacity-0'
-                  }`}
-                  style={{ fontFamily: "Trirong, serif" }}
-                >
-                  6
-                </span>
+
+              {/* Number 6 - swipes in from below */}
+              <span
+                className={`absolute left-0 text-7xl md:text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#f54a00] to-[#ff6b2c] transition-all duration-1000 ease-out ${
+                  animationComplete
+                    ? "-translate-y-14 md:-translate-y-25 opacity-100"
+                    : "translate-y-full opacity-0"
+                }`}
+                style={{ fontFamily: "Trirong, serif" }}
+              >
+                6
               </span>
-            </div>
+            </span>
           </div>
+        </div>
 
         {/* Subtext */}
         <p
           className="mb-0.5 font-semibold text-[#0e540b]"
-          style={{ fontFamily: "Assistant, sans-serif", fontSize: "clamp(0.9rem,2.8vw,1.1rem)" }}
+          style={{
+            fontFamily: "Assistant, sans-serif",
+            fontSize: "clamp(0.9rem,2.8vw,1.1rem)",
+          }}
         >
           Fresh Beginnings, Fresh Vegetables 🌿
         </p>
         <p
           className="mb-3 text-[#f54a00]"
-          style={{ fontFamily: "Assistant, sans-serif", fontSize: "clamp(0.75rem,2.6vw,0.95rem)" }}
+          style={{
+            fontFamily: "Assistant, sans-serif",
+            fontSize: "clamp(0.75rem,2.6vw,0.95rem)",
+          }}
         >
           Start the year healthy with farm-fresh produce
         </p>
@@ -99,9 +114,24 @@ export default function VegBazarNewYear() {
         {/* Offers */}
         <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
           {[
-            { icon: Gift, title: "New Year Special", desc: "15% off first order", green: true },
-            { icon: PartyPopper, title: "Free Delivery", desc: "Above ₹250", green: false },
-            { icon: Sparkles, title: "Fresh Promise", desc: "Daily farm delivery", green: true },
+            {
+              icon: Gift,
+              title: "Loyalty Reward",
+              desc: "3rd Order: Free Delivery or Extra Discount",
+              green: true,
+            },
+            {
+              icon: PartyPopper,
+              title: "Free Delivery",
+              desc: "Above ₹250",
+              green: false,
+            },
+            {
+              icon: Sparkles,
+              title: "Fresh Promise",
+              desc: "Daily farm delivery",
+              green: true,
+            },
           ].map((item, i) => (
             <div
               key={i}
