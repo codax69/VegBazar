@@ -19,7 +19,7 @@ import Store from "../assets/Fruit-Store.svg";
 import axios from "axios";
 import { GiBasket } from "react-icons/gi";
 import VegBazarBanner from "./VegBazarBanner";
-import TestimonialsCarousel from "./TestimonialsCarousel ";
+import TestimonialsCarousel from "./TestimonialsCarousel";
 
 // Updated VegetableCard component supporting both weight and set pricing
 const hasEnoughStock = (veg, option, isSetModel) => {
@@ -224,8 +224,8 @@ const VegetableCard = memo(
                 alt={veg.name}
                 loading="lazy"
                 decoding="async"
-                width="96"
-                height="96"
+                width="100"
+                height="100"
               />
             ) : (
               <div
@@ -382,7 +382,6 @@ const VegetableCard = memo(
     );
   }
 );
-VegetableCard.displayName = "VegetableCard";
 
 // Memoized OfferCard component
 const OfferCard = memo(({ offer, onNavigate }) => {
@@ -486,15 +485,6 @@ const Homepage = () => {
   const { setVegetableOrder, navigate } = useOrderContext();
   const [topSellingVegetables, setTopSellingVegetables] = useState([]);
   const [suggestedVegetables, setSuggestedVegetables] = useState([]);
-
-  // ✅ Log orderSummary on mount
-  // useEffect(() => {
-  //   const savedCart = localStorage.getItem("orderSummary");
-  //   console.log(
-  //     "📦 HomePage - Initial orderSummary from localStorage:",
-  //     savedCart ? JSON.parse(savedCart) : null
-  //   );
-  // }, []);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -600,7 +590,6 @@ const Homepage = () => {
   );
 
   const setSelectedWeight = useCallback((vegId, weight) => {
-    // console.log(`⚖️ Weight changed for ${vegId}: ${weight}`);
     setSelectedWeights((prev) => ({
       ...prev,
       [vegId]: weight,
@@ -608,7 +597,6 @@ const Homepage = () => {
   }, []);
 
   const setSelectedSet = useCallback((vegId, set) => {
-    // console.log(`📦 Set changed for ${vegId}: ${set}`);
     setSelectedSets((prev) => ({
       ...prev,
       [vegId]: set,
@@ -623,7 +611,6 @@ const Homepage = () => {
         quantity: item.quantity,
       }));
 
-      // console.log("💰 Calculating prices for items:", normalizedItems);
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_SERVER_URL}/api/orders/calculate-price`,
@@ -631,7 +618,6 @@ const Homepage = () => {
       );
 
       const updatedPrices = response.data.data;
-      // console.log("✅ Prices calculated:", updatedPrices);
 
       cartData.items = cartData.items.map((item) => {
         const calculatedItem = updatedPrices.items.find(
@@ -669,9 +655,7 @@ const Homepage = () => {
       const currentQty = cartItems[cartKey] || 0;
       const newQty = currentQty + 1;
 
-      // console.log(
-      //   `➕ Adding to cart: ${veg.name} (${option}) - Qty: ${newQty}`
-      // );
+    
 
       setCartItems((prev) => ({
         ...prev,
@@ -681,7 +665,6 @@ const Homepage = () => {
       const savedCart = localStorage.getItem("orderSummary");
       let cartData = savedCart ? JSON.parse(savedCart) : { items: [] };
 
-      // console.log("📦 Current cart data:", cartData);
 
       const existingItemIndex = cartData.items.findIndex(
         (item) =>
@@ -704,12 +687,9 @@ const Homepage = () => {
         optionLabel = sets[setIndex]?.label || option;
       }
 
-      // console.log(
-      //   `💵 Price for option ${option}: ₹${priceForOption}, Market: ₹${marketPriceForOption}, Label: ${optionLabel}`
-      // );
+      
 
       if (existingItemIndex >= 0) {
-        // console.log(`📝 Updating existing item at index ${existingItemIndex}`);
         cartData.items[existingItemIndex].quantity = newQty;
         cartData.items[existingItemIndex].pricePerUnit = priceForOption;
         cartData.items[existingItemIndex].price = priceForOption;
@@ -717,7 +697,6 @@ const Homepage = () => {
         cartData.items[existingItemIndex].weight = option;
         cartData.items[existingItemIndex].weightLabel = optionLabel;
       } else {
-        // console.log(`🆕 Adding new item to cart`);
         cartData.items.push({
           id: veg._id,
           vegetableId: veg._id,
@@ -735,23 +714,9 @@ const Homepage = () => {
       }
 
       cartData = await calculatePrices(cartData);
-
-      // console.log("💾 Final cart data before saving:", cartData);
-      // console.log("📊 Total items in cart:", cartData.items.length);
-      // console.log("💰 Cart summary:", cartData.summary);
-
-      // ✅ Log each item's price
-      // cartData.items.forEach((item, idx) => {
-      //   console.log(
-      //     `  Item ${idx}: ${item.name} (${item.weightLabel}) - ₹${item.pricePerUnit} x ${item.quantity} = ₹${item.totalPrice}`
-      //   );
-      // });
-
       localStorage.setItem("orderSummary", JSON.stringify(cartData));
       setVegetableOrder(cartData);
-
-      // console.log("✅ OrderSummary updated:", cartData);
-    },
+        },
     [
       cartItems,
       getSelectedOption,
@@ -767,13 +732,7 @@ const Homepage = () => {
       const option = getSelectedOption(veg);
       const cartKey = `${veg._id}-${option}`;
       const currentQty = cartItems[cartKey] || 0;
-
-      // console.log(
-      //   `➖ Removing from cart: ${veg.name} (${option}) - Current Qty: ${currentQty}`
-      // );
-
       if (currentQty <= 1) {
-        // console.log("🗑️ Removing item completely from cart");
         const newCartItems = { ...cartItems };
         delete newCartItems[cartKey];
         setCartItems(newCartItems);
@@ -789,22 +748,18 @@ const Homepage = () => {
               )
           );
 
-          // console.log("📦 Cart after removal:", cartData);
 
           if (cartData.items.length > 0) {
             cartData = await calculatePrices(cartData);
             localStorage.setItem("orderSummary", JSON.stringify(cartData));
             setVegetableOrder(cartData);
-            // console.log("✅ Cart updated after removal:", cartData);
           } else {
-            // console.log("🧹 Cart is now empty");
             localStorage.removeItem("orderSummary");
             setVegetableOrder([]);
           }
         }
       } else {
         const newQty = currentQty - 1;
-        // console.log(`📉 Decreasing quantity to ${newQty}`);
         setCartItems((prev) => ({
           ...prev,
           [cartKey]: newQty,
@@ -824,7 +779,6 @@ const Homepage = () => {
             cartData = await calculatePrices(cartData);
             localStorage.setItem("orderSummary", JSON.stringify(cartData));
             setVegetableOrder(cartData);
-            // console.log("✅ Cart quantity updated:", cartData);
           }
         }
       }
@@ -847,11 +801,11 @@ const Homepage = () => {
         title: "Delivery",
         desc: "Next Morning Delivery Available 8 AM - 10 AM",
       },
-      // {
-      //   icon: Leaf,
-      //   title: "Farm Fresh",
-      //   desc: "Directly sourced from local farmers",
-      // },
+      {
+        icon: Leaf,
+        title: "Farm Fresh",
+        desc: "Directly sourced from local farmers",
+      },
       {
         icon: Star,
         title: "Quality Promise",
@@ -870,21 +824,14 @@ const Homepage = () => {
     () => Object.values(cartItems).reduce((sum, qty) => sum + qty, 0),
     [cartItems]
   );
-
-  // useEffect(() => {
-  //   console.log("🛒 Total cart items changed:", totalCartItems);
-  // }, [totalCartItems]);
-
   const handleNavigateToOffers = useCallback(() => {
     window.scrollTo(0, 0);
     navigate("/offers");
   }, [navigate]);
 
   const handleNavigateToVegBag = useCallback(() => {
-    // console.log("🔗 Navigating to veg-bag");
     const savedCart = localStorage.getItem("orderSummary");
     const cartData = savedCart ? JSON.parse(savedCart) : null;
-    // console.log("📦 OrderSummary at navigation:", cartData);
 
     // ✅ Log each item with correct price
     if (cartData?.items) {
@@ -892,7 +839,7 @@ const Homepage = () => {
     }
 
     window.scrollTo(0, 0);
-    navigate("/veg-bag");
+    navigate("/cart");
   }, [navigate]);
 
   return (

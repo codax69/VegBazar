@@ -156,8 +156,7 @@ const VegetableSelection = () => {
   const [loading, setLoading] = useState(true);
   // Memoize API URL
   const API_URL = useMemo(() => import.meta.env.VITE_API_SERVER_URL, []);
- console.log(selectedOffer)
- console.log(vegetables)
+
   // Get effective vegetable limit (treat 0 as 1)
   const effectiveLimit = useMemo(() => {
     const limit = selectedOffer?.vegetableLimit || 0;
@@ -210,7 +209,6 @@ const VegetableSelection = () => {
     (vegetable) => {
       // Strict check: Don't allow selection if out of stock
       if (vegetable.outOfStock || vegetable.stockKg === 0) {
-        console.log(`${vegetable.name} is out of stock and cannot be selected`);
         return;
       }
 
@@ -254,7 +252,6 @@ const VegetableSelection = () => {
           `${API_URL}/api/offers/${selectedOffer._id}`
         );
         const data = response.data.data.vegetables || [];
-        console.log({data})
         const offerWeight = selectedOffer?.weight || selectedOffer?.totalWeight || '500g';
         
         const processedVegetables = data
@@ -263,7 +260,6 @@ const VegetableSelection = () => {
             return priceForOffer ? { ...v, priceForOffer } : null;
           })
           .filter(Boolean);
-        console.log(processedVegetables)
         setVegetables(processedVegetables);
       } catch (error) {
         console.error("Error fetching offer details:", error.message);
@@ -288,7 +284,7 @@ const VegetableSelection = () => {
 
   const handleContinue = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    navigate("/customer-info");
+    navigate("/address");
   }, [navigate]);
 
   const handleBack = useCallback(() => {

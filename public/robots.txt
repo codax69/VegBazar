@@ -1,0 +1,25 @@
+# robots.txt for VegBazar
+
+User-agent: *
+Allow: /
+Allow: /public/
+Allow: /products
+Allow: /categories
+Allow: /about
+Allow: /contact
+
+Disallow: /api/
+Disallow: /admin/
+Disallow: /user/
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /orders/
+Disallow: /account/
+Disallow: /login/
+Disallow: /register/
+Disallow: /reset-password/
+Disallow: /private/
+Disallow: /*.json$
+Disallow: /service-worker.js
+
+Sitemap: https://vegbazar.com/sitemap.xml

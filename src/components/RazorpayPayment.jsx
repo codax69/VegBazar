@@ -183,7 +183,6 @@ const RazorpayPayment = ({
             couponDiscount: couponCode?.discount || 0,
           };
 
-          console.log("📦 Built custom order data:", orderData);
           return orderData;
         }
 
@@ -208,7 +207,6 @@ const RazorpayPayment = ({
             couponDiscount: couponCode?.discount || 0,
           };
 
-          console.log("📦 Built basket order data:", orderData);
           return orderData;
         }
 
@@ -263,7 +261,6 @@ const RazorpayPayment = ({
       setCurrentOrderId(orderId);
       const orderData = buildOrderData(orderId);
 
-      console.log("🚀 Creating order in backend:", orderData);
 
       // Create order in backend
       const result = await axios.post(
@@ -272,7 +269,6 @@ const RazorpayPayment = ({
         { timeout: 15000 }
       );
 
-      console.log("✅ Backend order creation response:", result.data);
 
       if (!result?.data?.data?.razorpayOrder?.id) {
         throw new Error("Failed to create order. Please try again.");
@@ -301,7 +297,6 @@ const RazorpayPayment = ({
         order_id: razorpayOrderId,
         handler: async function (response) {
           try {
-            console.log("💳 Payment successful, verifying...", response);
 
             // Build verification data
             const verifyData = {
@@ -334,7 +329,6 @@ const RazorpayPayment = ({
               verifyData.totalAmount = totalAmount;
             }
 
-            console.log("🔐 Sending verification data:", verifyData);
 
             const verifyResult = await axios.post(
               `${
@@ -344,7 +338,6 @@ const RazorpayPayment = ({
               { timeout: 15000 }
             );
 
-            console.log("✅ Verification response:", verifyResult.data);
 
             if (verifyResult.data.success) {
               // Clear pending order data
@@ -354,7 +347,7 @@ const RazorpayPayment = ({
               if (onSuccess) {
                 onSuccess();
               } else {
-                navigate("/order-confirmation", {
+                navigate("/conformation", {
                   state: { orderData: orderData },
                 });
               }
@@ -387,7 +380,6 @@ const RazorpayPayment = ({
         theme: { color: "#0e540b" },
         modal: {
           ondismiss: function () {
-            console.log("❌ Payment modal dismissed by user");
             setIsLoading(false);
             setError("Payment cancelled. Please try again when ready.");
             

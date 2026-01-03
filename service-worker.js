@@ -1,15 +1,13 @@
 const CACHE_NAME = 'vegbazar-v1';
 const RUNTIME_CACHE = 'vegbazar-runtime';
 
-// Files to cache on install
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/offline.html',
-  '/vegbazar.svg'
+  '/public/',
+  '/public/index.html',
+  '/public/offline.html',
+  '/public/vegbazar.svg'
 ];
 
-// Install event - cache static assets
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Installing...');
   event.waitUntil(
@@ -18,11 +16,27 @@ self.addEventListener('install', (event) => {
         console.log('[Service Worker] Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
+      .then(() => {
+        return self.registration.showNotification('VegBazar Installed!', {
+          body: 'The app has been installed successfully. You can now use it offline!',
+          icon: '/public/vegbazar.svg',
+          badge: '/public/vegbazar.svg',
+          tag: 'vegbazar-install',
+          requireInteraction: false,
+          vibrate: [200, 100, 200, 100, 200],
+          actions: [
+            {
+              action: 'open',
+              title: 'Open App',
+              icon: '/public/vegbazar.svg'
+            }
+          ]
+        });
+      })
       .then(() => self.skipWaiting())
   );
 });
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   console.log('[Service Worker] Activating...');
   event.waitUntil(
@@ -35,26 +49,31 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      return self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({
+            type: 'SW_ACTIVATED',
+            message: 'Service Worker activated successfully'
+          });
+        });
+      });
     }).then(() => self.clients.claim())
   );
 });
 
-// Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip cross-origin requests
   if (url.origin !== location.origin) {
     return;
   }
 
-  // Network first strategy for API calls and dynamic content
   if (request.url.includes('/api/') || request.method !== 'GET') {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone and cache successful responses
           if (response && response.status === 200) {
             const responseClone = response.clone();
             caches.open(RUNTIME_CACHE).then((cache) => {
@@ -64,14 +83,12 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // Fallback to cache if network fails
           return caches.match(request);
         })
     );
     return;
   }
 
-  // Cache first strategy for static assets
   event.respondWith(
     caches.match(request)
       .then((cachedResponse) => {
@@ -81,7 +98,6 @@ self.addEventListener('fetch', (event) => {
 
         return fetch(request)
           .then((response) => {
-            // Don't cache if not a valid response
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
@@ -95,25 +111,21 @@ self.addEventListener('fetch', (event) => {
             return response;
           })
           .catch(() => {
-            // Show offline page for navigation requests
             if (request.destination === 'document') {
-              return caches.match('/offline.html').then((offlineResponse) => {
-                // Inject script to monitor online status
+              return caches.match('/public/offline.html').then((offlineResponse) => {
                 return offlineResponse.text().then((html) => {
                   const modifiedHtml = html.replace('</body>', `
                     <script>
-                      // Monitor online status
                       window.addEventListener('online', () => {
                         console.log('Back online! Redirecting to home...');
-                        window.location.href = '/';
+                        window.location.href = '/public/';
                       });
                       
-                      // Check periodically in case the event doesn't fire
                       setInterval(() => {
                         if (navigator.onLine) {
-                          fetch('/', { method: 'HEAD', cache: 'no-cache' })
+                          fetch('/public/', { method: 'HEAD', cache: 'no-cache' })
                             .then(() => {
-                              window.location.href = '/';
+                              window.location.href = '/public/';
                             })
                             .catch(() => {
                               console.log('Still offline');
@@ -134,7 +146,6 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Background sync for pending orders
 self.addEventListener('sync', (event) => {
   console.log('[Service Worker] Background sync:', event.tag);
   
@@ -145,16 +156,12 @@ self.addEventListener('sync', (event) => {
 
 async function syncPendingOrders() {
   try {
-    // Get pending orders from IndexedDB or cache
-    // Send them to server when online
     console.log('[Service Worker] Syncing pending orders...');
-    // Add your sync logic here
   } catch (error) {
     console.error('[Service Worker] Sync failed:', error);
   }
 }
 
-// Push notifications for order updates
 self.addEventListener('push', (event) => {
   console.log('[Service Worker] Push received');
   
@@ -164,12 +171,10 @@ self.addEventListener('push', (event) => {
   
   if (event.data) {
     try {
-      // Try to parse as JSON first
       data = event.data.json();
       title = data.title || title;
       body = data.body || body;
     } catch {
-      // If not JSON, treat as plain text
       console.log('[Service Worker] Push data is plain text');
       body = event.data.text();
     }
@@ -177,20 +182,20 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: body,
-    icon: '/vegbazar.svg',
-    badge: '/vegbazar.svg',
+    icon: '/public/vegbazar.svg',
+    badge: '/public/vegbazar.svg',
     vibrate: [200, 100, 200],
     tag: data.tag || 'vegbazar-notification',
     requireInteraction: false,
     data: {
-      url: data.url || '/',
+      url: data.url || '/public/',
       dateOfArrival: Date.now()
     },
     actions: [
       {
         action: 'view',
         title: 'View',
-        icon: '/vegbazar.svg'
+        icon: '/public/vegbazar.svg'
       },
       {
         action: 'close',
@@ -204,7 +209,6 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
   console.log('[Service Worker] Notification clicked:', event.action);
   
@@ -214,18 +218,16 @@ self.addEventListener('notificationclick', (event) => {
     return;
   }
 
-  const urlToOpen = event.notification.data?.url || '/';
+  const urlToOpen = event.notification.data?.url || '/public/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
-        // Check if there's already a window open
         for (let client of clientList) {
           if (client.url === urlToOpen && 'focus' in client) {
             return client.focus();
           }
         }
-        // Open new window if none found
         if (clients.openWindow) {
           return clients.openWindow(urlToOpen);
         }
@@ -233,7 +235,6 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// Handle messages from the client
 self.addEventListener('message', (event) => {
   console.log('[Service Worker] Message received:', event.data);
 
@@ -253,14 +254,26 @@ self.addEventListener('message', (event) => {
     );
   }
   
-  // Handle online status check from offline page
   if (event.data && event.data.type === 'CHECK_ONLINE') {
-    fetch('/', { method: 'HEAD', cache: 'no-cache' })
+    fetch('/public/', { method: 'HEAD', cache: 'no-cache' })
       .then(() => {
         event.ports[0].postMessage({ online: true });
       })
       .catch(() => {
         event.ports[0].postMessage({ online: false });
       });
+  }
+  
+  if (event.data && event.data.type === 'REQUEST_NOTIFICATION') {
+    event.waitUntil(
+      self.registration.showNotification('Welcome to VegBazar!', {
+        body: 'Thanks for installing! You\'ll receive updates about your orders.',
+        icon: '/public/vegbazar.svg',
+        badge: '/public/vegbazar.svg',
+        tag: 'vegbazar-welcome',
+        requireInteraction: false,
+        vibrate: [200, 100, 200]
+      })
+    );
   }
 });

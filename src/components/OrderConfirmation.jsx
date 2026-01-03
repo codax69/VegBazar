@@ -55,15 +55,12 @@ const OrderConfirmation = () => {
   // ✅ Check for saved order on mount
   useEffect(() => {
     const orderDataFromStorage = sessionStorage.getItem("lastOrderData");
-    // console.log("🔍 Checking sessionStorage on mount:", orderDataFromStorage);
     
     if (orderDataFromStorage) {
       try {
         const parsedData = JSON.parse(orderDataFromStorage);
-        // console.log("✅ Found order data:", parsedData);
         // Handle both direct data and nested response structure
         const actualData = parsedData?.data?.data || parsedData?.data || parsedData;
-        // console.log("📦 Actual order data:", actualData);
         setSavedOrderData(actualData);
         setIsOrderPlaced(true);
       } catch (error) {
@@ -77,14 +74,12 @@ const OrderConfirmation = () => {
   // Redirect if no order type and no saved order data
   useEffect(() => {
     if (!orderType && !savedOrderData && !isOrderPlaced) {
-      // console.log("⚠️ No order data, redirecting to home");
       navigate("/");
       window.scrollTo(0, 0);
     }
   }, [orderType, savedOrderData, isOrderPlaced, navigate]);
 
   const handleNewOrder = () => {
-    // console.log("🔄 Clearing order data and resetting");
     sessionStorage.removeItem("lastOrderData");
     sessionStorage.removeItem("orderJustPlaced");
     localStorage.removeItem("orderSummary");
@@ -104,7 +99,6 @@ const OrderConfirmation = () => {
   const orderData = useMemo(() => {
     // ✅ Use saved order data if available
     if (savedOrderData) {
-      // console.log("📦 Using saved order data:", savedOrderData);
       return savedOrderData;
     }
 
@@ -186,7 +180,6 @@ const OrderConfirmation = () => {
 
       // If order already exists, just show success
       if (savedOrderData) {
-        // console.log("✅ Order already exists, showing success");
         setIsOrderPlaced(true);
         return;
       }
@@ -221,7 +214,6 @@ const OrderConfirmation = () => {
         if (res.status >= 200 && res.status < 300) {
           // ✅ Store the order data from the response (actual created order)
           const createdOrder = res.data?.data || orderData;
-          // console.log("💾 Storing created order:", createdOrder);
           sessionStorage.setItem("lastOrderData", JSON.stringify(createdOrder));
           setIsOrderPlaced(true);
         } else {
@@ -240,10 +232,8 @@ const OrderConfirmation = () => {
 
   // ✅ Show success if order is placed
   if (isOrderPlaced && orderData) {
-    // console.log("✅ Rendering OrderSuccess with data:", orderData);
     // Extract order data - handle both direct orderData and nested response.data.data
     const actualOrderData = orderData?.data?.data || orderData?.data || orderData;
-    // console.log("📦 Actual order data being passed:", actualOrderData);
     
     return (
       <OrderSuccess
@@ -254,32 +244,29 @@ const OrderConfirmation = () => {
   }
 
   if (isSubmitting) {
-    // console.log("⏳ Showing loading state");
     return <OrderLoading />;
   }
   
   if (submitError) {
-    // console.log("❌ Showing error:", submitError);
     return (
       <OrderFailed
         errorMessage={submitError}
         onRetry={() => setSubmitError(null)}
         onGoBack={() => {
           window.scrollTo(0, 0);
-          navigate(savedOrderData || isCustomOrder ? "/veg-bag" : "/billing");
+          navigate(savedOrderData || isCustomOrder ? "/cart" : "/billing");
         }}
       />
     );
   }
 
-  // Show confirmation form
-  // console.log("📋 Showing confirmation form");
+  
   return (
     <div className="min-h-screen bg-[#ffffff] py-4 pt-20">
       <div className="max-w-5xl mx-auto px-4">
         <button
           onClick={() => {
-            navigate(isCustomOrder ? "/veg-bag" : "/billing");
+            navigate(isCustomOrder ? "/cart" : "/billing");
             window.scrollTo(0, 0);
           }}
           className="flex items-center gap-2 mb-3 text-gray-700 hover:text-[#0e540b] transition-colors group"

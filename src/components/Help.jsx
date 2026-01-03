@@ -10,37 +10,87 @@ const Help = () => {
     rating: 0,
   });
   const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  
   const handleFeedbackRedirect = () => {
     const googleFormUrl = "https://forms.cloud.microsoft/r/b7J31zqjZS";
     window.open(googleFormUrl, "_blank", "noopener,noreferrer");
   };
 
-  const handleRatingClick = (rating) => setFeedback({ ...feedback, rating });
+  const handleRatingClick = (rating) => {
+    setFeedback({ ...feedback, rating });
+    setErrors({ ...errors, rating: "" });
+  };
 
-  const handleSubmit = async() => {
+  const validateForm = () => {
+    const newErrors = {};
 
-    const submitTestimonial = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/testimonials`,feedback)
-    // eslint-disable-next-line no-unused-vars
-    const data = await submitTestimonial.data
-    // console.log(data)
-    if (!feedback.name || !feedback.email || !feedback.comment || feedback.rating === 0) {
-      alert("Please fill in all fields and provide a rating");
+    if (!feedback.name.trim()) {
+      newErrors.name = "Name is required";
+    } else if (feedback.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!feedback.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(feedback.email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+
+    if (!feedback.comment.trim()) {
+      newErrors.comment = "Comment is required";
+    } else if (feedback.comment.trim().length < 10) {
+      newErrors.comment = "Comment must be at least 10 characters";
+    }
+
+    if (feedback.rating === 0) {
+      newErrors.rating = "Please provide a rating";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
       return;
     }
-    // console.log("Feedback submitted:", feedback);
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFeedback({ name: "", email: "", comment: "", rating: 0 });
-    }, 3000);
+
+    setIsSubmitting(true);
+
+    try {
+      const submitTestimonial = await axios.post(
+        `${import.meta.env.VITE_API_SERVER_URL}/api/testimonials`,
+        feedback
+      );
+      const data = await submitTestimonial.data;
+      
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFeedback({ name: "", email: "", comment: "", rating: 0 });
+        setErrors({});
+      }, 3000);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      alert("Failed to submit feedback. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFeedback({ ...feedback, [field]: value });
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: "" });
+    }
   };
 
   return (
     <div className="min-h-screen md:pt-20 pb-10 px-3 bg-[#ffffff]">
       <div className="max-w-2xl mx-auto space-y-6 md:space-y-8">
-        {/* Header */}
         <div className="text-center mb-4">
           <h1 className="text-2xl md:text-3xl font-poppins font-semibold text-[#0e540b] mb-1">
             Help & Support
@@ -50,7 +100,6 @@ const Help = () => {
           </p>
         </div>
 
-        {/* Contact Section */}
         <div className="bg-[#f0fcf6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl md:text-2xl font-poppins font-semibold mb-3 flex items-center gap-2 text-[#0e540b]">
             <MessageSquare className="w-5 h-5" /> Get in Touch
@@ -86,7 +135,6 @@ const Help = () => {
             </a>
           </div>
 
-          {/* Survey Button */}
           <div className="mt-5 text-center">
             <button
               onClick={handleFeedbackRedirect}
@@ -96,12 +144,11 @@ const Help = () => {
               📝 Complete Our Survey
             </button>
             <p className="text-gray-600 text-[11px] mt-2 font-assistant italic">
-              Note: Give feedback and we’ll serve you better.
+              Note: Give feedback and we'll serve you better.
             </p>
           </div>
         </div>
 
-        {/* Feedback Form */}
         <div className="bg-[#ffffff] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl font-poppins font-semibold mb-3 text-[#0e540b]">
             Quick Feedback
@@ -120,26 +167,41 @@ const Help = () => {
           ) : (
             <div className="space-y-4">
               <div className="grid md:grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  placeholder="Your Name"
-                  value={feedback.name}
-                  onChange={(e) => setFeedback({ ...feedback, name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-assistant"
-                  style={{ borderColor: "#dcdcdc" }}
-                  onFocus={(e) => (e.target.style.borderColor = "#0e540b")}
-                  onBlur={(e) => (e.target.style.borderColor = "#dcdcdc")}
-                />
-                <input
-                  type="email"
-                  placeholder="Your Email"
-                  value={feedback.email}
-                  onChange={(e) => setFeedback({ ...feedback, email: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-assistant"
-                  style={{ borderColor: "#dcdcdc" }}
-                  onFocus={(e) => (e.target.style.borderColor = "#0e540b")}
-                  onBlur={(e) => (e.target.style.borderColor = "#dcdcdc")}
-                />
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    value={feedback.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-assistant ${
+                      errors.name ? "border-red-500" : ""
+                    }`}
+                    style={{ borderColor: errors.name ? "#ef4444" : "#dcdcdc" }}
+                    onFocus={(e) => !errors.name && (e.target.style.borderColor = "#0e540b")}
+                    onBlur={(e) => !errors.name && (e.target.style.borderColor = "#dcdcdc")}
+                  />
+                  {errors.name && (
+                    <p className="text-red-500 text-[10px] mt-1 font-assistant">{errors.name}</p>
+                  )}
+                </div>
+
+                <div>
+                  <input
+                    type="email"
+                    placeholder="Your Email"
+                    value={feedback.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-assistant ${
+                      errors.email ? "border-red-500" : ""
+                    }`}
+                    style={{ borderColor: errors.email ? "#ef4444" : "#dcdcdc" }}
+                    onFocus={(e) => !errors.email && (e.target.style.borderColor = "#0e540b")}
+                    onBlur={(e) => !errors.email && (e.target.style.borderColor = "#dcdcdc")}
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-[10px] mt-1 font-assistant">{errors.email}</p>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -168,31 +230,57 @@ const Help = () => {
                     </button>
                   ))}
                 </div>
+                {errors.rating && (
+                  <p className="text-red-500 text-[10px] mt-1 font-assistant">{errors.rating}</p>
+                )}
               </div>
 
-              <textarea
-                rows="4"
-                placeholder="Tell us about your experience..."
-                value={feedback.comment}
-                onChange={(e) => setFeedback({ ...feedback, comment: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-assistant resize-none"
-                style={{ borderColor: "#dcdcdc" }}
-                onFocus={(e) => (e.target.style.borderColor = "#0e540b")}
-                onBlur={(e) => (e.target.style.borderColor = "#dcdcdc")}
-              ></textarea>
+              <div>
+                <textarea
+                  rows="4"
+                  placeholder="Tell us about your experience... (minimum 10 characters)"
+                  value={feedback.comment}
+                  onChange={(e) => handleInputChange("comment", e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-assistant resize-none ${
+                    errors.comment ? "border-red-500" : ""
+                  }`}
+                  style={{ borderColor: errors.comment ? "#ef4444" : "#dcdcdc" }}
+                  onFocus={(e) => !errors.comment && (e.target.style.borderColor = "#0e540b")}
+                  onBlur={(e) => !errors.comment && (e.target.style.borderColor = "#dcdcdc")}
+                ></textarea>
+                <div className="flex justify-between items-center mt-1">
+                  {errors.comment && (
+                    <p className="text-red-500 text-[10px] font-assistant">{errors.comment}</p>
+                  )}
+                  <p className={`text-[10px] font-assistant ml-auto ${
+                    feedback.comment.length >= 10 ? "text-green-600" : "text-gray-500"
+                  }`}>
+                    {feedback.comment.length}/10 characters
+                  </p>
+                </div>
+              </div>
 
               <button
                 onClick={handleSubmit}
-                className="w-full text-white py-2 rounded-md font-amiko text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full text-white py-2 rounded-md font-amiko text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: "#0e540b" }}
               >
-                <Send className="w-4 h-4" /> Submit Feedback
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" /> Submit Feedback
+                  </>
+                )}
               </button>
             </div>
           )}
         </div>
 
-        {/* FAQ Section */}
         <div className="bg-[#ffffff] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl font-poppins font-semibold mb-3 text-[#0e540b]">
             FAQs
@@ -209,7 +297,7 @@ const Help = () => {
               },
               {
                 q: "What if I'm not satisfied with quality?",
-                a: "Contact us immediately — we’ll replace or refund promptly.",
+                a: "Contact us immediately — we'll replace or refund promptly.",
               },
               {
                 q: "Do you offer bulk or corporate orders?",
