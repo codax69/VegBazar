@@ -8,15 +8,15 @@ const ProgressIndicator = () => {
   const steps = [
     { path: "/offers", icon: Package, label: "Basket" },
     { path: "/select-vegetables", icon: ShoppingCart, label: "Items" },
-    { path: "/customer-info", icon: User, label: "Info" },
+    { path: "/address", icon: User, label: "Info" },
     { path: "/billing", icon: File, label: "Pay" },
-    { path: "/order-confirmation", icon: CheckCircle, label: "Done" },
+    { path: "/confirmation", icon: CheckCircle, label: "Done" },
   ];
 
   const currentStep = steps.findIndex((s) => s.path === currentRoute) + 1;
 
   return (
-    <div className="fixed md:top-16 top-10 left-0 w-full bg-white/95 backdrop-blur-sm shadow-sm shadow-[#0e540b]/20 z-30 py-2">
+    <div className="fixed md:top-16 top-12 left-0 w-full bg-white/95 backdrop-blur-sm shadow-sm shadow-[#0e540b]/20 z-30 py-2">
       <div className="w-full overflow-x-auto">
         <div className="flex justify-center mt-2 mb-2 min-w-max h-4 px-2">
           <div className="flex items-center space-x-2 sm:space-x-3">
