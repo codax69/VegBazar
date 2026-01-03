@@ -159,6 +159,8 @@ const VegetableCard = memo(
                 alt={veg.name}
                 loading="lazy"
                 decoding="async"
+                height="96"
+                width="96"
               />
             ) : (
               <div className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br rounded-lg sm:rounded-xl mb-1.5 sm:mb-2 flex items-center justify-center mx-auto ${
@@ -608,7 +610,7 @@ const CustomizedVegetableSelection = () => {
       }
 
       window.scrollTo(0, 0);
-      navigate("/veg-bag");
+      navigate("/cart");
     } catch (error) {
       console.error("Checkout failed:", error);
       setError(error.message || "Failed to process order.");
@@ -623,7 +625,7 @@ const CustomizedVegetableSelection = () => {
     const fetchVegetables = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/api/vegetables`);
+        const response = await axios.get(`${API_URL}/api/vegetables/random`);
         const veggiesData = response.data?.data || [];
         setVegetables(veggiesData);
       } catch (error) {
@@ -644,7 +646,7 @@ const CustomizedVegetableSelection = () => {
   }, [cartItems]);
 
   return (
-    <div className="min-h-screen bg-[#ffffff] pb-20 md:pb-32">
+    <div className="min-h-screen bg-[#ffffff] py-4 md:pb-4">
       <div className="w-full max-w-7xl mx-auto mt-5 bg-[#ffffff] p-4 sm:p-1 md:p-8">
         {/* Header */}
         <div className="flex items-center md:justify-between gap-10 mb-8 pb-4 border-b-2 border-gray-100">
