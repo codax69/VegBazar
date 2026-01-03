@@ -277,3 +277,16 @@ self.addEventListener('message', (event) => {
     );
   }
 });
+
+// Auto-update functionality - checks on page visibility change
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'PAGE_VISIBLE') {
+    self.registration.update()
+      .then(() => {
+        console.log('[Service Worker] Auto-update check completed');
+      })
+      .catch((error) => {
+        console.error('[Service Worker] Auto-update check failed:', error);
+      });
+  }
+});
