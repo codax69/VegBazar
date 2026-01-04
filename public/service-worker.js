@@ -263,4 +263,20 @@ self.addEventListener('message', (event) => {
         event.ports[0].postMessage({ online: false });
       });
   }
+<<<<<<< HEAD:public/service-worker.js
+=======
+  
+  if (event.data && event.data.type === 'REQUEST_NOTIFICATION') {
+    event.waitUntil(
+      self.registration.showNotification('Welcome to VegBazar!', {
+        body: 'Thanks for installing! You\'ll receive updates about your orders.',
+        icon: '/public/vegbazar.svg',
+        badge: '/public/vegbazar.svg',
+        tag: 'vegbazar-welcome',
+        requireInteraction: false,
+        vibrate: [200, 100, 200]
+      })
+    );
+  }
+>>>>>>> parent of ee080c1 (fix:service worker):service-worker.js
 });
