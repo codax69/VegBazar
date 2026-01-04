@@ -35,7 +35,7 @@ const VegetableOffers = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#ffffff] pt-28 px-3 sm:pt-24 sm:px-4 md:pt-28 lg:pt-30">
+    <div className="min-h-screen bg-[#ffffff] pt-8 px-3 sm:py-8 sm:px-4 md:pt-20 lg:py-20">
       <div className="w-full max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="mb-4 sm:mb-6">

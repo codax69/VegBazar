@@ -407,7 +407,7 @@ const VegetableCart = () => {
         alert("Please complete your customer information first");
         setLoading(false);
         setLoadingAction("");
-        navigate("/address");
+        navigate("/customer-info");
         return;
       }
 
@@ -547,11 +547,11 @@ const VegetableCart = () => {
     navigate("/");
   }, [navigate]);
   const handleAddAddress = useCallback(
-    () => navigate("/address"),
+    () => navigate("/customer-info"),
     [navigate]
   );
   const handleEditAddress = useCallback(
-    () => navigate("/address"),
+    () => navigate("/customer-info"),
     [navigate]
   );
 
@@ -604,7 +604,7 @@ const VegetableCart = () => {
 
   // Render cart with items
   return (
-    <div className="min-h-screen max-w-7xl mx-auto bg-gray-50 pt-20 lg:pb-0">
+    <div className="min-h-screen bg-gray-50 py-10 lg:pb-0">
       <div className="container mx-auto px-4 md:py-4 lg:py-3">
         {/* Header */}
         <div className="mb-4 md:mb-3">

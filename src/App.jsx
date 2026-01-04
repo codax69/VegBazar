@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -8,161 +8,26 @@ import {
 } from "react-router-dom";
 import { OrderContext } from "./Context/OrderContext";
 import { ThemeProvider } from "./Context/ThemeContext";
-import { UserAuthProvider } from "./Context/UserAuthContext";
-import { CartProvider } from "./Context/CartContext";
-import { BillProvider } from "./Context/BillContext";
+import CustomerInfo from "./components/CustomerInfo";
+import VegetableOffers from "./components/VegetableOffers";
+import VegetableSelection from "./components/VegetableSelection";
+import OrderConfirmation from "./components/OrderConfirmation";
+import ProgressIndicator from "./components/ProgressIndicator";
+import Help from "./components/Help";
+import BillingPage from "./components/BillingPage";
+import CustomizedVegetableSelection from "./components/CustomizedVegetableSelection";
+import VegetableCart from "./components/VegetableCart";
+import HomePage from "./components/HomePage";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import Navbar from "./components/Navbar";
+import OrderTracking from "./components/OrderTracking";
+import { Home, Tag, ShoppingBag, Phone, Menu, X } from "lucide-react";
 import BackButtonHandler from "./components/BackButtonHandler";
-import AuthModal from "./components/AuthModal";
-import ProgressIndicator from "./components/ProgressIndicator";
-
-// Lazy load components for better performance
-const HomePage = lazy(() => import("./components/HomePage"));
-const CustomerInfo = lazy(() => import("./components/CustomerInfo"));
-const VegetableOffers = lazy(() => import("./components/VegetableOffers"));
-const VegetableSelection = lazy(() => import("./components/VegetableSelection"));
-const OrderConfirmation = lazy(() => import("./components/OrderConfirmation"));
-const Help = lazy(() => import("./components/Help"));
-const BillingPage = lazy(() => import("./components/BillingPage"));
-const CustomizedVegetableSelection = lazy(() => import("./components/CustomizedVegetableSelection"));
-const VegetableCart = lazy(() => import("./components/VegetableCart"));
-const OrderTracking = lazy(() => import("./components/OrderTracking"));
-const BillingSuccess = lazy(() => import("./components/BillingSuccess"));
-const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
-
-// Loading component
-const LoadingSpinner = () => (
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '60vh'
-  }}>
-    <div style={{
-      width: '50px',
-      height: '50px',
-      border: '4px solid #f3f3f3',
-      borderTop: '4px solid #4CAF50',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite'
-    }} />
-    <style>{`
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    `}</style>
-  </div>
-);
+import { CartProvider, useCart } from "./Context/CartContext";
+import { BillProvider } from "./Context/BillContext";
+import BillingSuccess from "./components/BillingSuccess";
 
 const AppContent = () => {
-  const location = useLocation();
-
-  const hideProgressRoutes = [
-    "/",
-    "/veg-bag",
-    "/vegetables",
-    "/customized-vegetables",
-    "/track-your-order",
-    "/support",
-    "/cart",
-  ];
-
-  return (
-    <>
-      <BackButtonHandler />
-      <Navbar />
-      {!hideProgressRoutes.includes(location.pathname) && <ProgressIndicator />}
-
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          {/* Public Routes - No Auth Required */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/offers" element={<VegetableOffers />} />
-          <Route path="/vegetables" element={<VegetableSelection />} />
-          <Route path="/support" element={<Help />} />
-          <Route
-            path="/customized-vegetables"
-            element={<CustomizedVegetableSelection />}
-          />
-
-          {/* Protected Routes - Auth Required */}
-          <Route
-            path="/address"
-            element={
-              <ProtectedRoute>
-                <CustomerInfo />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/billing"
-            element={
-              <ProtectedRoute>
-                <BillingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/confirmation"
-            element={
-              <ProtectedRoute>
-                <OrderConfirmation />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/billing-success"
-            element={
-              <ProtectedRoute>
-                <BillingSuccess />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/track-your-order"
-            element={
-              <ProtectedRoute>
-                <OrderTracking />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cart"
-            element={
-              <ProtectedRoute>
-                <VegetableCart />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Suspense>
-
-      <AuthModal />
-    </>
-  );
-};
-
-// Main App wrapper with all providers
-const VegetableSellingApp = () => {
-  return (
-    <GoogleReCaptchaProvider
-      reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-    >
-      <Router>
-        <ThemeProvider>
-          <UserAuthProvider>
-            <AppWithOrderContext />
-          </UserAuthProvider>
-        </ThemeProvider>
-      </Router>
-    </GoogleReCaptchaProvider>
-  );
-};
-
-// Separate component to provide OrderContext before CartProvider and BillProvider
-const AppWithOrderContext = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [formData, setFormData] = useState({
@@ -181,45 +46,32 @@ const AppWithOrderContext = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [vegetableOrder, setVegetableOrder] = useState([]);
 
-  // Fetch offers with caching
+  // Fetch offers
   const fetchOffers = async () => {
     try {
-      const cached = sessionStorage.getItem('offers');
-      if (cached) {
-        setOffers(JSON.parse(cached));
-        return;
-      }
-      
       const response = await fetch(
         `${import.meta.env.VITE_API_SERVER_URL}/api/offers`
       );
       const data = await response.json();
       setOffers(data.data.offers);
-      sessionStorage.setItem('offers', JSON.stringify(data.data.offers));
     } catch (error) {
       console.error("Error fetching offers:", error);
     }
   };
 
-  // Fetch vegetables with caching
+  // Fetch vegetables
   const fetchVegetables = async () => {
     try {
-      const cached = sessionStorage.getItem('vegetables');
-      if (cached) {
-        setAllVegetables(JSON.parse(cached));
-        return;
-      }
-      
       const response = await fetch(
         `${import.meta.env.VITE_API_SERVER_URL}/api/vegetables`
       );
       const data = await response.json();
-      const vegetables = data.data.map((v) => ({
-        name: v.name,
-        image: v.image,
-      }));
-      setAllVegetables(vegetables);
-      sessionStorage.setItem('vegetables', JSON.stringify(vegetables));
+      setAllVegetables(
+        data.data.map((v) => ({
+          name: v.name,
+          image: v.image,
+        }))
+      );
     } catch (error) {
       console.error("Error fetching vegetables:", error);
     }
@@ -233,15 +85,15 @@ const AppWithOrderContext = () => {
   // Offline detection
   useEffect(() => {
     const handleOffline = () => {
-      window.location.href = "/offline.html";
+      window.location.href = '/offline.html';
     };
 
     const handleOnline = () => {
       // Optionally handle online state
     };
 
-    window.addEventListener("offline", handleOffline);
-    window.addEventListener("online", handleOnline);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
 
     // Check initial online status
     if (!navigator.onLine) {
@@ -249,8 +101,8 @@ const AppWithOrderContext = () => {
     }
 
     return () => {
-      window.removeEventListener("offline", handleOffline);
-      window.removeEventListener("online", handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
     };
   }, []);
 
@@ -289,15 +141,65 @@ const AppWithOrderContext = () => {
     setVegetableOrder,
     vegetableOrder,
   };
-
   return (
-    <OrderContext.Provider value={contextValue}>
-      <CartProvider>
+    <ThemeProvider>
+      <OrderContext.Provider value={contextValue}>
         <BillProvider>
-          <AppContent />
+        <BackButtonHandler />
+        <div className="min-h-screen bg-[#ffffff] flex flex-col">
+          <Navbar />
+          <div className="pt-16 flex-1 container max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+            {![
+              "/",
+              "/veg-bag",
+              "/vegetables",
+              "/track-your-order",
+              "/support",
+              ...(selectedOffer === null ? ["/customer-info"] : []),
+            ].includes(location.pathname) && <ProgressIndicator />}
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/customer-info" element={<CustomerInfo />} />
+              <Route path="/offers" element={<VegetableOffers />} />
+              <Route
+                path="/vegetables"
+                element={<CustomizedVegetableSelection />}
+              />
+              <Route
+                path="/select-vegetables"
+                element={<VegetableSelection />}
+              />
+              <Route path="/billing" element={<BillingPage />} />
+              <Route
+                path="/order-confirmation"
+                element={<OrderConfirmation />}
+              />
+              <Route path="/veg-bag" element={<VegetableCart />} />
+              <Route path="/track-your-order" element={<OrderTracking />} />
+              <Route path="/support" element={<Help />} />
+              <Route path="/order-success" element={<BillingSuccess />} />
+            </Routes>
+          </div>
+        </div>
         </BillProvider>
+      </OrderContext.Provider>
+    </ThemeProvider>
+  );
+};
+
+// Wrap with Router and Google ReCaptcha
+const VegetableSellingApp = () => {
+  return (
+    <GoogleReCaptchaProvider
+      reCaptchaKey={import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY}
+      scriptProps={{ async: false, defer: false, appendTo: "head" }}
+    >
+      <CartProvider>
+        <Router>
+          <AppContent />
+        </Router>
       </CartProvider>
-    </OrderContext.Provider>
+    </GoogleReCaptchaProvider>
   );
 };
 

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useOrderContext } from "../Context/OrderContext.jsx";
-import { useUserAuth } from "../Context/UserAuthContext.jsx";
 import {
   FiUser,
   FiMapPin,
@@ -18,7 +17,6 @@ import { LuShieldCheck } from "react-icons/lu";
 
 const CustomerInfo = () => {
   const { formData, setFormData, navigate, selectedOffer } = useOrderContext();
-  const { user } = useUserAuth();
   const [cities, setCities] = useState([]);
 
   const {
@@ -29,24 +27,29 @@ const CustomerInfo = () => {
     setValue,
   } = useForm({
     defaultValues: {
-      name: formData.name || user?.username || "",
+      name: formData.name || "",
       address: formData.address || "",
       city: formData.city || "",
       area: formData.area || "",
       mobile: formData.mobile || "",
-      email: formData.email || user?.email || "",
+      email: formData.email || "",
     },
   });
 
   const watchedCity = watch("city");
 
   useEffect(() => {
-    // Pre-populate form with authenticated user data
-    if (user) {
-      if (user.username && !formData.name) setValue("name", user.username);
-      if (user.email && !formData.email) setValue("email", user.email);
+    const saved = localStorage.getItem("customerInfo");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      Object.keys(parsed).forEach((key) => {
+        if (parsed[key]) setValue(key, parsed[key]);
+      });
+
+      // Also update context
+      setFormData(parsed);
     }
-  }, [user, formData, setValue]);
+  }, [setValue, setFormData]);
 
   const CityApiCall = async () => {
     try {
@@ -70,10 +73,13 @@ const CustomerInfo = () => {
   const onSubmit = (data) => {
     window.scrollTo(0, 0);
 
-    // Save to context only
+    // Save to context
     setFormData(data);
 
-    navigate(selectedOffer ? "/billing" : "/cart");
+    // Save to localStorage
+    localStorage.setItem("customerInfo", JSON.stringify(data));
+
+    navigate(selectedOffer ? "/billing" : "/veg-bag");
   };
 
   return (

@@ -2,6 +2,11 @@ import { useEffect, useContext, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { OrderContext } from "../Context/OrderContext";
 
+/**
+ * BackButtonHandler Component
+ * Manages browser back button and Android hardware back button behavior
+ * Provides controlled navigation flow and prevents unwanted exits
+ */
 const BackButtonHandler = () => {
   const navigate = useNavigate();
   const location = useLocation();
