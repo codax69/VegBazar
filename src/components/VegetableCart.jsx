@@ -506,7 +506,7 @@ const VegetableCart = () => {
 
         // Navigate to confirmation page
         window.scrollTo(0, 0);
-        navigate("/confirmation");
+        navigate("/order-confirmation");
       }
     } catch (error) {
       console.error("❌ Error creating order:", error);
