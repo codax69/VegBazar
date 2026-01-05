@@ -839,7 +839,7 @@ const Homepage = () => {
     }
 
     window.scrollTo(0, 0);
-    navigate("/cart");
+    navigate("/veg-bag");
   }, [navigate]);
 
   return (
