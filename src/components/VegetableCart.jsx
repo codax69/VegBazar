@@ -803,9 +803,6 @@ const AddressSection = React.memo(
                   />
                 )}
               </div>
-              <p className="font-assistant text-xs md:text-[11px] text-gray-600 mb-0.5">
-                {userSavedAddress.mobile}
-              </p>
               <p className="font-assistant text-xs md:text-[11px] text-gray-700 leading-relaxed">
                 {userSavedAddress.address}, {userSavedAddress.area},{" "}
                 {userSavedAddress.city}
@@ -960,34 +957,6 @@ const PaymentMethodSection = React.memo(
             <CheckCircle size={18} className="text-[#0e540b] md:w-4 md:h-4" />
           )}
         </label>
-         <label
-          className={`flex items-center gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${
-            paymentMethod === ""
-              ? "border-[#0e540b] bg-green-50"
-              : "border-gray-200 hover:border-green-300"
-          }`}
-        >
-          <input
-            type="radio"
-            name="payment"
-            value="ONLINE"
-            checked={paymentMethod === "ONLINE"}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="w-4 h-4 md:w-3.5 md:h-3.5 text-[#0e540b] focus:ring-[#0e540b]"
-          />
-          <CreditCard size={22} className="text-gray-600 md:w-5 md:h-5" />
-          <div className="flex-1">
-            <p className="font-poppins font-semibold text-gray-800 text-sm md:text-xs">
-              Online Payment
-            </p>
-            <p className="font-assistant text-xs md:text-[10px] text-gray-600">
-              UPI, Card, Net Banking
-            </p>
-          </div>
-          {paymentMethod === "ONLINE" && (
-            <CheckCircle size={18} className="text-[#0e540b] md:w-4 md:h-4" />
-          )}
-        </label>
       </div>
     </div>
   )
@@ -1047,7 +1016,6 @@ const PriceSummary = React.memo(
               <span className="font-assistant text-xs text-gray-600">
                 Delivery Charge
               </span>
-              {/* ✅ FIXED: Show dynamic delivery charge */}
               <span className="font-assistant font-semibold text-gray-800 text-sm">
                 {deliveryCharge === 0
                   ? "FREE"
