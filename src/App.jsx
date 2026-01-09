@@ -171,7 +171,7 @@ const AppContent = () => {
               />
               <Route path="/billing" element={<BillingPage />} />
               <Route
-                path="/order-confirmation"
+                path="/confirmation"
                 element={<OrderConfirmation />}
               />
               <Route path="/veg-bag" element={<VegetableCart />} />
