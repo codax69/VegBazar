@@ -960,7 +960,7 @@ const PaymentMethodSection = React.memo(
             <CheckCircle size={18} className="text-[#0e540b] md:w-4 md:h-4" />
           )}
         </label>
-        <label
+        {/* <label
           className={`flex items-center gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${
             paymentMethod === "ONLINE"
               ? "border-[#0e540b] bg-green-50"
@@ -987,7 +987,7 @@ const PaymentMethodSection = React.memo(
           {paymentMethod === "ONLINE" && (
             <CheckCircle size={18} className="text-[#0e540b] md:w-4 md:h-4" />
           )}
-        </label>
+        </label> */}
       </div>
     </div>
   )
