@@ -155,31 +155,27 @@ const VegetableCard = memo(
       }
     }, [veg, isSetModel]);
 
+    // ✅ FIX: Calculate currentOption first (no useMemo needed)
     const currentOption = isSetModel ? selectedSet : selectedWeight;
+    
+    // ✅ FIX: Get selected option data directly
     const selectedOptionData =
       availableOptions.find((opt) => opt.value === currentOption) ||
       availableOptions[0];
 
-    // Check if current selection is out of stock
+    // ✅ FIX: Simple calculations without useMemo
     const isCurrentOptionOutOfStock = !selectedOptionData?.inStock;
-
-    const { actualPrice, marketPrice, savings } = useMemo(() => {
-      const actual = selectedOptionData?.price || 0;
-      const market = selectedOptionData?.marketPrice || actual;
-      return {
-        actualPrice: actual,
-        marketPrice: market,
-        savings: market - actual,
-      };
-    }, [selectedOptionData]);
+    const actualPrice = selectedOptionData?.price || 0;
+    const marketPrice = selectedOptionData?.marketPrice || actualPrice;
+    const savings = marketPrice - actualPrice;
 
     // Get stock warning message
     const stockWarning = useMemo(() => {
       if (isCompletelyOutOfStock || !isCurrentOptionOutOfStock) return null;
 
-      const availableOptions = availableOptions.filter((opt) => opt.inStock);
+      const availableOpts = availableOptions.filter((opt) => opt.inStock);
 
-      if (availableOptions.length === 0) return null;
+      if (availableOpts.length === 0) return null;
 
       if (isSetModel) {
         const stockPieces = veg.stockPieces || 0;
@@ -187,13 +183,13 @@ const VegetableCard = memo(
           message: `Only ${stockPieces} piece${
             stockPieces !== 1 ? "s" : ""
           } left`,
-          alternatives: availableOptions.map((opt) => opt.label).join(", "),
+          alternatives: availableOpts.map((opt) => opt.label).join(", "),
         };
       } else {
         const stockKg = veg.stockKg || 0;
         return {
           message: `Only ${stockKg}kg available`,
-          alternatives: availableOptions.map((opt) => opt.label).join(", "),
+          alternatives: availableOpts.map((opt) => opt.label).join(", "),
         };
       }
     }, [
@@ -383,6 +379,7 @@ const VegetableCard = memo(
   }
 );
 
+VegetableCard.displayName = "VegetableCard";
 // Memoized OfferCard component
 const OfferCard = memo(({ offer, onNavigate }) => {
   return (
