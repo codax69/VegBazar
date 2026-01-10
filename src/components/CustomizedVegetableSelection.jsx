@@ -610,7 +610,7 @@ const CustomizedVegetableSelection = () => {
       }
 
       window.scrollTo(0, 0);
-      navigate("/cart");
+      navigate("/veg-bag");
     } catch (error) {
       console.error("Checkout failed:", error);
       setError(error.message || "Failed to process order.");
