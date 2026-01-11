@@ -1,94 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-IN" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
-    <!-- Primary site icons (favicons + app icons) -->
-    <link rel="icon" href="./public/favicon.ico" sizes="any" />
-    <link rel="icon" type="image/png" href="./public/favicon.ico" />
+    
+    <!-- Primary site icons (favicons + app icons) - FIXED PATHS -->
+    <link rel="icon" href="./public/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="./public/vegbazar.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16x16.png" />
-    <link rel="shortcut icon" type="image/png" href="./public/favicon.ico" />
-    <!-- Safari pinned tab -->
-    <link rel="mask-icon" href="/vegbazar.svg" color="#0e540b" />
-    <!-- Apple / iOS -->
+    <link rel="shortcut icon" href="./public/favicon.ico" />
+    <link rel="mask-icon" href="./public/vegbazar.svg" color="#0e540b" />
     <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png" />
-    <!-- Android / Progressive Web App -->
+    <link rel="apple-touch-icon" sizes="152x152" href="./public/apple-touch-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="./public/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="
+    <!-- Progressive Web App -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="VegBazar" />
     <meta name="application-name" content="VegBazar" />
     <meta name="theme-color" content="#0e540b" />
     <meta name="msapplication-TileColor" content="#0e540b" />
     <meta name="msapplication-TileImage" content="/vegbazar.svg" />
-    <link rel="manifest" href="./public/site.webmanifest" />
+    <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- Viewport & SEO basics -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VegBazar</title>
+    <!-- Viewport & Basic Meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    
+    <!-- Primary SEO Tags -->
+    <title>VegBazar Valsad - Fresh Vegetables & Farm Vegetable Delivery | Order Online</title>
     <meta
       name="description"
-      content="VegBazar Valsad - Order fresh vegetables online from local farms. Best veg bazar for vegetable delivery in Valsad, Abrama & Tithal Road. Farm fresh vegetables delivered next morning. Free delivery above ₹250."
+      content="Order farm-fresh vegetables online from VegBazar Valsad. Best vegetable delivery service in Valsad, Abrama & Tithal Road. Next morning delivery. Free shipping above ₹250. Farm to doorstep in 24 hours."
     />
     <meta
       name="keywords"
-      content="vegbazar, valsad, veg bazar, veg bajhar, vegetable in valsad, fresh vegetable, vegetables, vegetable delivery valsad, fresh vegetables valsad, farm vegetable, vegetables from farm, online vegetable valsad, vegbazar valsad, veg bazar valsad, fresh veg valsad, vegetable home delivery valsad, farm fresh vegetables valsad, organic vegetables valsad, vegetable baskets valsad, next morning delivery valsad"
+      content="vegbazar valsad, veg bazar valsad, veg bajhar valsad, fresh vegetables valsad, vegetable delivery valsad, online vegetables valsad, farm fresh vegetables, vegetable home delivery valsad, organic vegetables valsad, sabzi online valsad, vegetable shop valsad, fresh veg delivery, abrama vegetable delivery, tithal road vegetables, next morning delivery valsad, farm to home vegetables, seasonal vegetables valsad, vegetable subscription valsad, local farm vegetables, healthy vegetables valsad"
     />
-    <meta name="author" content="VegBazar" />
-    <meta
-      name="robots"
-      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
-    />
-    <meta name="googlebot" content="index, follow" />
+    <meta name="author" content="VegBazar Valsad" />
+    <link rel="canonical" href="https://vegbazar.store/" />
+    
+    <!-- Alternate Language Links -->
+    <link rel="alternate" href="https://vegbazar.store/" hreflang="en-IN" />
+    <link rel="alternate" href="https://vegbazar.store/" hreflang="hi-IN" />
+    <link rel="alternate" href="https://vegbazar.store/" hreflang="gu-IN" />
+    <link rel="alternate" href="https://vegbazar.store/" hreflang="x-default" />
+    
+    <!-- Robots & Crawling -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="rating" content="general" />
+    <meta name="revisit-after" content="1 days" />
+    
+    <!-- Geographic & Location -->
     <meta name="geo.region" content="IN-GJ" />
-    <meta name="geo.placename" content="Valsad" />
+    <meta name="geo.placename" content="Valsad, Gujarat, India" />
     <meta name="geo.position" content="20.586472;72.935694" />
     <meta name="ICBM" content="20.586472, 72.935694" />
-    <link rel="canonical" href="https://vegbazar.store/" />
-    <link rel="alternate" href="https://vegbazar.store/" hreflang="en-IN" />
+    <meta name="DC.title" content="VegBazar Valsad - Fresh Vegetable Delivery" />
 
-    <!-- Open Graph (Facebook / LinkedIn) -->
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="VegBazar Valsad" />
-    <meta
-      property="og:title"
-      content="VegBazar Valsad — Fresh Vegetables & Farm Vegetable Delivery | Best Veg Bazar"
-    />
-    <meta
-      property="og:description"
-      content="Order fresh vegetables from VegBazar Valsad. Farm fresh vegetables delivered next morning in Valsad, Abrama & Tithal Road. Best veg bazar for quality vegetable delivery. Free delivery above ₹250."
-    />
+    <meta property="og:title" content="VegBazar Valsad - Fresh Vegetables & Farm Vegetable Delivery" />
+    <meta property="og:description" content="Order farm-fresh vegetables from local farms in Valsad. Next morning delivery to Valsad, Abrama & Tithal Road. Free delivery above ₹250. Quality vegetables from farm to your doorstep." />
     <meta property="og:url" content="https://vegbazar.store/" />
-    <meta
-      property="og:image"
-      content="https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg"
-    />
-    <meta
-      property="og:image:alt"
-      content="VegBazar Valsad — Fresh Vegetables Online"
-    />
+    <meta property="og:image" content="https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg" />
+    <meta property="og:image:secure_url" content="https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg" />
+    <meta property="og:image:alt" content="VegBazar Valsad - Fresh Vegetables Online" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="en_IN" />
+    <meta property="og:locale:alternate" content="hi_IN" />
+    <meta property="og:locale:alternate" content="gu_IN" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@VegBazar" />
     <meta name="twitter:creator" content="@VegBazar" />
-    <meta
-      name="twitter:title"
-      content="VegBazar Valsad — Fresh Vegetables & Farm Vegetable Delivery"
-    />
-    <meta
-      name="twitter:description"
-      content="Order fresh vegetables from local farms in Valsad. VegBazar delivers farm fresh vegetables next morning. Best veg bazar in Valsad. Free delivery above ₹250."
-    />
-    <meta
-      name="twitter:image"
-      content="https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg"
-    />
+    <meta name="twitter:title" content="VegBazar Valsad - Fresh Vegetables & Farm Vegetable Delivery" />
+    <meta name="twitter:description" content="Order farm-fresh vegetables from local farms in Valsad. Next morning delivery. Free shipping above ₹250. Farm to doorstep quality vegetables." />
+    <meta name="twitter:image" content="https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg" />
     <meta name="twitter:image:alt" content="VegBazar Valsad Fresh Vegetables" />
 
-    <!-- Structured data (Organization + LocalBusiness + Product + FAQ + BreadcrumbList) -->
+    <!-- Enhanced Structured Data (Organization + LocalBusiness + Product + FAQ + BreadcrumbList + Offers) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -97,10 +95,17 @@
             "@type": "Organization",
             "@id": "https://vegbazar.store/#org",
             "name": "VegBazar Valsad",
-            "alternateName": ["Veg Bazar", "VegBazar", "Veg Bajhar Valsad"],
+            "alternateName": ["Veg Bazar Valsad", "VegBazar", "Veg Bajhar Valsad", "वेग बाज़ार वलसाड"],
             "url": "https://vegbazar.store/",
-            "logo": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
-            "description": "Fresh vegetables and farm vegetable delivery service in Valsad",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
+              "width": 512,
+              "height": 512
+            },
+            "description": "Leading fresh vegetables and farm vegetable delivery service in Valsad, Gujarat. Farm to doorstep delivery in 24 hours.",
+            "foundingDate": "2024",
+            "slogan": "Farm Fresh to Your Doorstep",
             "sameAs": [
               "https://www.facebook.com/vegbazar",
               "https://www.instagram.com/vegbazar",
@@ -112,8 +117,14 @@
                 "telephone": "+91-8780564115",
                 "contactType": "Customer Service",
                 "email": "info.vegbazar@gmail.com",
-                "areaServed": "IN",
-                "availableLanguage": ["English", "Hindi", "Gujarati"]
+                "areaServed": ["IN-GJ", "Valsad", "Abrama", "Tithal Road"],
+                "availableLanguage": ["English", "Hindi", "Gujarati"],
+                "hoursAvailable": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                  "opens": "06:00",
+                  "closes": "20:00"
+                }
               }
             ]
           },
@@ -122,7 +133,7 @@
             "@id": "https://vegbazar.store/#business",
             "name": "VegBazar Valsad",
             "alternateName": "Veg Bazar Valsad",
-            "description": "Fresh vegetables delivery in Valsad - Farm fresh vegetables from local farms delivered next morning to Valsad, Abrama and Tithal Road",
+            "description": "Premium fresh vegetables delivery in Valsad - Farm fresh vegetables from local farms delivered next morning to Valsad, Abrama and Tithal Road. Organic and seasonal vegetables available.",
             "image": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
             "address": {
               "@type": "PostalAddress",
@@ -133,24 +144,17 @@
               "addressCountry": "IN"
             },
             "telephone": "+91-8780564115",
+            "email": "info.vegbazar@gmail.com",
             "url": "https://vegbazar.store/",
             "geo": {
               "@type": "GeoCoordinates",
               "latitude": 20.586472,
               "longitude": 72.935694
             },
-            "priceRange": "₹",
+            "priceRange": "₹₹",
             "openingHoursSpecification": {
               "@type": "OpeningHoursSpecification",
-              "dayOfWeek": [
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-                "Sunday"
-              ],
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
               "opens": "06:00",
               "closes": "20:00"
             },
@@ -158,7 +162,8 @@
             "areaServed": [
               {
                 "@type": "City",
-                "name": "Valsad"
+                "name": "Valsad",
+                "sameAs": "https://en.wikipedia.org/wiki/Valsad"
               },
               {
                 "@type": "Place",
@@ -167,6 +172,10 @@
               {
                 "@type": "Place",
                 "name": "Tithal Road"
+              },
+              {
+                "@type": "Place",
+                "name": "Vashiyar Valley"
               }
             ],
             "hasOfferCatalog": {
@@ -184,18 +193,26 @@
                   "@type": "Offer",
                   "itemOffered": {
                     "@type": "Product",
-                    "name": "Farm Vegetables"
+                    "name": "Farm Fresh Vegetables"
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Product",
+                    "name": "Organic Vegetables"
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Product",
+                    "name": "Seasonal Vegetables"
                   }
                 }
               ]
             },
-            "paymentAccepted": [
-              "Cash",
-              "Credit Card",
-              "Debit Card",
-              "UPI",
-              "Net Banking"
-            ],
+            "paymentAccepted": ["Cash", "Credit Card", "Debit Card", "UPI", "Net Banking", "Paytm", "PhonePe", "Google Pay"],
             "currenciesAccepted": "INR",
             "aggregateRating": {
               "@type": "AggregateRating",
@@ -203,13 +220,15 @@
               "reviewCount": "500",
               "bestRating": "5",
               "worstRating": "1"
-            }
+            },
+            "knowsAbout": ["Fresh Vegetables", "Farm Produce", "Organic Vegetables", "Vegetable Delivery", "Next Morning Delivery"],
+            "hasMap": "https://maps.google.com/?q=20.586472,72.935694"
           },
           {
             "@type": "Product",
             "name": "Fresh Vegetable Basket - VegBazar Valsad",
             "image": "https://res.cloudinary.com/dltmiswel/image/upload/v1762599003/vegbazar_irwqy0.svg",
-            "description": "Handpicked seasonal vegetable basket with 8-10 farm fresh vegetables. Next morning delivery in Valsad.",
+            "description": "Handpicked seasonal vegetable basket with 8-10 farm fresh vegetables. Next morning delivery in Valsad. Perfect for daily cooking needs.",
             "brand": {
               "@type": "Brand",
               "name": "VegBazar Valsad"
@@ -221,15 +240,52 @@
               "availability": "https://schema.org/InStock",
               "url": "https://vegbazar.store/offers",
               "priceValidUntil": "2025-12-31",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@type": "Organization",
+                "name": "VegBazar Valsad"
+              },
               "deliveryLeadTime": {
                 "@type": "QuantitativeValue",
                 "minValue": 0,
                 "maxValue": 1,
                 "unitCode": "DAY"
+              },
+              "shippingDetails": {
+                "@type": "OfferShippingDetails",
+                "shippingRate": {
+                  "@type": "MonetaryAmount",
+                  "value": "0",
+                  "currency": "INR"
+                },
+                "shippingDestination": {
+                  "@type": "DefinedRegion",
+                  "addressCountry": "IN",
+                  "addressRegion": "Gujarat"
+                },
+                "deliveryTime": {
+                  "@type": "ShippingDeliveryTime",
+                  "businessDays": {
+                    "@type": "OpeningHoursSpecification",
+                    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+                  },
+                  "cutoffTime": "20:00",
+                  "handlingTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 0,
+                    "maxValue": 1,
+                    "unitCode": "DAY"
+                  }
+                }
               }
             },
             "category": "Fresh Vegetables",
-            "itemCondition": "https://schema.org/NewCondition"
+            "sku": "VB-BASKET-001",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.8",
+              "reviewCount": "250"
+            }
           },
           {
             "@type": "FAQPage",
@@ -239,7 +295,7 @@
                 "name": "Does VegBazar deliver fresh vegetables in Valsad?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes, VegBazar delivers farm-fresh vegetables in Valsad with next morning delivery. We source fresh vegetables directly from local farms and deliver to Valsad, Abrama, and Tithal Road areas."
+                  "text": "Yes, VegBazar delivers farm-fresh vegetables in Valsad with next morning delivery. We source fresh vegetables directly from local farms and deliver to Valsad, Abrama, and Tithal Road areas within 24 hours of harvest."
                 }
               },
               {
@@ -247,7 +303,7 @@
                 "name": "What areas does VegBazar Valsad deliver vegetables to?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "VegBazar delivers fresh vegetables in Valsad city, Abrama, and Tithal Road. We offer next morning vegetable delivery across these areas in Valsad."
+                  "text": "VegBazar delivers fresh vegetables in Valsad city, Abrama, Tithal Road, and Vashiyar Valley. We offer next morning vegetable delivery across these areas in Valsad district."
                 }
               },
               {
@@ -255,7 +311,7 @@
                 "name": "Are the vegetables from VegBazar farm fresh?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes, all vegetables from VegBazar are farm fresh. We source vegetables directly from local farms in and around Valsad to ensure maximum freshness and quality."
+                  "text": "Yes, all vegetables from VegBazar are 100% farm fresh. We source vegetables directly from local farms in and around Valsad to ensure maximum freshness, quality, and nutritional value. Vegetables are harvested and delivered within 24 hours."
                 }
               },
               {
@@ -263,7 +319,7 @@
                 "name": "Is there free delivery for vegetables in Valsad?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes, VegBazar offers free vegetable delivery in Valsad on orders above ₹250. Orders below ₹250 have nominal delivery charges."
+                  "text": "Yes, VegBazar offers free vegetable delivery in Valsad on orders above ₹250. Orders below ₹250 have nominal delivery charges of ₹30."
                 }
               },
               {
@@ -271,7 +327,23 @@
                 "name": "What is veg bazar or veg bajhar?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Veg Bazar (also spelled veg bajhar) means vegetable market. VegBazar is Valsad's online veg bazar offering fresh vegetables with home delivery from farm to your doorstep."
+                  "text": "Veg Bazar (also spelled veg bajhar or वेग बाज़ार) means vegetable market in Hindi. VegBazar is Valsad's premier online vegetable market offering fresh vegetables with home delivery from farm to your doorstep."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What payment methods does VegBazar accept?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "VegBazar accepts all major payment methods including Cash on Delivery, UPI (PhonePe, Google Pay, Paytm), Credit/Debit Cards, and Net Banking for your convenience."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I order organic vegetables from VegBazar Valsad?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, VegBazar offers organic and naturally grown vegetables from certified local farms in Valsad. Check our organic vegetables section for available seasonal produce."
                 }
               }
             ]
@@ -290,31 +362,52 @@
                 "position": 2,
                 "name": "Fresh Vegetables Valsad",
                 "item": "https://vegbazar.store/vegetables"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Offers",
+                "item": "https://vegbazar.store/offers"
               }
             ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://vegbazar.store/#website",
+            "url": "https://vegbazar.store/",
+            "name": "VegBazar Valsad",
+            "description": "Fresh vegetable delivery service in Valsad",
+            "publisher": {
+              "@id": "https://vegbazar.store/#org"
+            },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://vegbazar.store/search?q={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
           }
         ]
       }
     </script>
 
-    <!-- Performance / Security hints -->
+    <!-- Performance & Security -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
-    <link
-      rel="preconnect"
-      href="https://www.googletagmanager.com"
-      crossorigin
-    />
-    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://accounts.google.com" crossorigin />
+    
+    <!-- OpenSearch -->
+    <link rel="search" type="application/opensearchdescription+xml" title="VegBazar Valsad Search" href="/opensearch.xml" />
 
-    <!-- Optional: OpenSearch (site search integration) -->
-    <link
-      rel="search"
-      type="application/opensearchdescription+xml"
-      title="VegBazar Valsad Search"
-      href="/opensearch.xml"
-    />
-
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="/src/index.css" />
+
+    <!-- Preload critical resources -->
+    <link rel="preload" as="style" href="/src/index.css" />
 
     <!-- Google Sign-In -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -328,7 +421,10 @@
         dataLayer.push(arguments);
       }
       gtag("js", new Date());
-      gtag("config", "G-M7N6DPZNRF", { anonymize_ip: true });
+      gtag("config", "G-M7N6DPZNRF", { 
+        anonymize_ip: true,
+        cookie_flags: 'SameSite=None;Secure'
+      });
     </script>
 
     <div id="root"></div>
@@ -339,7 +435,7 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("./service-worker.js")
+            .register("/service-worker.js")
             .then((reg) => {
               console.log("✅ Service Worker registered:", reg.scope);
 
