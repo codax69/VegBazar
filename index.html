@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <!-- Primary site icons (favicons + app icons) -->
-    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="./public/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="./public/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16x16.png" />
@@ -339,7 +339,7 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/public/service-worker.js")
+            .register("./service-worker.js")
             .then((reg) => {
               console.log("✅ Service Worker registered:", reg.scope);
 
