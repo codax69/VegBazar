@@ -4,7 +4,6 @@ import { useBillContext } from "../Context/BillContext";
 import RazorpayPayment from "./RazorpayPayment";
 import CouponCodeSection from "./CouponCodeSection";
 import axios from "axios";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import {
   FiPackage,
   FiCreditCard,
@@ -106,8 +105,6 @@ const BillingPage = () => {
     handleRemoveCoupon,
   } = useBillContext();
 
-  const { executeRecaptcha } = useGoogleReCaptcha();
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [orderCount, setOrderCount] = useState(null);
@@ -190,11 +187,6 @@ const BillingPage = () => {
       e.preventDefault();
       window.scrollTo(0, 0);
 
-      if (!executeRecaptcha) {
-        setSubmitError("reCAPTCHA not ready. Try again shortly.");
-        return;
-      }
-
       if (!orderData) {
         setSubmitError("Order data not ready. Please wait.");
         return;
@@ -206,17 +198,6 @@ const BillingPage = () => {
       setSubmitError(null);
 
       try {
-        const captchaToken = await executeRecaptcha("submit_order");
-        if (!captchaToken) throw new Error("Captcha not generated.");
-
-        const captchaRes = await axios.post(`${API_URL}/api/verify-captcha`, {
-          token: captchaToken,
-          action: "submit_order",
-        });
-
-        if (!captchaRes.data.success)
-          throw new Error("Captcha verification failed.");
-
         const res = await axios.post(
           `${API_URL}/api/orders/create-order`,
           orderData
@@ -225,7 +206,7 @@ const BillingPage = () => {
         if (res.status >= 200 && res.status < 300) {
           setIsOrderPlaced(true);
           // Navigate with order data in state
-          navigate("/order-success", { 
+          navigate("/billing-success", { 
             state: { orderData: orderData }
           });
         } else {
@@ -238,7 +219,7 @@ const BillingPage = () => {
         setIsSubmitting(false);
       }
     },
-    [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced, navigate]
+    [isSubmitting, orderData, setIsOrderPlaced, navigate]
   );
 
   // Memoized handlers

@@ -2,11 +2,6 @@ import { useEffect, useContext, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { OrderContext } from "../Context/OrderContext";
 
-/**
- * BackButtonHandler Component
- * Manages browser back button and Android hardware back button behavior
- * Provides controlled navigation flow and prevents unwanted exits
- */
 const BackButtonHandler = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,12 +14,12 @@ const BackButtonHandler = () => {
       // Route mapping for back navigation
       const routes = {
         // Order flow
-        "/order-confirmation": "/veg-bag",
+        "/confirmation": "/veg-bag",
         "/billing": selectedOffer ? "/select-vegetables" : "/offers",
         "/select-vegetables": "/offers",
         
         // Shopping flow
-        "/veg-bag": "/",
+        "/cart": "/",
         "/vegetables": "/",
         "/offers": "/",
         
@@ -42,7 +37,7 @@ const BackButtonHandler = () => {
 
   // Check if route should be protected from leaving
   const isProtectedRoute = useCallback((path) => {
-    return ["/billing", "/order-confirmation"].includes(path);
+    return ["/billing", "/confirmation"].includes(path);
   }, []);
 
   // Main back button handler

@@ -380,6 +380,8 @@ const VegetableCard = memo(
 );
 
 VegetableCard.displayName = "VegetableCard";
+
+VegetableCard.displayName = "VegetableCard";
 // Memoized OfferCard component
 const OfferCard = memo(({ offer, onNavigate }) => {
   return (

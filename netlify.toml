@@ -5,9 +5,12 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Cross-Origin-Opener-Policy = "same-origin-allow-popups"
+
+# IMPORTANT: Remove global X-Frame-Options DENY
+# It breaks Google Sign-In
 
 [[headers]]
   for = "/assets/*"

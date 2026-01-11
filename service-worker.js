@@ -290,3 +290,13 @@ self.addEventListener('message', (event) => {
       });
   }
 });
+self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
+
+  if (
+    url.origin.includes("auth0.com") ||
+    url.origin.includes("google.com")
+  ) {
+    return;
+  }
+});

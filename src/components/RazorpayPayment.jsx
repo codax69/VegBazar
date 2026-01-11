@@ -347,7 +347,7 @@ const RazorpayPayment = ({
               if (onSuccess) {
                 onSuccess();
               } else {
-                navigate("/conformation", {
+                navigate("/order-conformation", {
                   state: { orderData: orderData },
                 });
               }

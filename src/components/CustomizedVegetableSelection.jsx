@@ -625,7 +625,7 @@ const CustomizedVegetableSelection = () => {
     const fetchVegetables = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/api/vegetables`);
+        const response = await axios.get(`${API_URL}/api/vegetables/random`);
         const veggiesData = response.data?.data || [];
         setVegetables(veggiesData);
       } catch (error) {

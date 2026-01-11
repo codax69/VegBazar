@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import {
   CheckCircle,
   ArrowLeft,

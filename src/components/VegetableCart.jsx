@@ -407,7 +407,7 @@ const VegetableCart = () => {
         alert("Please complete your customer information first");
         setLoading(false);
         setLoadingAction("");
-        navigate("/customer-info");
+        navigate("/address");
         return;
       }
 
@@ -547,11 +547,11 @@ const VegetableCart = () => {
     navigate("/");
   }, [navigate]);
   const handleAddAddress = useCallback(
-    () => navigate("/customer-info"),
+    () => navigate("/address"),
     [navigate]
   );
   const handleEditAddress = useCallback(
-    () => navigate("/customer-info"),
+    () => navigate("/address"),
     [navigate]
   );
 
@@ -604,7 +604,7 @@ const VegetableCart = () => {
 
   // Render cart with items
   return (
-    <div className="min-h-screen bg-gray-50 py-10 lg:pb-0">
+    <div className="min-h-screen max-w-7xl mx-auto bg-gray-50 pt-20 lg:pb-0">
       <div className="container mx-auto px-4 md:py-4 lg:py-3">
         {/* Header */}
         <div className="mb-4 md:mb-3">
@@ -954,6 +954,34 @@ const PaymentMethodSection = React.memo(
             </p>
           </div>
           {paymentMethod === "COD" && (
+            <CheckCircle size={18} className="text-[#0e540b] md:w-4 md:h-4" />
+          )}
+        </label>
+        <label
+          className={`flex items-center gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${
+            paymentMethod === "ONLINE"
+              ? "border-[#0e540b] bg-green-50"
+              : "border-gray-200 hover:border-green-300"
+          }`}
+        >
+          <input
+            type="radio"
+            name="payment"
+            value="ONLINE"
+            checked={paymentMethod === "ONLINE"}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="w-4 h-4 md:w-3.5 md:h-3.5 text-[#0e540b] focus:ring-[#0e540b]"
+          />
+          <CreditCard size={22} className="text-gray-600 md:w-5 md:h-5" />
+          <div className="flex-1">
+            <p className="font-poppins font-semibold text-gray-800 text-sm md:text-xs">
+              Online Payment
+            </p>
+            <p className="font-assistant text-xs md:text-[10px] text-gray-600">
+              UPI, Card, Net Banking
+            </p>
+          </div>
+          {paymentMethod === "ONLINE" && (
             <CheckCircle size={18} className="text-[#0e540b] md:w-4 md:h-4" />
           )}
         </label>
