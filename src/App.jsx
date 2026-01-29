@@ -131,6 +131,7 @@ const AppWithOrderContext = () => {
 
       const response = await axios.get(`${API_URL}/api/offers`);
       setOffers(response.data?.data.offers);
+      console.log(offers)
       sessionStorage.setItem(
         "offers",
         JSON.stringify(response.data?.data.offers)
@@ -154,6 +155,7 @@ const AppWithOrderContext = () => {
         name: v.name,
         image: v.image,
       }));
+      console.log(vegetables);
       setAllVegetables(vegetables);
       sessionStorage.setItem("vegetables", JSON.stringify(vegetables));
     } catch (error) {
