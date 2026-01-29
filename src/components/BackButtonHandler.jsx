@@ -26,7 +26,7 @@ const BackButtonHandler = () => {
         // Info pages
         "/customer-info": 
           selectedOffer ? "/select-vegetables" : "/",
-        "/track-your-order": "/",
+        "/orders": "/",
         "/support": "/",
       };
 

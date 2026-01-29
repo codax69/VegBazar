@@ -1,38 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { Package, Calendar, DollarSign, Filter, ChevronLeft, ChevronRight, Search, Clock, CheckCircle, XCircle, Truck, X, Loader } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Package,
+  Calendar,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Truck,
+  Loader,
+} from "lucide-react";
+import { useAuth } from "../Context/AuthProvider";
 
-// API call function
-const fetchOrderHistory = async (params) => {
+// API call function (Unchanged)
+const fetchOrderHistory = async (params, token) => {
   const queryParams = new URLSearchParams();
-  
-  if (params.page) queryParams.append('page', params.page);
-  if (params.limit) queryParams.append('limit', params.limit);
-  if (params.status) queryParams.append('status', params.status);
-  if (params.sortBy) queryParams.append('sortBy', params.sortBy);
-  if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
-  if (params.startDate) queryParams.append('startDate', params.startDate);
-  if (params.endDate) queryParams.append('endDate', params.endDate);
 
-  const token = localStorage.getItem('token');
-  
+  if (params.page) queryParams.append("page", params.page);
+  if (params.limit) queryParams.append("limit", params.limit);
+  if (params.status) queryParams.append("status", params.status);
+  if (params.sortBy) queryParams.append("sortBy", params.sortBy);
+  if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
+  if (params.startDate) queryParams.append("startDate", params.startDate);
+  if (params.endDate) queryParams.append("endDate", params.endDate);
+  if (params.search) queryParams.append("search", params.search);
+
   if (!token) {
-    throw new Error('Authentication required. Please log in.');
+    throw new Error("Authentication required. Please log in.");
   }
 
-  const response = await fetch(`${import.meta.env.VITE_API_SERVER_URL}/api/user/orders?${queryParams.toString()}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    }
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_API_SERVER_URL}/api/user/order-history?${queryParams.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
 
   if (!response.ok) {
     if (response.status === 401) {
-      localStorage.removeItem('token'); // Clear invalid token
-      throw new Error('Session expired. Please log in again.');
+      throw new Error("Session expired. Please log in again.");
     }
-    throw new Error('Failed to fetch order history');
+    throw new Error("Failed to fetch order history");
   }
 
   const data = await response.json();
@@ -40,23 +54,23 @@ const fetchOrderHistory = async (params) => {
 };
 
 const OrderHistory = () => {
-  const [currentView, setCurrentView] = useState('list'); // 'list' or 'detail'
+  const { isAuthenticated, logout } = useAuth();
+  const [currentView, setCurrentView] = useState("list");
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Filter and pagination states
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
-  const [status, setStatus] = useState('');
-  const [sortBy, setSortBy] = useState('date');
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [status, setStatus] = useState("");
+  const [sortBy, setSortBy] = useState("date");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // Pagination info
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -64,144 +78,178 @@ const OrderHistory = () => {
     totalOrders: 0,
     hasNext: false,
     hasPrev: false,
-    limit: 10
+    limit: 10,
   });
+
 
   // Fetch orders
   useEffect(() => {
     const loadOrders = async () => {
+      if (!isAuthenticated) {
+        setError("Please log in to view your orders");
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchOrderHistory({
-          page,
-          limit,
-          status,
-          sortBy,
-          sortOrder,
-          startDate,
-          endDate
-        });
-        
+
+        const token = localStorage.getItem("accessToken");
+
+        const data = await fetchOrderHistory(
+          {
+            page,
+            limit,
+            status,
+            sortBy,
+            sortOrder,
+            startDate,
+            endDate,
+          },
+          token,
+        );
+
         setOrders(data.orders);
         setPagination(data.pagination);
       } catch (err) {
         setError(err.message);
+
+        if (
+          err.message.includes("Session expired") ||
+          err.message.includes("Authentication required")
+        ) {
+          setTimeout(() => {
+            logout();
+            window.location.href = "/login";
+          }, 2000);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadOrders();
-  }, [page, limit, status, sortBy, sortOrder, startDate, endDate]);
+  }, [
+    page,
+    limit,
+    status,
+    sortBy,
+    sortOrder,
+    startDate,
+    endDate,
+    isAuthenticated,
+    logout,
+  ]);
 
-  // Status badge styling
-  const getStatusBadge = (status) => {
+  // Medium Size Badges
+  const getStatusBadge = (orderStatus) => {
     const statusConfig = {
-      pending: { icon: Clock, color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
-      processing: { icon: Package, color: 'bg-blue-100 text-blue-800', label: 'Processing' },
-      shipped: { icon: Truck, color: 'bg-purple-100 text-purple-800', label: 'Shipped' },
-      delivered: { icon: CheckCircle, color: 'bg-green-100 text-green-800', label: 'Delivered' },
-      cancelled: { icon: XCircle, color: 'bg-red-100 text-red-800', label: 'Cancelled' }
+      placed: {
+        icon: Clock,
+        color: "bg-yellow-50 text-yellow-700 border border-yellow-200",
+        label: "Placed",
+      },
+      processed: {
+        icon: Package,
+        color: "bg-blue-50 text-blue-700 border border-blue-200",
+        label: "Processed",
+      },
+      shipped: {
+        icon: Truck,
+        color: "bg-purple-50 text-purple-700 border border-purple-200",
+        label: "Shipped",
+      },
+      delivered: {
+        icon: CheckCircle,
+        color: "bg-green-50 text-[#0e540b] border border-[#0e540b]/20",
+        label: "Delivered",
+      },
+      cancelled: {
+        icon: XCircle,
+        color: "bg-red-50 text-red-700 border border-red-200",
+        label: "Cancelled",
+      },
     };
 
-    const config = statusConfig[status] || statusConfig.pending;
+    const normalizedStatus = orderStatus?.toLowerCase() || "placed";
+    const config = statusConfig[normalizedStatus] || statusConfig.placed;
     const Icon = config.icon;
 
     return (
-      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
-        <Icon size={14} />
-        {config.label}
+      <span
+        className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-poppins font-medium whitespace-nowrap ${config.color}`}
+      >
+        <Icon size={12} className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+        <span className="hidden xs:inline">{config.label}</span>
       </span>
     );
   };
 
-  // Format date
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
-  // Format currency
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+    return `₹${amount.toLocaleString("en-IN")}`;
   };
 
-  // Filter orders by search term
-  const filteredOrders = orders.filter(order =>
-    order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order._id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // No client-side filtering needed as server handles it
+  const filteredOrders = orders;
 
-  // Handle view order details
   const viewOrderDetails = (orderId) => {
     setSelectedOrderId(orderId);
-    setCurrentView('detail');
+    setCurrentView("detail");
   };
 
-  // Handle back to list
   const backToList = () => {
-    setCurrentView('list');
+    setCurrentView("list");
     setSelectedOrderId(null);
   };
 
-  // Apply filters
   const applyFilters = () => {
     setPage(1);
     setShowFilters(false);
   };
 
-  // Reset filters
   const resetFilters = () => {
-    setStatus('');
-    setSortBy('date');
-    setSortOrder('desc');
-    setStartDate('');
-    setEndDate('');
+    setStatus("");
+    setSortBy("date");
+    setSortOrder("desc");
+    setStartDate("");
+    setEndDate("");
     setPage(1);
   };
 
   // Order List View
   const OrderListView = () => (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Order History</h1>
-        <p className="text-gray-600">View and track all your orders</p>
+      <div className="mb-4 sm:mb-6">
+        <h1 className="font-poppins text-xl sm:text-2xl font-bold text-[#2d3748]">
+          Order History
+        </h1>
+        <p className="font-poppins text-[#718096] text-xs sm:text-sm mt-1">
+          View and track all your recent orders
+        </p>
       </div>
 
-      {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search by order number..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-
+      {/* Filters */}
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 mb-4 sm:mb-5">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
           {/* Filter Button */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+            className="font-poppins text-xs sm:text-sm flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 hover:bg-gray-100 text-[#2d3748] rounded-lg transition-all border border-gray-200 font-medium w-full sm:w-auto"
           >
-            <Filter size={20} />
-            Filters
+            <Filter size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <span>Filters</span>
             {(status || startDate || endDate) && (
-              <span className="ml-1 px-2 py-0.5 bg-green-500 text-white text-xs rounded-full">
+              <span className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 bg-[#f04700] text-white text-[9px] sm:text-[10px] rounded-full">
                 {[status, startDate, endDate].filter(Boolean).length}
               </span>
             )}
@@ -210,31 +258,33 @@ const OrderHistory = () => {
 
         {/* Filter Panel */}
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Status Filter */}
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <label className="font-poppins text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
+                Status
+              </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                className="font-poppins text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
               >
                 <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
+                <option value="placed">Placed</option>
+                <option value="processed">Processed</option>
                 <option value="shipped">Shipped</option>
                 <option value="delivered">Delivered</option>
                 <option value="cancelled">Cancelled</option>
               </select>
             </div>
 
-            {/* Sort By */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+              <label className="font-poppins text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
+                Sort By
+              </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                className="font-poppins text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
               >
                 <option value="date">Date</option>
                 <option value="status">Status</option>
@@ -242,39 +292,40 @@ const OrderHistory = () => {
               </select>
             </div>
 
-            {/* Start Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+              <label className="font-poppins text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
+                Start Date
+              </label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                className="font-poppins text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
               />
             </div>
 
-            {/* End Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+              <label className="font-poppins text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
+                End Date
+              </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                className="font-poppins text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
               />
             </div>
 
-            {/* Filter Actions */}
-            <div className="md:col-span-4 flex gap-2 justify-end">
+            <div className="sm:col-span-2 lg:col-span-4 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end mt-1 sm:mt-2">
               <button
                 onClick={resetFilters}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="font-poppins text-xs sm:text-sm px-4 py-2 text-[#718096] hover:bg-gray-50 rounded-lg border border-gray-200 transition-all w-full sm:w-auto"
               >
                 Reset
               </button>
               <button
                 onClick={applyFilters}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                className="font-poppins text-xs sm:text-sm px-4 sm:px-5 py-2 bg-[#0e540b] hover:bg-[#0a3d08] text-white rounded-lg transition-all shadow-sm font-medium w-full sm:w-auto"
               >
                 Apply Filters
               </button>
@@ -283,78 +334,94 @@ const OrderHistory = () => {
         )}
       </div>
 
-      {/* Loading State */}
       {loading && (
-        <div className="flex justify-center items-center py-12">
-          <Loader className="animate-spin text-green-600" size={40} />
+        <div className="flex justify-center py-8 sm:py-12">
+          <Loader className="animate-spin text-[#f04700]" size={28} />
         </div>
       )}
 
-      {/* Error State */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <p className="text-red-800">{error}</p>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+          <p className="font-poppins text-xs sm:text-sm text-red-800 font-medium">
+            {error}
+          </p>
         </div>
       )}
 
-      {/* Orders List */}
       {!loading && !error && (
         <>
           {filteredOrders.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-              <Package className="mx-auto text-gray-400 mb-4" size={48} />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No orders found</h3>
-              <p className="text-gray-600">You haven't placed any orders yet.</p>
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-8 sm:p-10 text-center">
+              <Package className="mx-auto text-gray-300 mb-2 sm:mb-3" size={36} />
+              <h3 className="font-poppins text-sm sm:text-base font-bold text-[#2d3748]">
+                No orders found
+              </h3>
+              <p className="font-poppins text-xs sm:text-sm text-[#718096] mt-1">
+                Try adjusting your filters
+              </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-2 sm:space-y-3">
               {filteredOrders.map((order) => (
                 <div
                   key={order._id}
-                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
+                  className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 lg:p-5 hover:shadow-md hover:border-[#0e540b]/30 transition-all cursor-pointer group"
                   onClick={() => viewOrderDetails(order._id)}
                 >
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    {/* Order Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {order.orderNumber || `Order #${order._id.slice(-6)}`}
-                        </h3>
-                        {getStatusBadge(order.status)}
+                  <div className="flex flex-col gap-3 sm:gap-4">
+                    {/* Top Row: Order ID & Status */}
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="font-poppins text-sm sm:text-base lg:text-lg font-bold text-[#2d3748] group-hover:text-[#0e540b] transition-colors truncate flex-1">
+                        {order.orderId || `#${order._id.slice(-6)}`}
+                      </h3>
+                      {getStatusBadge(order.orderStatus)}
+                    </div>
+
+                    {/* Middle Row: Order Info */}
+                    <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 sm:gap-y-2 text-[#718096]">
+                      <div className="flex items-center gap-1 sm:gap-1.5 font-poppins text-[10px] sm:text-xs lg:text-sm">
+                        <Calendar size={12} className="sm:w-[14px] sm:h-[14px] flex-shrink-0" />
+                        <span className="whitespace-nowrap">{formatDate(order.orderDate)}</span>
                       </div>
-                      
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-1">
-                          <Calendar size={16} />
-                          {formatDate(order.createdAt)}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Package size={16} />
-                          {order.items.length} item{order.items.length !== 1 ? 's' : ''}
-                        </div>
-                        <div className="flex items-center gap-1 font-semibold text-gray-900">
-                          <DollarSign size={16} />
-                          {formatCurrency(order.totalAmount)}
-                        </div>
+                      <div className="flex items-center gap-1 sm:gap-1.5 font-poppins text-[10px] sm:text-xs lg:text-sm">
+                        <Package size={12} className="sm:w-[14px] sm:h-[14px] flex-shrink-0" />
+                        <span className="whitespace-nowrap">
+                          {order.selectedVegetables?.length || 0} items
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 sm:gap-1.5 font-poppins text-xs sm:text-sm font-semibold text-[#2d3748]">
+                        <span className="whitespace-nowrap">{formatCurrency(order.totalAmount)}</span>
                       </div>
                     </div>
 
-                    {/* Order Items Preview */}
-                    <div className="flex items-center gap-2">
-                      {order.items.slice(0, 3).map((item, idx) => (
-                        <img
-                          key={idx}
-                          src={item.vegetable.image}
-                          alt={item.vegetable.name}
-                          className="w-12 h-12 rounded-lg object-cover border-2 border-white shadow-sm"
-                        />
-                      ))}
-                      {order.items.length > 3 && (
-                        <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
-                          +{order.items.length - 3}
+                    {/* Bottom Row: Images & Arrow */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 overflow-x-auto flex-1 pb-1">
+                        <div className="flex -space-x-2 sm:-space-x-3">
+                          {order.selectedVegetables
+                            ?.slice(0, 3)
+                            .map(
+                              (item, idx) =>
+                                item.vegetable?.image && (
+                                  <img
+                                    key={idx}
+                                    src={item.vegetable.image}
+                                    alt=""
+                                    className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full object-cover border-2 border-white ring-1 ring-gray-100 shadow-sm flex-shrink-0"
+                                  />
+                                ),
+                            )}
                         </div>
-                      )}
+                        {order.selectedVegetables?.length > 3 && (
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 rounded-full bg-gray-100 flex items-center justify-center text-[10px] sm:text-xs font-bold text-gray-500 flex-shrink-0">
+                            +{order.selectedVegetables.length - 3}
+                          </div>
+                        )}
+                      </div>
+                      <ChevronRight
+                        size={18}
+                        className="text-gray-300 group-hover:text-[#0e540b] transition-colors flex-shrink-0 sm:w-5 sm:h-5"
+                      />
                     </div>
                   </div>
                 </div>
@@ -364,44 +431,26 @@ const OrderHistory = () => {
 
           {/* Pagination */}
           {pagination.totalPages > 1 && (
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="text-sm text-gray-600">
-                Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, pagination.totalOrders)} of {pagination.totalOrders} orders
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPage(page - 1)}
-                  disabled={!pagination.hasPrev}
-                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                
-                <div className="flex gap-1">
-                  {[...Array(pagination.totalPages)].map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setPage(idx + 1)}
-                      className={`px-4 py-2 rounded-lg transition-colors ${
-                        page === idx + 1
-                          ? 'bg-green-600 text-white'
-                          : 'border border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      {idx + 1}
-                    </button>
-                  ))}
-                </div>
-                
-                <button
-                  onClick={() => setPage(page + 1)}
-                  disabled={!pagination.hasNext}
-                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
+            <div className="mt-4 sm:mt-5 flex items-center justify-between bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-2 sm:p-3">
+              <button
+                onClick={() => setPage(page - 1)}
+                disabled={!pagination.hasPrev}
+                className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                <ChevronLeft size={18} className="text-gray-600 sm:w-5 sm:h-5" />
+              </button>
+
+              <span className="font-poppins text-xs sm:text-sm font-medium text-[#2d3748]">
+                Page {page} of {pagination.totalPages}
+              </span>
+
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={!pagination.hasNext}
+                className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                <ChevronRight size={18} className="text-gray-600 sm:w-5 sm:h-5" />
+              </button>
             </div>
           )}
         </>
@@ -411,101 +460,142 @@ const OrderHistory = () => {
 
   // Order Detail View
   const OrderDetailView = () => {
-    const order = orders.find(o => o._id === selectedOrderId);
+    const order = orders.find((o) => o._id === selectedOrderId);
 
-    if (!order) {
-      return (
-        <div className="max-w-4xl mx-auto p-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <p className="text-gray-600">Order not found</p>
-            <button
-              onClick={backToList}
-              className="mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-            >
-              Back to Orders
-            </button>
-          </div>
-        </div>
-      );
-    }
+    if (!order) return null;
 
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        {/* Back Button */}
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
         <button
           onClick={backToList}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="font-poppins text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 text-[#718096] hover:text-[#0e540b] mb-4 sm:mb-5 transition-colors font-medium"
         >
-          <ChevronLeft size={20} />
-          Back to Orders
+          <ChevronLeft size={16} className="sm:w-[18px] sm:h-[18px]" /> Back to Orders
         </button>
 
-        {/* Order Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                {order.orderNumber || `Order #${order._id.slice(-6)}`}
-              </h1>
-              <p className="text-gray-600">Order ID: {order._id}</p>
+        {/* Header Card */}
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 lg:p-6 mb-4 sm:mb-5">
+          <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-5 border-b border-gray-100 pb-4 sm:pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
+                  <h1 className="font-poppins text-lg sm:text-xl lg:text-2xl font-bold text-[#2d3748] truncate">
+                    {order.orderId || `Order #${order._id.slice(-6)}`}
+                  </h1>
+                  {getStatusBadge(order.orderStatus)}
+                </div>
+                <p className="font-poppins text-[10px] sm:text-xs lg:text-sm text-[#718096]">
+                  Placed on {formatDate(order.orderDate)}
+                </p>
+              </div>
+              <div className="text-left sm:text-right">
+                <p className="font-poppins text-xs sm:text-sm text-[#718096]">
+                  Total Amount
+                </p>
+                <p className="font-poppins text-lg sm:text-xl lg:text-2xl font-bold text-[#0e540b]">
+                  {formatCurrency(order.totalAmount)}
+                </p>
+              </div>
             </div>
-            {getStatusBadge(order.status)}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Order Date</p>
-              <p className="font-medium text-gray-900">{formatDate(order.createdAt)}</p>
+              <p className="font-poppins text-[10px] sm:text-xs font-bold uppercase text-[#718096] mb-1">
+                Payment
+              </p>
+              <p className="font-poppins text-xs sm:text-sm font-medium text-[#2d3748]">
+                {order.paymentMethod}
+              </p>
+              <p className="font-poppins text-[10px] sm:text-xs text-[#718096] capitalize mt-0.5">
+                Status: {order.paymentStatus}
+              </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-1">Total Amount</p>
-              <p className="font-medium text-gray-900 text-lg">{formatCurrency(order.totalAmount)}</p>
+              {/* Address placeholder */}
             </div>
           </div>
         </div>
 
-        {/* Order Items */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Order Items</h2>
-          
-          <div className="space-y-4">
-            {order.items.map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
-              >
-                <img
-                  src={item.vegetable.image}
-                  alt={item.vegetable.name}
-                  className="w-20 h-20 rounded-lg object-cover"
-                />
-                
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1">
-                    {item.vegetable.name}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Quantity: {item.quantity}
-                  </p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+          {/* Items List */}
+          <div className="lg:col-span-2 bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
+            <h2 className="font-poppins text-xs sm:text-sm font-bold text-[#2d3748] mb-3 sm:mb-4">
+              Order Items ({order.selectedVegetables?.length})
+            </h2>
+            <div className="space-y-2 sm:space-y-3">
+              {order.selectedVegetables?.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 p-2.5 sm:p-3 bg-gray-50/50 rounded-lg sm:rounded-xl border border-gray-100 hover:border-[#0e540b]/20 transition-all"
+                >
+                  {item.vegetable?.image && (
+                    <img
+                      src={item.vegetable.image}
+                      alt={item.vegetable.name}
+                      className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full object-cover shadow-sm flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-poppins text-xs sm:text-sm lg:text-base font-bold text-[#2d3748] truncate">
+                      {item.vegetable?.name}
+                    </h3>
+                    <p className="font-poppins text-[10px] sm:text-xs lg:text-sm text-[#718096] mt-0.5">
+                      {item.quantity} × {item.weight}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-poppins text-xs sm:text-sm lg:text-base font-bold text-[#2d3748]">
+                      {formatCurrency(item.subtotal)}
+                    </p>
+                    <p className="font-poppins text-[10px] sm:text-xs text-[#718096]">
+                      {formatCurrency(item.pricePerUnit)}/unit
+                    </p>
+                  </div>
                 </div>
-                
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">
-                    {formatCurrency(item.price)}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {formatCurrency(item.price / item.quantity)} each
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Order Summary */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex justify-between items-center text-lg font-bold text-gray-900">
-              <span>Total</span>
-              <span>{formatCurrency(order.totalAmount)}</span>
+          {/* Summary Box */}
+          <div className="h-fit bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
+            <h2 className="font-poppins text-xs sm:text-sm font-bold text-[#2d3748] mb-3 sm:mb-4">
+              Order Summary
+            </h2>
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex justify-between font-poppins text-xs sm:text-sm text-[#718096]">
+                <span>Vegetables Total</span>
+                <span className="font-medium text-[#2d3748]">
+                  {formatCurrency(order.vegetablesTotal)}
+                </span>
+              </div>
+
+              {order.couponDiscount > 0 && (
+                <div className="flex justify-between font-poppins text-xs sm:text-sm text-[#f04700]">
+                  <span>Discount</span>
+                  <span className="font-bold">
+                    -{formatCurrency(order.couponDiscount)}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between font-poppins text-xs sm:text-sm text-[#718096]">
+                <span>Delivery Charges</span>
+                <span className="font-medium text-[#2d3748]">
+                  {order.deliveryCharges === 0
+                    ? "FREE"
+                    : formatCurrency(order.deliveryCharges)}
+                </span>
+              </div>
+
+              <div className="pt-2 sm:pt-3 mt-2 sm:mt-3 border-t border-gray-100 flex justify-between items-center">
+                <span className="font-poppins text-sm sm:text-base font-bold text-[#2d3748]">
+                  Grand Total
+                </span>
+                <span className="font-poppins text-base sm:text-lg font-bold text-[#f04700]">
+                  {formatCurrency(order.totalAmount)}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -513,10 +603,9 @@ const OrderHistory = () => {
     );
   };
 
-  // Render current view
   return (
-    <div className="min-h-screen bg-gray-50">
-      {currentView === 'list' ? <OrderListView /> : <OrderDetailView />}
+    <div className="min-h-screen pt-8 bg-gray-50">
+      {currentView === "list" ? <OrderListView /> : <OrderDetailView />}
     </div>
   );
 };

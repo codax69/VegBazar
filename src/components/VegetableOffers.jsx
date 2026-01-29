@@ -35,7 +35,7 @@ const VegetableOffers = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#ffffff] pt-28 px-3 sm:pt-24 sm:px-4 md:pt-28 lg:pt-30">
+    <div className="min-h-screen bg-[#ffffff] pt-14 px-3 sm:pt-28 sm:px-4 md:pt-28 lg:pt-30">
       <div className="w-full max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="mb-4 sm:mb-6">
@@ -170,7 +170,7 @@ const VegetableOffers = () => {
                 <div className="flex items-center justify-center gap-1.5 mb-2">
                   <Leaf className="w-4 h-4 text-[#0e540b]" />
                   <h3 className="text-sm sm:text-base font-semibold text-gray-800">
-                    Fresh & Organic
+                    Fresh
                   </h3>
                 </div>
                 <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">

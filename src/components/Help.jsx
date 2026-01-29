@@ -89,7 +89,7 @@ const Help = () => {
   };
 
   return (
-    <div className="min-h-screen md:pt-20 pb-10 px-3 bg-[#ffffff]">
+    <div className="min-h-screen pt-6 md:pt-24 pb-10 px-3 bg-[#ffffff]">
       <div className="max-w-2xl mx-auto space-y-6 md:space-y-8">
         <div className="text-center mb-4">
           <h1 className="text-2xl md:text-3xl font-poppins font-semibold text-[#0e540b] mb-1">

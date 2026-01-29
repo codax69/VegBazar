@@ -18,6 +18,7 @@ import { useBillContext } from "../Context/BillContext";
 import OrderSuccess from "./OrderSuccess";
 import OrderFailed from "./OrderFailed";
 import OrderLoading from "./OrderLoading";
+import { useAuth } from "../Context/AuthProvider";
 
 const OrderConfirmation = () => {
   const {
@@ -29,6 +30,7 @@ const OrderConfirmation = () => {
     isOrderPlaced,
     paymentMethod,
   } = useOrderContext();
+  const { user } = useAuth();
 
   const {
     orderType,
@@ -49,17 +51,17 @@ const OrderConfirmation = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [savedOrderData, setSavedOrderData] = useState(null);
-  const { executeRecaptcha } = useGoogleReCaptcha();
 
   // ✅ Check for saved order on mount
   useEffect(() => {
     const orderDataFromStorage = sessionStorage.getItem("lastOrderData");
-    
+
     if (orderDataFromStorage) {
       try {
         const parsedData = JSON.parse(orderDataFromStorage);
         // Handle both direct data and nested response structure
-        const actualData = parsedData?.data?.data || parsedData?.data || parsedData;
+        const actualData =
+          parsedData?.data?.data || parsedData?.data || parsedData;
         setSavedOrderData(actualData);
         setIsOrderPlaced(true);
       } catch (error) {
@@ -110,7 +112,7 @@ const OrderConfirmation = () => {
       return {
         orderId,
         orderType: "custom",
-        customerInfo: formData || {},
+        customerInfo: { name: user?.username || "", email: user?.email || "", mobile: user?.phone || "" } || {},
         selectedVegetables: items.map((item) => ({
           vegetable: item.id || item.vegetableId,
           name: item.name,
@@ -128,7 +130,7 @@ const OrderConfirmation = () => {
         totalAmount: customCalculations.totalAmount || 0,
         couponDiscount: customCalculations.couponDiscount || 0,
         paymentMethod: paymentMethod || "COD",
-        paymentStatus: paymentMethod === "COD" ? "pending" : "awaiting_payment",
+        paymentStatus: paymentMethod === "COD" ? "pending" : "Completed",
         orderStatus: "placed",
         orderDate: new Date().toISOString(),
       };
@@ -183,28 +185,12 @@ const OrderConfirmation = () => {
         return;
       }
 
-      if (!executeRecaptcha) {
-        setSubmitError("reCAPTCHA not ready. Try again shortly.");
-        return;
-      }
-
       if (isSubmitting) return;
 
       setIsSubmitting(true);
       setSubmitError(null);
 
       try {
-        const captchaToken = await executeRecaptcha("submit_order");
-        if (!captchaToken) throw new Error("Captcha not generated.");
-
-        const captchaRes = await axios.post(
-          `${import.meta.env.VITE_API_SERVER_URL}/api/verify-captcha`,
-          { token: captchaToken, action: "submit_order" }
-        );
-
-        if (!captchaRes.data.success)
-          throw new Error("Captcha verification failed.");
-
         const res = await axios.post(
           `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
           orderData
@@ -225,27 +211,29 @@ const OrderConfirmation = () => {
         setIsSubmitting(false);
       }
     },
-    [executeRecaptcha, isSubmitting, orderData, setIsOrderPlaced, savedOrderData]
+    [
+      isSubmitting,
+      orderData,
+      setIsOrderPlaced,
+      savedOrderData,
+    ]
   );
-  
 
   // ✅ Show success if order is placed
   if (isOrderPlaced && orderData) {
     // Extract order data - handle both direct orderData and nested response.data.data
-    const actualOrderData = orderData?.data?.data || orderData?.data || orderData;
-    
+    const actualOrderData =
+      orderData?.data?.data || orderData?.data || orderData;
+
     return (
-      <OrderSuccess
-        orderData={actualOrderData}
-        onNewOrder={handleNewOrder}
-      />
+      <OrderSuccess orderData={actualOrderData} onNewOrder={handleNewOrder} />
     );
   }
 
   if (isSubmitting) {
     return <OrderLoading />;
   }
-  
+
   if (submitError) {
     return (
       <OrderFailed
@@ -259,7 +247,6 @@ const OrderConfirmation = () => {
     );
   }
 
-  
   return (
     <div className="min-h-screen bg-[#ffffff] py-4 pt-20">
       <div className="max-w-5xl mx-auto px-4">
@@ -295,7 +282,9 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <Package className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">Order ID</p>
+                      <p className="text-xs text-gray-500 font-poppins">
+                        Order ID
+                      </p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm">
                         {orderData?.orderId || "N/A"}
                       </p>
@@ -304,7 +293,9 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <User className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">Full Name</p>
+                      <p className="text-xs text-gray-500 font-poppins">
+                        Full Name
+                      </p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm">
                         {formData?.name || "N/A"}
                       </p>
@@ -313,7 +304,9 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <Phone className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">Mobile Number</p>
+                      <p className="text-xs text-gray-500 font-poppins">
+                        Mobile Number
+                      </p>
                       <p className="font-semibold text-gray-800 font-assistant text-sm">
                         {formData?.mobile || "N/A"}
                       </p>
@@ -323,7 +316,9 @@ const OrderConfirmation = () => {
                     <div className="flex items-start gap-2">
                       <Mail className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-xs text-gray-500 font-poppins">Email</p>
+                        <p className="text-xs text-gray-500 font-poppins">
+                          Email
+                        </p>
                         <p className="font-semibold text-gray-800 font-assistant text-sm truncate">
                           {formData.email}
                         </p>
@@ -347,7 +342,9 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <CreditCard className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">Total Amount</p>
+                      <p className="text-xs text-gray-500 font-poppins">
+                        Total Amount
+                      </p>
                       <p className="font-bold text-[#0e540b] text-lg">
                         ₹{(totalAmount || 0).toFixed(2)}
                       </p>
@@ -357,7 +354,9 @@ const OrderConfirmation = () => {
                     <div className="flex items-start gap-2">
                       <MapPin className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-xs text-gray-500 font-poppins">Delivery Address</p>
+                        <p className="text-xs text-gray-500 font-poppins">
+                          Delivery Address
+                        </p>
                         <p className="font-semibold text-gray-800 font-assistant text-sm break-words">
                           {formData.address}
                           {formData.area && `, ${formData.area}`}
@@ -371,69 +370,85 @@ const OrderConfirmation = () => {
             </div>
 
             {/* Coupon Info - if applied */}
-            {(orderData?.couponCode || appliedCoupon) && (couponDiscount > 0 || orderData?.couponDiscount > 0) && (
-              <div className="bg-green-50 p-3 rounded-lg border border-green-200 mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-600 font-assistant">Coupon Applied</p>
-                    <p className="font-semibold text-green-700 font-assistant text-sm">
-                      {orderData?.couponCode || appliedCoupon?.code || "Discount Applied"}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-600 font-assistant">Discount</p>
-                    <p className="font-bold text-green-700 text-sm">
-                      -₹{(orderData?.couponDiscount || couponDiscount || 0).toFixed(2)}
-                    </p>
+            {(orderData?.couponCode || appliedCoupon) &&
+              (couponDiscount > 0 || orderData?.couponDiscount > 0) && (
+                <div className="bg-green-50 p-3 rounded-lg border border-green-200 mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-600 font-assistant">
+                        Coupon Applied
+                      </p>
+                      <p className="font-semibold text-green-700 font-assistant text-sm">
+                        {orderData?.couponCode ||
+                          appliedCoupon?.code ||
+                          "Discount Applied"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-600 font-assistant">
+                        Discount
+                      </p>
+                      <p className="font-bold text-green-700 text-sm">
+                        -₹
+                        {(
+                          orderData?.couponDiscount ||
+                          couponDiscount ||
+                          0
+                        ).toFixed(2)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Selected Vegetables */}
-            {orderData?.selectedVegetables && orderData.selectedVegetables.length > 0 && (
-              <div className="bg-white p-4 rounded-lg border border-gray-200 mb-4">
-                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2 text-sm">
-                  <ShoppingBag className="w-4 h-4 text-[#0e540b]" />
-                  Selected Items ({orderData.selectedVegetables.length})
-                </h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {orderData.selectedVegetables.map((veg, index) => {
-                    // Handle nested vegetable structure from API
-                    const vegName = veg.name || veg.vegetable?.name || "Unknown";
-                    const vegWeight = veg.weight || veg.vegetable?.weight || "";
-                    
-                    return (
-                      <div
-                        key={index}
-                        className="flex justify-between items-center p-2 bg-gray-50 rounded-lg text-sm"
-                      >
-                        <div className="flex-1">
-                          <span className="font-medium text-gray-800 font-assistant">
-                            {vegName}
-                          </span>
-                          {vegWeight && (
-                            <span className="text-xs text-gray-600 ml-2">
-                              ({vegWeight})
+            {orderData?.selectedVegetables &&
+              orderData.selectedVegetables.length > 0 && (
+                <div className="bg-white p-4 rounded-lg border border-gray-200 mb-4">
+                  <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2 text-sm">
+                    <ShoppingBag className="w-4 h-4 text-[#0e540b]" />
+                    Selected Items ({orderData.selectedVegetables.length})
+                  </h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {orderData.selectedVegetables.map((veg, index) => {
+                      // Handle nested vegetable structure from API
+                      const vegName =
+                        veg.name || veg.vegetable?.name || "Unknown";
+                      const vegWeight =
+                        veg.weight || veg.vegetable?.weight || "";
+
+                      return (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center p-2 bg-gray-50 rounded-lg text-sm"
+                        >
+                          <div className="flex-1">
+                            <span className="font-medium text-gray-800 font-assistant">
+                              {vegName}
                             </span>
+                            {vegWeight && (
+                              <span className="text-xs text-gray-600 ml-2">
+                                ({vegWeight})
+                              </span>
+                            )}
+                          </div>
+                          {veg.quantity && veg.pricePerUnit && (
+                            <div className="text-right">
+                              <div className="text-xs text-gray-600">
+                                ₹{parseFloat(veg.pricePerUnit).toFixed(2)} ×{" "}
+                                {veg.quantity}
+                              </div>
+                              <div className="font-semibold text-green-700">
+                                ₹{(veg.subtotal || 0).toFixed(2)}
+                              </div>
+                            </div>
                           )}
                         </div>
-                        {veg.quantity && veg.pricePerUnit && (
-                          <div className="text-right">
-                            <div className="text-xs text-gray-600">
-                              ₹{parseFloat(veg.pricePerUnit).toFixed(2)} × {veg.quantity}
-                            </div>
-                            <div className="font-semibold text-green-700">
-                              ₹{(veg.subtotal || 0).toFixed(2)}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* reCAPTCHA Notice */}
             <div className="bg-gray-50 p-2 rounded-lg mb-4 border border-gray-200">
@@ -464,7 +479,7 @@ const OrderConfirmation = () => {
 
             <button
               onClick={handleSubmitOrder}
-              disabled={isSubmitting || !executeRecaptcha}
+              disabled={isSubmitting}
               className="w-full bg-gradient-to-r font-assistant from-[#0e540b] to-green-700 text-white font-bold py-3 px-5 rounded-lg hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <CheckCircle className="w-5 h-5" />

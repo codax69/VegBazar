@@ -1,17 +1,31 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <!-- Primary site icons (favicons + app icons) -->
     <link rel="icon" href="./public/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="./public/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16x16.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./public/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="./public/favicon-16x16.png"
+    />
     <link rel="shortcut icon" type="image/png" href="./public/favicon.ico" />
     <!-- Safari pinned tab -->
     <link rel="mask-icon" href="/vegbazar.svg" color="#0e540b" />
     <!-- Apple / iOS -->
-    <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="./public/apple-touch-icon.png"
+    />
     <!-- Android / Progressive Web App -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -318,6 +332,17 @@
 
     <!-- Google Sign-In -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- PWA Install Prompt Capture -->
+    <script>
+      window.deferredPrompt = null;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        window.deferredPrompt = e;
+      });
+    </script>
   </head>
 
   <body>
@@ -360,7 +385,7 @@
               });
             })
             .catch((err) =>
-              console.warn("❌ Service Worker registration failed:", err)
+              console.warn("❌ Service Worker registration failed:", err),
             );
         });
 

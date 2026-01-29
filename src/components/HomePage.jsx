@@ -14,10 +14,7 @@ import {
   Minus,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
-import Veggies from "../assets/veggies.svg";
-import Store from "../assets/Fruit-Store.svg";
 import axios from "axios";
-import { GiBasket } from "react-icons/gi";
 import VegBazarBanner from "./VegBazarBanner";
 import TestimonialsCarousel from "./TestimonialsCarousel";
 
@@ -142,22 +139,22 @@ const VegetableCard = memo(
         return weights.length > 0
           ? weights
           : [
-              {
-                id: 0,
-                label: "250g",
-                value: "250g",
-                price: veg.price || 0,
-                marketPrice: veg.price || 0,
-                inStock: hasEnoughStock(veg, "250g", false),
-                kg: 0.25,
-              },
-            ];
+            {
+              id: 0,
+              label: "250g",
+              value: "250g",
+              price: veg.price || 0,
+              marketPrice: veg.price || 0,
+              inStock: hasEnoughStock(veg, "250g", false),
+              kg: 0.25,
+            },
+          ];
       }
     }, [veg, isSetModel]);
 
     // ✅ FIX: Calculate currentOption first (no useMemo needed)
     const currentOption = isSetModel ? selectedSet : selectedWeight;
-    
+
     // ✅ FIX: Get selected option data directly
     const selectedOptionData =
       availableOptions.find((opt) => opt.value === currentOption) ||
@@ -180,9 +177,8 @@ const VegetableCard = memo(
       if (isSetModel) {
         const stockPieces = veg.stockPieces || 0;
         return {
-          message: `Only ${stockPieces} piece${
-            stockPieces !== 1 ? "s" : ""
-          } left`,
+          message: `Only ${stockPieces} piece${stockPieces !== 1 ? "s" : ""
+            } left`,
           alternatives: availableOpts.map((opt) => opt.label).join(", "),
         };
       } else {
@@ -202,20 +198,18 @@ const VegetableCard = memo(
 
     return (
       <div
-        className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${
-          isCompletelyOutOfStock
+        className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${isCompletelyOutOfStock
             ? "bg-gray-100 border-gray-300 opacity-75"
             : "bg-[#ffffff] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
-        }`}
+          }`}
       >
         {/* Vegetable Image */}
         <div className="text-center">
-          <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-1.5 sm:mb-2">
+          <div className="relative w-28 h-28 sm:w-30 sm:h-30 md:w-32 md:h-32 mx-auto mb-1.5 sm:mb-2">
             {veg.image ? (
               <img
-                className={`w-full h-full object-cover rounded-lg sm:rounded-xl ${
-                  isCompletelyOutOfStock ? "grayscale" : ""
-                }`}
+                className={`w-full h-full object-cover rounded-lg sm:rounded-xl ${isCompletelyOutOfStock ? "grayscale" : ""
+                  }`}
                 src={veg.image}
                 alt={veg.name}
                 loading="lazy"
@@ -225,18 +219,16 @@ const VegetableCard = memo(
               />
             ) : (
               <div
-                className={`w-full h-full bg-gradient-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${
-                  isCompletelyOutOfStock
+                className={`w-full h-full bg-gradient-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${isCompletelyOutOfStock
                     ? "from-gray-200 to-gray-300"
                     : "from-gray-50 to-[#ffffff]"
-                }`}
+                  }`}
               >
                 <Leaf
-                  className={`w-8 h-8 sm:w-10 sm:h-10 ${
-                    isCompletelyOutOfStock
+                  className={`w-8 h-8 sm:w-10 sm:h-10 ${isCompletelyOutOfStock
                       ? "text-gray-400"
                       : "text-[#0e540b]/30"
-                  }`}
+                    }`}
                 />
               </div>
             )}
@@ -249,9 +241,8 @@ const VegetableCard = memo(
             )}
           </div>
           <p
-            className={`font-medium text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${
-              isCompletelyOutOfStock ? "text-gray-500" : ""
-            }`}
+            className={`font-medium text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${isCompletelyOutOfStock ? "text-gray-500" : "text-black"
+              }`}
           >
             {veg.name}
             {isSetModel && (
@@ -291,13 +282,12 @@ const VegetableCard = memo(
                   }}
                   disabled={disabled}
                   className={`px-3 py-1.5 text-[11px] font-medium rounded-lg transition-all duration-300 relative
-            ${
-              disabled
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 line-through"
-                : isActive
-                ? "bg-[#0e540b] text-white shadow-md scale-[1.02]"
-                : "bg-[#ffffff] text-gray-700 hover:bg-[#e8f2e8] hover:text-[#0e540b] shadow-sm"
-            }`}
+            ${disabled
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 line-through"
+                      : isActive
+                        ? "bg-[#0e540b] text-white shadow-md scale-[1.02]"
+                        : "bg-[#ffffff] text-black hover:bg-[#e8f2e8] hover:text-[#0e540b] shadow-sm"
+                    }`}
                 >
                   {option.label}
                   {disabled && (
@@ -324,7 +314,7 @@ const VegetableCard = memo(
                 </p>
               )}
             </div>
-            <p className="text-[11px] sm:text-[11px] text-gray-500">
+            <p className="text-[11px] sm:text-[11px] text-black">
               per {selectedOptionData?.label}
             </p>
             {savings > 0 && (
@@ -337,7 +327,7 @@ const VegetableCard = memo(
 
         {/* Add to Cart Button or Quantity Controls */}
         {isCompletelyOutOfStock ? (
-          <div className="w-full bg-gray-300 text-gray-600 font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm text-center cursor-not-allowed">
+          <div className="w-full bg-gray-300 text-black font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm text-center cursor-not-allowed">
             Unavailable
           </div>
         ) : isCurrentOptionOutOfStock ? (
@@ -496,15 +486,13 @@ const Homepage = () => {
             .catch(() => ({ data: { data: [] } })),
           axios
             .get(
-              `${
-                import.meta.env.VITE_API_SERVER_URL
+              `${import.meta.env.VITE_API_SERVER_URL
               }/api/offers/Top-offers/suggestion`
             )
             .catch(() => ({ data: { data: [] } })),
           axios
             .get(
-              `${
-                import.meta.env.VITE_API_SERVER_URL
+              `${import.meta.env.VITE_API_SERVER_URL
               }/api/testimonials/published`
             )
             .catch(() => ({ data: { data: { testimonials: [] } } })),
@@ -654,7 +642,7 @@ const Homepage = () => {
       const currentQty = cartItems[cartKey] || 0;
       const newQty = currentQty + 1;
 
-    
+
 
       setCartItems((prev) => ({
         ...prev,
@@ -686,7 +674,7 @@ const Homepage = () => {
         optionLabel = sets[setIndex]?.label || option;
       }
 
-      
+
 
       if (existingItemIndex >= 0) {
         cartData.items[existingItemIndex].quantity = newQty;
@@ -715,7 +703,7 @@ const Homepage = () => {
       cartData = await calculatePrices(cartData);
       localStorage.setItem("orderSummary", JSON.stringify(cartData));
       setVegetableOrder(cartData);
-        },
+    },
     [
       cartItems,
       getSelectedOption,
@@ -834,11 +822,11 @@ const Homepage = () => {
 
     // ✅ Log each item with correct price
     if (cartData?.items) {
-      cartData.items.forEach((item, idx) => {});
+      cartData.items.forEach((item, idx) => { });
     }
 
     window.scrollTo(0, 0);
-    navigate("/veg-bag");
+    navigate("/cart");
   }, [navigate]);
 
   return (

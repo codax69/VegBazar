@@ -71,7 +71,7 @@ export const BillProvider = ({ children }) => {
   useEffect(() => {
     const fetchOrderCount = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/orders/today/orders`);
+        const res = await axios.get(`${API_URL}/api/orders/today/total`);
         setOrderCount(res.data.data.count + 1);
       } catch (err) {
         console.error('Error fetching order count:', err);

@@ -10,8 +10,10 @@ import {
   Banknote,
   CheckCircle,
   Edit,
+  CloudCog,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
+import { useAuth } from "../Context/AuthProvider.jsx";
 import axios from "axios";
 import RazorpayPayment from "./RazorpayPayment";
 import CouponCodeSection from "./CouponCodeSection";
@@ -59,34 +61,22 @@ const VegetableCart = () => {
     paymentMethod,
     setIsOrderPlaced,
   } = useOrderContext();
-
-  const [selectedAddress, setSelectedAddress] = useState("");
+  const { user } = useAuth();
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [orderCount, setOrderCount] = useState(1);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [deliveryCharge, setDeliveryCharge] = useState(20);
   const [loading, setLoading] = useState(false);
   const [loadingAction, setLoadingAction] = useState("");
+  const [defaultAddress, setDefaultAddress] = useState(null);
 
   // Memoized items and summary
   const items = useMemo(() => getOrderItems(vegetableOrder), [vegetableOrder]);
   const summary = useMemo(
     () => getOrderSummary(vegetableOrder),
-    [vegetableOrder]
+    [vegetableOrder],
   );
-
-  // Memoized user address
-  const userSavedAddress = useMemo(() => {
-    if (!formData?.address) return null;
-    return {
-      label: formData.name || "My Address",
-      name: formData.name || "",
-      mobile: formData.mobile || "",
-      address: formData.address,
-      area: formData.area,
-      city: formData.city,
-    };
-  }, [formData]);
 
   const subtotal = useMemo(() => {
     if (summary?.subtotal) return summary.subtotal;
@@ -107,20 +97,55 @@ const VegetableCart = () => {
 
   const isCheckoutDisabled = !selectedAddress || !paymentMethod;
 
-  // ✅ AUTO-SELECT ADDRESS when user has saved address
-  useEffect(() => {
-    if (userSavedAddress && !selectedAddress) {
-      setSelectedAddress("saved");
-    }
-  }, [userSavedAddress, selectedAddress]);
+  const customerInfo = useMemo(() => ({
+    name: user?.username || "",
+    mobile: user?.phone || "",
+    email: user?.email || "",
+  }), [user]);
 
+  // Fetch default address from API
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchDefaultAddress = async () => {
+      const userId = user?._id || user?.id;
+      if (!userId) {
+        return;
+      }
+
+      try {
+        const { data } = await axios.get(
+          `${API_URL}/api/addresses/active`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+        
+        if (isMounted && data?.data.defaultAddress) {
+          setDefaultAddress(data.data.defaultAddress);
+          setSelectedAddress(data.data.defaultAddress);
+        }
+
+      } catch (error) {
+        console.error("❌ Error fetching default address:", error);
+        setDefaultAddress(null);
+      }
+    };
+
+    fetchDefaultAddress();
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
   // Fetch order count on mount
   useEffect(() => {
     let isMounted = true;
 
     const fetchOrderCount = async () => {
       try {
-        const { data } = await axios.get(`${API_URL}/api/orders/today/orders`);
+        const { data } = await axios.get(`${API_URL}/api/orders/today/total`);
         if (isMounted) {
           setOrderCount(data.data.count + 1);
         }
@@ -167,6 +192,43 @@ const VegetableCart = () => {
     }
   }, []);
 
+  // Auto-recalculate delivery charge when subtotal changes
+  useEffect(() => {
+    const recalculateDelivery = async () => {
+      if (items.length === 0 || loading) return;
+
+      const orderJustPlaced = sessionStorage.getItem("orderJustPlaced");
+      if (orderJustPlaced) return;
+
+      try {
+        const updatedPrices = await calculatePrice(items, appliedCoupon?.code);
+
+        if (updatedPrices?.summary?.deliveryCharges !== undefined) {
+          const newDeliveryCharge = updatedPrices.summary.deliveryCharges;
+
+          if (newDeliveryCharge !== deliveryCharge) {
+            setDeliveryCharge(newDeliveryCharge);
+
+            setVegetableOrder({
+              ...vegetableOrder,
+              items: items,
+              summary: updatedPrices.summary,
+              coupon: updatedPrices.coupon || appliedCoupon,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("❌ Failed to recalculate delivery charge:", error);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      recalculateDelivery();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [subtotal, items.length]);
+
   // Save cart to localStorage
   useEffect(() => {
     const orderJustPlaced = sessionStorage.getItem("orderJustPlaced");
@@ -180,10 +242,10 @@ const VegetableCart = () => {
         const orderData = vegetableOrder?.summary
           ? { ...vegetableOrder, items: normalizedItems }
           : {
-              items: normalizedItems,
-              summary: {},
-              timestamp: new Date().toISOString(),
-            };
+            items: normalizedItems,
+            summary: {},
+            timestamp: new Date().toISOString(),
+          };
         localStorage.setItem("orderSummary", JSON.stringify(orderData));
       }, 500);
 
@@ -212,7 +274,7 @@ const VegetableCart = () => {
 
     const { data } = await axios.post(
       `${API_URL}/api/orders/calculate-price`,
-      payload
+      payload,
     );
     return data.data;
   }, []);
@@ -240,12 +302,12 @@ const VegetableCart = () => {
         console.error("❌ Coupon application failed:", error);
         throw new Error(
           error.response?.data?.message ||
-            error.message ||
-            "Failed to apply coupon"
+          error.message ||
+          "Failed to apply coupon",
         );
       }
     },
-    [items, vegetableOrder, calculatePrice, setVegetableOrder]
+    [items, vegetableOrder, calculatePrice, setVegetableOrder],
   );
 
   const handleRemoveCoupon = useCallback(async () => {
@@ -285,20 +347,20 @@ const VegetableCart = () => {
 
         const updatedPrices = await calculatePrice(
           updatedItems,
-          appliedCoupon?.code
+          appliedCoupon?.code,
         );
         const itemsWithPrices = updatedItems.map((item) => {
           const calculatedItem = updatedPrices.items.find(
             (i) =>
               i.vegetableId === (item.id || item.vegetableId) &&
-              i.weight === item.weight
+              i.weight === item.weight,
           );
           return calculatedItem
             ? {
-                ...item,
-                pricePerUnit: calculatedItem.pricePerUnit,
-                totalPrice: calculatedItem.subtotal,
-              }
+              ...item,
+              pricePerUnit: calculatedItem.pricePerUnit,
+              totalPrice: calculatedItem.subtotal,
+            }
             : item;
         });
 
@@ -306,11 +368,11 @@ const VegetableCart = () => {
           Array.isArray(vegetableOrder)
             ? itemsWithPrices
             : {
-                items: itemsWithPrices,
-                summary: updatedPrices.summary || {},
-                coupon: updatedPrices.coupon || appliedCoupon,
-                timestamp: updatedPrices.timestamp || new Date().toISOString(),
-              }
+              items: itemsWithPrices,
+              summary: updatedPrices.summary || {},
+              coupon: updatedPrices.coupon || appliedCoupon,
+              timestamp: updatedPrices.timestamp || new Date().toISOString(),
+            },
         );
 
         if (updatedPrices.coupon?.discount) {
@@ -325,7 +387,7 @@ const VegetableCart = () => {
         setLoadingAction("");
       }
     },
-    [items, vegetableOrder, appliedCoupon, calculatePrice, setVegetableOrder]
+    [items, vegetableOrder, appliedCoupon, calculatePrice, setVegetableOrder],
   );
 
   const removeItem = useCallback(
@@ -339,20 +401,20 @@ const VegetableCart = () => {
         if (updatedItems.length > 0) {
           const updatedPrices = await calculatePrice(
             updatedItems,
-            appliedCoupon?.code
+            appliedCoupon?.code,
           );
           const itemsWithPrices = updatedItems.map((item) => {
             const calculatedItem = updatedPrices.items.find(
               (i) =>
                 i.vegetableId === (item.id || item.vegetableId) &&
-                i.weight === item.weight
+                i.weight === item.weight,
             );
             return calculatedItem
               ? {
-                  ...item,
-                  pricePerUnit: calculatedItem.pricePerUnit,
-                  totalPrice: calculatedItem.subtotal,
-                }
+                ...item,
+                pricePerUnit: calculatedItem.pricePerUnit,
+                totalPrice: calculatedItem.subtotal,
+              }
               : item;
           });
 
@@ -360,12 +422,12 @@ const VegetableCart = () => {
             Array.isArray(vegetableOrder)
               ? itemsWithPrices
               : {
-                  items: itemsWithPrices,
-                  summary: updatedPrices.summary || {},
-                  coupon: updatedPrices.coupon || appliedCoupon,
-                  timestamp:
-                    updatedPrices.timestamp || new Date().toISOString(),
-                }
+                items: itemsWithPrices,
+                summary: updatedPrices.summary || {},
+                coupon: updatedPrices.coupon || appliedCoupon,
+                timestamp:
+                  updatedPrices.timestamp || new Date().toISOString(),
+              },
           );
 
           if (updatedPrices.coupon?.discount) {
@@ -387,7 +449,7 @@ const VegetableCart = () => {
         setLoadingAction("");
       }
     },
-    [items, vegetableOrder, appliedCoupon, calculatePrice, setVegetableOrder]
+    [items, vegetableOrder, appliedCoupon, calculatePrice, setVegetableOrder],
   );
 
   const handleCheckout = useCallback(async () => {
@@ -395,19 +457,10 @@ const VegetableCart = () => {
       setLoading(true);
       setLoadingAction("Placing your order...");
 
-      // Validation checks
       if (!selectedAddress || !paymentMethod) {
         alert("Please select both delivery address and payment method");
         setLoading(false);
         setLoadingAction("");
-        return;
-      }
-
-      if (!formData.name || !formData.mobile || !formData.address) {
-        alert("Please complete your customer information first");
-        setLoading(false);
-        setLoadingAction("");
-        navigate("/address");
         return;
       }
 
@@ -425,7 +478,7 @@ const VegetableCart = () => {
 
         const existingIndex = acc.findIndex(
           (v) =>
-            (v.vegetableId || v.id) === vegetableId && v.weight === item.weight
+            (v.vegetableId || v.id) === vegetableId && v.weight === item.weight,
         );
 
         if (existingIndex >= 0) {
@@ -439,27 +492,28 @@ const VegetableCart = () => {
         return acc;
       }, []);
 
-      // Update state if duplicates were found
       if (uniqueVegetables.length !== normalizedItems.length) {
         setVegetableOrder(
           Array.isArray(vegetableOrder)
             ? uniqueVegetables
-            : { ...vegetableOrder, items: uniqueVegetables }
+            : { ...vegetableOrder, items: uniqueVegetables },
         );
       }
 
       // Calculate price details
       const priceDetails = await calculatePrice(
         uniqueVegetables,
-        appliedCoupon?.code
+        appliedCoupon?.code,
       );
       const orderId = generateOrderId(orderCount);
 
-      // Prepare order data
+      const userId = user?._id || user?.id;
       const orderData = {
         orderId,
         orderType: "custom",
-        customerInfo: formData,
+        userId: userId || null,
+        customerInfo,
+        deliveryAddressId: selectedAddress._id,
         selectedVegetables: uniqueVegetables.map((item) => ({
           vegetable: item.vegetableId || item.id,
           name: item.name,
@@ -481,30 +535,24 @@ const VegetableCart = () => {
         orderStatus: "placed",
         orderDate: new Date().toISOString(),
       };
-
+      // console.log("Order Data:", orderData);
       // Handle COD payment
       if (paymentMethod === "COD") {
-        // Create order in backend
         await axios.post(`${API_URL}/api/orders/create-order`, orderData);
 
-        // Save order data to sessionStorage for confirmation page
         sessionStorage.setItem("lastOrderData", JSON.stringify(orderData));
         sessionStorage.setItem("orderJustPlaced", "true");
 
-        // Clear state
         setVegetableOrder([]);
         setAppliedCoupon(null);
         setCouponDiscount(0);
         setDeliveryCharge(20);
 
-        // Clear localStorage BEFORE navigation
         localStorage.removeItem("orderSummary");
         localStorage.removeItem("vegbazar_cart");
 
-        // Update order placed state
         setIsOrderPlaced(true);
 
-        // Navigate to confirmation page
         window.scrollTo(0, 0);
         navigate("/confirmation");
       }
@@ -513,7 +561,6 @@ const VegetableCart = () => {
       const errorMessage = error.response?.data?.message || error.message;
       alert(`Failed to create order: ${errorMessage}`);
 
-      // Navigate to error page for server errors
       if (error.response?.status >= 500) {
         navigate("/order-failed");
       }
@@ -524,7 +571,6 @@ const VegetableCart = () => {
   }, [
     selectedAddress,
     paymentMethod,
-    formData,
     items,
     vegetableOrder,
     orderCount,
@@ -539,30 +585,23 @@ const VegetableCart = () => {
     setDeliveryCharge,
     setIsOrderPlaced,
     navigate,
+    user,
+    customerInfo,
   ]);
-  // Memoized navigation handlers
+
   const handleContinueShopping = useCallback(() => navigate("/"), [navigate]);
   const handleBrowseVegetables = useCallback(() => {
     window.scrollTo(0, 0);
     navigate("/");
   }, [navigate]);
-  const handleAddAddress = useCallback(
-    () => navigate("/address"),
-    [navigate]
-  );
-  const handleEditAddress = useCallback(
-    () => navigate("/address"),
-    [navigate]
-  );
+  const handleChangeAddress = useCallback(() => navigate("/address"), [navigate]);
 
-  // Show loading overlay when processing
   if (loading) {
     return (
       <OrderLoading loadingText={loadingAction} loadingMsg="Please wait..." />
     );
   }
 
-  // Render empty cart
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 pt-5 py-14 lg:pb-0">
@@ -602,11 +641,9 @@ const VegetableCart = () => {
     );
   }
 
-  // Render cart with items
   return (
     <div className="min-h-screen max-w-7xl mx-auto bg-gray-50 pt-20 lg:pb-0">
       <div className="container mx-auto px-4 md:py-4 lg:py-3">
-        {/* Header */}
         <div className="mb-4 md:mb-3">
           <div className="flex gap-1 flex-col items-center justify-baseline">
             <button
@@ -624,9 +661,7 @@ const VegetableCart = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-3 md:gap-2.5">
-          {/* Left Side - Cart Items */}
           <div className="flex-1 lg:w-2/3 space-y-3 md:space-y-2.5">
-            {/* Coupon Section - Mobile */}
             <div className="lg:hidden">
               <CouponCodeSection
                 onApplyCoupon={handleApplyCoupon}
@@ -637,7 +672,6 @@ const VegetableCart = () => {
               />
             </div>
 
-            {/* Mobile Bill Summary */}
             <div className="lg:hidden bg-[#f0fcf6] p-4 rounded-lg shadow-md">
               <h3 className="font-poppins text-base font-bold text-gray-800 mb-3 border-b pb-2">
                 Bill Summary
@@ -669,6 +703,15 @@ const VegetableCart = () => {
                       : `₹${deliveryCharge.toFixed(2)}`}
                   </span>
                 </div>
+
+                {deliveryCharge > 0 && subtotal < 250 && (
+                  <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="font-assistant text-xs text-green-700 font-semibold">
+                      🎉 Add ₹{(250 - subtotal).toFixed(2)} more for FREE
+                      delivery!
+                    </p>
+                  </div>
+                )}
                 <div className="border-t border-gray-200 pt-2 mt-2">
                   <div className="flex justify-between items-center">
                     <span className="font-poppins font-bold text-gray-800">
@@ -690,30 +733,24 @@ const VegetableCart = () => {
               )}
             </div>
 
-            {/* Delivery Address */}
             <AddressSection
-              userSavedAddress={userSavedAddress}
-              selectedAddress={selectedAddress}
-              setSelectedAddress={setSelectedAddress}
-              onAddAddress={handleAddAddress}
-              onEditAddress={handleEditAddress}
+              defaultAddress={defaultAddress}
+              onChangeAddress={handleChangeAddress}
+              user={user}
             />
 
-            {/* Cart Items */}
             <CartItems
               items={items}
               updateQuantity={updateQuantity}
               removeItem={removeItem}
             />
 
-            {/* Payment Method */}
             <PaymentMethodSection
               paymentMethod={paymentMethod}
               setPaymentMethod={setPaymentMethod}
             />
           </div>
 
-          {/* Right Side - Desktop Price Summary */}
           <PriceSummary
             subtotal={subtotal}
             deliveryCharge={deliveryCharge}
@@ -726,11 +763,12 @@ const VegetableCart = () => {
             appliedCoupon={appliedCoupon}
             onRemoveCoupon={handleRemoveCoupon}
             couponDiscount={couponDiscount}
+            customerInfo={customerInfo}
+            selectedAddress={selectedAddress}
           />
         </div>
       </div>
 
-      {/* Mobile Sticky Payment Button */}
       <MobileCheckoutButton
         paymentMethod={paymentMethod}
         vegetableOrder={vegetableOrder}
@@ -738,26 +776,21 @@ const VegetableCart = () => {
         total={total}
         handleCheckout={handleCheckout}
         appliedCoupon={appliedCoupon}
+        customerInfo={customerInfo}
+        selectedAddress={selectedAddress}
       />
     </div>
   );
 };
 
-// Extracted sub-components for better performance
 const AddressSection = React.memo(
-  ({
-    userSavedAddress,
-    selectedAddress,
-    setSelectedAddress,
-    onAddAddress,
-    onEditAddress,
-  }) => (
+  ({ defaultAddress, onChangeAddress, user }) => (
     <div className="bg-[#f0fcf6] p-4 md:p-3 rounded-lg shadow-md">
       <h3 className="font-poppins text-base md:text-sm font-bold text-gray-800 mb-3 md:mb-2 flex items-center gap-2">
         <MapPin size={18} className="text-[#0e540b] md:w-4 md:h-4" />
         Delivery Address
       </h3>
-      {!userSavedAddress ? (
+      {!defaultAddress ? (
         <div className="text-center py-6 md:py-4">
           <MapPin
             size={48}
@@ -767,7 +800,7 @@ const AddressSection = React.memo(
             No delivery address added yet
           </p>
           <button
-            onClick={onAddAddress}
+            onClick={onChangeAddress}
             className="font-assistant px-5 py-2.5 md:px-4 md:py-2 bg-[#0e540b] text-white rounded-lg hover:bg-green-800 transition text-sm md:text-xs font-semibold inline-flex items-center gap-2"
           >
             <Plus size={16} className="md:w-3.5 md:h-3.5" />
@@ -775,52 +808,57 @@ const AddressSection = React.memo(
           </button>
         </div>
       ) : (
-        <div className="space-y-2 md:space-y-1.5">
-          <label
-            className={`flex gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${
-              selectedAddress === "saved"
-                ? "border-[#0e540b] bg-green-50"
-                : "border-gray-200 hover:border-green-300"
-            }`}
-          >
-            <input
-              type="radio"
-              name="address"
-              value="saved"
-              checked={selectedAddress === "saved"}
-              onChange={() => setSelectedAddress("saved")}
-              className="mt-0.5 w-4 h-4 md:w-3.5 md:h-3.5 text-[#0e540b] focus:ring-green-700"
-            />
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1.5 md:mb-1">
-                <span className="font-poppins font-semibold text-gray-800 text-sm md:text-xs">
-                  {userSavedAddress.name}
+        <div className="space-y-3">
+          <div className="p-3 md:p-2.5 rounded-lg border-2 border-[#0e540b] bg-green-50">
+            <div className="flex items-center justify-between mb-2 md:mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="font-poppins font-semibold text-gray-800 text-sm md:text-xs capitalize">
+                  {defaultAddress.type || 'Home'}
                 </span>
-                {selectedAddress === "saved" && (
-                  <CheckCircle
-                    size={16}
-                    className="text-[#0e540b] md:w-3.5 md:h-3.5"
-                  />
+                {defaultAddress.isDefault && (
+                  <span className="px-2 py-0.5 bg-[#0e540b] text-white text-[10px] rounded-full">
+                    Default
+                  </span>
                 )}
               </div>
-              <p className="font-assistant text-xs md:text-[11px] text-gray-700 leading-relaxed">
-                {userSavedAddress.address}, {userSavedAddress.area},{" "}
-                {userSavedAddress.city}
-              </p>
+              <CheckCircle size={18} className="text-[#0e540b] md:w-4 md:h-4" />
             </div>
-          </label>
+            {user?.username && (
+              <p className="font-assistant text-sm md:text-xs text-gray-800 font-semibold mb-1">
+                {user.username}
+              </p>
+            )}
+            {user?.phone && (
+              <p className="font-assistant text-xs md:text-[11px] text-gray-700 mb-1.5">
+                {user.phone}
+              </p>
+            )}
+            <p className="font-assistant text-xs md:text-[11px] text-gray-700 leading-relaxed">
+              {defaultAddress.street}
+            </p>
+            {defaultAddress.area && (
+              <p className="font-assistant text-xs md:text-[11px] text-gray-600">
+                {defaultAddress.area}
+              </p>
+            )}
+            <p className="font-assistant text-xs md:text-[11px] text-gray-600">
+              {defaultAddress.city}, {defaultAddress.state} - {defaultAddress.pincode}
+            </p>
+          </div>
+
           <button
-            onClick={onEditAddress}
+            onClick={onChangeAddress}
             className="font-assistant w-full px-4 py-2 md:px-3 md:py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm md:text-xs font-semibold inline-flex items-center justify-center gap-2"
           >
             <Edit size={14} className="md:w-3.5 md:h-3.5" />
-            Edit Address
+            Change Address
           </button>
         </div>
       )}
     </div>
-  )
+  ),
 );
+
 const CartItems = React.memo(({ items, updateQuantity, removeItem }) => (
   <div className="bg-[#f0fcf6] p-3 md:p-2.5 rounded-lg shadow-md">
     <h3 className="font-poppins text-base md:text-sm font-bold text-gray-800 mb-2 md:mb-1.5 border-b pb-1.5 md:pb-1">
@@ -930,11 +968,10 @@ const PaymentMethodSection = React.memo(
       </h3>
       <div className="space-y-2.5 md:space-y-2">
         <label
-          className={`flex items-center gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${
-            paymentMethod === "COD"
-              ? "border-[#0e540b] bg-green-50"
-              : "border-gray-200 hover:border-green-300"
-          }`}
+          className={`flex items-center gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${paymentMethod === "COD"
+            ? "border-[#0e540b] bg-green-50"
+            : "border-gray-200 hover:border-green-300"
+            }`}
         >
           <input
             type="radio"
@@ -958,11 +995,10 @@ const PaymentMethodSection = React.memo(
           )}
         </label>
         <label
-          className={`flex items-center gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${
-            paymentMethod === "ONLINE"
-              ? "border-[#0e540b] bg-green-50"
-              : "border-gray-200 hover:border-green-300"
-          }`}
+          className={`flex items-center gap-3 md:gap-2 p-3 md:p-2.5 rounded-lg border-2 cursor-pointer transition ${paymentMethod === "ONLINE"
+            ? "border-[#0e540b] bg-green-50"
+            : "border-gray-200 hover:border-green-300"
+            }`}
         >
           <input
             type="radio"
@@ -987,7 +1023,7 @@ const PaymentMethodSection = React.memo(
         </label>
       </div>
     </div>
-  )
+  ),
 );
 
 const PriceSummary = React.memo(
@@ -1003,10 +1039,11 @@ const PriceSummary = React.memo(
     appliedCoupon,
     onRemoveCoupon,
     couponDiscount,
+    customerInfo,
+    selectedAddress,
   }) => (
     <div className="lg:w-1/3 hidden lg:block">
       <div className="bg-[#f0fcf6] p-3 rounded-lg shadow-md lg:sticky lg:top-4 space-y-3">
-        {/* Coupon Section */}
         <CouponCodeSection
           onApplyCoupon={onApplyCoupon}
           appliedCoupon={appliedCoupon}
@@ -1015,7 +1052,6 @@ const PriceSummary = React.memo(
           isMobile={false}
         />
 
-        {/* Price Summary */}
         <div>
           <h3 className="font-poppins text-sm font-bold text-gray-800 mb-2.5 border-b pb-1.5">
             Price Summary
@@ -1030,7 +1066,6 @@ const PriceSummary = React.memo(
               </span>
             </div>
 
-            {/* Coupon Discount */}
             {couponDiscount > 0 && (
               <div className="flex justify-between items-center text-green-600">
                 <span className="font-assistant text-xs">Coupon Discount</span>
@@ -1050,6 +1085,14 @@ const PriceSummary = React.memo(
                   : `₹${deliveryCharge.toFixed(2)}`}
               </span>
             </div>
+
+            {deliveryCharge > 0 && subtotal < 250 && (
+              <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
+                <p className="font-assistant text-xs text-green-700 font-semibold">
+                  🎉 Add ₹{(250 - subtotal).toFixed(2)} more for FREE delivery!
+                </p>
+              </div>
+            )}
             <div className="border-t border-gray-200 pt-2">
               <div className="flex justify-between items-center">
                 <span className="font-poppins font-bold text-gray-800 text-sm">
@@ -1073,16 +1116,17 @@ const PriceSummary = React.memo(
               orderType="custom"
               vegetableOrder={vegetableOrder}
               couponCode={appliedCoupon}
+              customerInfo={customerInfo}
+              deliveryAddress={selectedAddress}
             />
           ) : (
             <button
               onClick={handleCheckout}
               disabled={isCheckoutDisabled}
-              className={`font-assistant w-full py-2 rounded-lg font-bold text-sm transition transform shadow-md ${
-                isCheckoutDisabled
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-green-700 text-white hover:bg-green-800 hover:scale-[1.02]"
-              }`}
+              className={`font-assistant w-full py-2 rounded-lg font-bold text-sm transition transform shadow-md ${isCheckoutDisabled
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-green-700 text-white hover:bg-green-800 hover:scale-[1.02]"
+                }`}
             >
               {isCheckoutDisabled ? "Complete Selection" : "Place Order"}
             </button>
@@ -1090,7 +1134,7 @@ const PriceSummary = React.memo(
         </div>
       </div>
     </div>
-  )
+  ),
 );
 
 const MobileCheckoutButton = React.memo(
@@ -1101,6 +1145,8 @@ const MobileCheckoutButton = React.memo(
     total,
     handleCheckout,
     appliedCoupon,
+    customerInfo,
+    selectedAddress,
   }) => (
     <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[#f0fcf6] border-t border-gray-200 shadow-2xl z-50">
       <div className="px-4 py-3">
@@ -1110,17 +1156,18 @@ const MobileCheckoutButton = React.memo(
               orderType="custom"
               vegetableOrder={vegetableOrder}
               couponCode={appliedCoupon}
+              customerInfo={customerInfo}
+              deliveryAddress={selectedAddress}
             />
           </div>
         ) : (
           <button
             onClick={handleCheckout}
             disabled={isCheckoutDisabled}
-            className={`font-assistant w-full py-3 rounded-lg font-bold text-sm transition shadow-lg active:scale-95 ${
-              isCheckoutDisabled
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-green-700 text-white hover:bg-green-800"
-            }`}
+            className={`font-assistant w-full py-3 rounded-lg font-bold text-sm transition shadow-lg active:scale-95 ${isCheckoutDisabled
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-green-700 text-white hover:bg-green-800"
+              }`}
           >
             {isCheckoutDisabled
               ? "Complete Selection to Proceed"
@@ -1129,7 +1176,7 @@ const MobileCheckoutButton = React.memo(
         )}
       </div>
     </div>
-  )
+  ),
 );
 
 export default VegetableCart;

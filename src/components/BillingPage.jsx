@@ -1,8 +1,11 @@
 import React, { useMemo, useCallback, memo, useState, useEffect } from "react";
 import { useOrderContext } from "../Context/OrderContext";
+
 import { useBillContext } from "../Context/BillContext";
+import { useAuth } from "../Context/AuthProvider";
 import RazorpayPayment from "./RazorpayPayment";
 import CouponCodeSection from "./CouponCodeSection";
+import AddressSection from "./AddressSection";
 import axios from "axios";
 import {
   FiPackage,
@@ -29,18 +32,16 @@ const PaymentMethodButton = memo(({ method, isActive, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`w-full p-3 rounded-xl border-2 transition-all duration-300 ${
-        isActive
-          ? "border-[#023D01] bg-gradient-to-r from-green-50 to-emerald-50 shadow-md"
-          : "border-gray-200 hover:border-[#023D01] hover:bg-gray-100"
-      }`}
+      className={`w-full p-3 rounded-xl border-2 transition-all duration-300 ${isActive
+        ? "border-[#023D01] bg-gradient-to-r from-green-50 to-emerald-50 shadow-md"
+        : "border-gray-200 hover:border-[#023D01] hover:bg-gray-100"
+        }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div
-            className={`size-4 rounded-full border-2 flex items-center justify-center ${
-              isActive ? "border-[#0e540b]" : "border-gray-300"
-            }`}
+            className={`size-4 rounded-full border-2 flex items-center justify-center ${isActive ? "border-[#0e540b]" : "border-gray-300"
+              }`}
           >
             {isActive && <div className="size-2 rounded-full bg-[#0e540b]" />}
           </div>
@@ -108,7 +109,48 @@ const BillingPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [orderCount, setOrderCount] = useState(null);
+
   const [isLoadingOrderCount, setIsLoadingOrderCount] = useState(true);
+  const { user } = useAuth();
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [defaultAddress, setDefaultAddress] = useState(null);
+
+  // Fetch default address from API
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchDefaultAddress = async () => {
+      const userId = user?._id || user?.id;
+      if (!userId) {
+        return;
+      }
+
+      try {
+        const { data } = await axios.get(
+          `${API_URL}/api/addresses/active`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+        if (isMounted && data?.data.defaultAddress) {
+          setDefaultAddress(data.data.defaultAddress);
+          setSelectedAddress(data.data.defaultAddress);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching default address:", error);
+        setDefaultAddress(null);
+      }
+    };
+
+    fetchDefaultAddress();
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
+  const handleChangeAddress = useCallback(() => navigate("/address"), [navigate]);
 
   // Generate Order ID function
   const generateOrderId = useCallback((count) => {
@@ -125,7 +167,7 @@ const BillingPage = () => {
     const fetchOrderCount = async () => {
       try {
         setIsLoadingOrderCount(true);
-        const res = await axios.get(`${API_URL}/api/orders/today/orders`);
+        const res = await axios.get(`${API_URL}/api/orders/all`);
         setOrderCount(res.data.data.count + 1);
       } catch (err) {
         console.error("Error fetching order count:", err);
@@ -167,7 +209,9 @@ const BillingPage = () => {
       deliveryCharges: deliveryCharge,
       paymentMethod,
       paymentStatus: paymentMethod === "COD" ? "pending" : "awaiting_payment",
+
       orderStatus: "placed",
+      deliveryAddressId: selectedAddress?._id || null,
     };
   }, [
     orderCount,
@@ -179,7 +223,9 @@ const BillingPage = () => {
     couponDiscount,
     deliveryCharge,
     paymentMethod,
+
     generateOrderId,
+    selectedAddress,
   ]);
 
   const handleCOD = useCallback(
@@ -197,6 +243,12 @@ const BillingPage = () => {
       setIsSubmitting(true);
       setSubmitError(null);
 
+      if (paymentMethod === "COD" && !selectedAddress) {
+        setSubmitError("Please select a delivery address");
+        setIsSubmitting(false);
+        return;
+      }
+
       try {
         const res = await axios.post(
           `${API_URL}/api/orders/create-order`,
@@ -206,7 +258,7 @@ const BillingPage = () => {
         if (res.status >= 200 && res.status < 300) {
           setIsOrderPlaced(true);
           // Navigate with order data in state
-          navigate("/billing-success", { 
+          navigate("/billing-success", {
             state: { orderData: orderData }
           });
         } else {
@@ -251,8 +303,8 @@ const BillingPage = () => {
   }
 
   // Loading and Error States
-  if (isSubmitting) return <OrderLoading loadingText="Placing order...." loadingMsg="Please wait while we confirm your order..."/>;
-  if (isLoadingOrderCount) return <OrderLoading loadingText="Loading"/>;
+  if (isSubmitting) return <OrderLoading loadingText="Placing order...." loadingMsg="Please wait while we confirm your order..." />;
+  if (isLoadingOrderCount) return <OrderLoading loadingText="Loading" />;
   if (submitError)
     return (
       <OrderFailed
@@ -440,6 +492,13 @@ const BillingPage = () => {
                 <FiCreditCard className="size-4 text-[#0e540b]" />
                 Payment Method
               </h2>
+              <div className="space-y-2 mb-4">
+                <AddressSection
+                  defaultAddress={defaultAddress}
+                  onChangeAddress={handleChangeAddress}
+                  user={user}
+                />
+              </div>
 
               <div className="space-y-2">
                 <PaymentMethodButton
@@ -534,7 +593,7 @@ const BillingPage = () => {
                     <RazorpayPayment
                       orderType="basket"
                       couponCode={appliedCoupon?.code}
-                      orderData={orderData}
+                      deliveryAddress={selectedAddress}
                     />
                   )}
                   {paymentMethod === "COD" && (
@@ -543,7 +602,7 @@ const BillingPage = () => {
                       disabled={!orderData}
                       className="w-full py-2.5 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Place Order 
+                      Place Order
                     </button>
                   )}
                   {!paymentMethod && (
@@ -608,7 +667,7 @@ const BillingPage = () => {
               <RazorpayPayment
                 orderType="basket"
                 couponCode={appliedCoupon?.code}
-                orderData={orderData}
+                deliveryAddress={selectedAddress}
               />
             </div>
           )}

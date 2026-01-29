@@ -1,21 +1,37 @@
-// Fixed Navbar.jsx with Authentication
+// Fixed Navbar.jsx with Glassmorphism (No Active Lines in Bottom Nav)
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { FiHome, FiShoppingCart, FiPhone, FiUser, FiLogOut } from "react-icons/fi";
+import { FiHome, FiShoppingCart, FiPhone, FiUser, FiLogOut, FiMapPin } from "react-icons/fi";
 import { RiShoppingBag4Fill } from "react-icons/ri";
 import { GiBasket } from "react-icons/gi";
-import { MdLocalShipping } from "react-icons/md";
+import { PiPackageBold } from "react-icons/pi";
 import { useOrderContext } from "../Context/OrderContext";
 import { useLocation } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth } from "../Context/AuthProvider";
+import lettuce from "../assets/lettuce_17024589.png";
+import veg1 from "../assets/vegetable_12439915.png";
+import veg2 from "../assets/vegetable_5029309.png";
+import veg3 from "../assets/vegetables_2700637.png";
+import veg4 from "../assets/vegetables_498280.png";
+import veg5 from "../assets/vegetables_9241551.png";
 
 const VegBazarLogo = "/vegbazar.svg";
+
+const vegetableImages = [lettuce, veg1, veg2, veg3, veg4, veg5];
 
 const Navbar = () => {
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { navigate } = useOrderContext();
   const { pathname: currentPath } = useLocation();
-  const { isAuthenticated, user, logout, loginWithRedirect, isLoading } = useAuth0();
+  const { isAuthenticated, user, logout, isLoading } = useAuth();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % vegetableImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Optimized scroll handler with debouncing
   useEffect(() => {
@@ -62,9 +78,9 @@ const Navbar = () => {
     () => [
       { path: "/", icon: FiHome, label: "Home" },
       { path: "/offers", icon: GiBasket, label: "Basket" },
-      { path: "/customized-vegetables", icon: RiShoppingBag4Fill, label: "Vegetables" },
+      { path: "/vegetables", icon: RiShoppingBag4Fill, label: "Vegetables" },
       { path: "/cart", icon: FiShoppingCart, label: "Cart" },
-      { path: "/track-your-order", icon: MdLocalShipping, label: "Track" },
+      { path: "/orders", icon: PiPackageBold, label: "Orders" },
       { path: "/support", icon: FiPhone, label: "Support" },
     ],
     []
@@ -74,12 +90,12 @@ const Navbar = () => {
     () => [
       { path: "/", icon: FiHome, label: "Home" },
       { path: "/offers", icon: GiBasket, label: "Basket" },
-      { path: "/customized-vegetables", icon: RiShoppingBag4Fill, label: "Vegetables" },
+      { path: "/vegetables", icon: RiShoppingBag4Fill, label: "Vegetables" },
       { path: "/cart", icon: FiShoppingCart, label: "Cart" },
       {
-        path: "/track-your-order",
-        icon: MdLocalShipping,
-        label: "Track Order",
+        path: "/orders",
+        icon: PiPackageBold,
+        label: "Orders",
       },
       { path: "/support", icon: FiPhone, label: "Support" },
     ],
@@ -110,14 +126,35 @@ const Navbar = () => {
     if (isAuthenticated) {
       setShowUserMenu(!showUserMenu);
     } else {
-      loginWithRedirect();
+      navigate("/login");
     }
-  }, [isAuthenticated, showUserMenu, loginWithRedirect]);
+  }, [isAuthenticated, showUserMenu, navigate]);
+
+  // Get user display info
+  const getUserDisplayName = () => {
+    if (!user) return 'User';
+    return user.username || user.email?.split('@')[0] || 'User';
+  };
+
+  const getUserAvatar = () => {
+    if (user?.profilePicture) return user.profilePicture;
+    if (user?.name) {
+      // Generate initials avatar
+      const initials = user.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+      return initials;
+    }
+    return null;
+  };
 
   return (
     <>
       {/* Top Navbar - Desktop & Mobile */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#e8f9f0] to-[#f0fcf6] backdrop-blur-sm shadow-sm">
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-lg border-b border-white/20 shadow-sm transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
@@ -133,7 +170,7 @@ const Navbar = () => {
                 className="w-6 sm:w-7 md:w-8 lg:w-9"
                 loading="lazy"
               />
-              <span className="text-[#023D01] backdrop-blur-sm px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md text-xs sm:text-sm md:text-base font-semibold tracking-wide">
+              <span className="text-[#0e540b] bg-white/40 backdrop-blur-sm px-1.5 sm:px-2 rounded-md text-xs sm:text-sm md:text-md font-extrabold tracking-wide border border-white/50">
                 VegBazar
               </span>
             </button>
@@ -149,19 +186,34 @@ const Navbar = () => {
                     className={`
                       flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
                       transition-all duration-200 ease-out
-                      ${
-                        isActive
-                          ? "bg-green-100 text-black shadow-sm"
-                          : "text-black hover:bg-green-50"
+                      ${isActive
+                        ? "bg-green-100/80 text-black shadow-sm border border-green-200/50 backdrop-blur-sm"
+                        : "text-black hover:bg-white/50 hover:backdrop-blur-sm"
                       }
                     `}
                     aria-label={label}
                     aria-current={isActive ? "page" : undefined}
                   >
-                    <Icon
-                      className="w-4 h-4 flex-shrink-0"
-                      aria-hidden="true"
-                    />
+                    {path === "/vegetables" ? (
+                      <div className="relative w-4 h-4 flex-shrink-0">
+                        {vegetableImages.map((img, index) => (
+                          <img
+                            key={index}
+                            src={img}
+                            alt="Veg"
+                            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 ${index === currentImageIndex
+                              ? "opacity-100"
+                              : "opacity-0"
+                              }`}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <Icon
+                        className="w-4 h-4 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                    )}
                     <span className="font-assistant">{label}</span>
                   </button>
                 );
@@ -173,7 +225,7 @@ const Navbar = () => {
               {/* Shop Now Button */}
               <button
                 onClick={handleShopNow}
-                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-5 py-2 rounded-full text-sm font-semibold font-assistant shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-orange-500/90 to-orange-600/90 backdrop-blur-sm hover:from-orange-600 hover:to-orange-700 text-white px-5 py-2 rounded-full text-sm font-semibold font-assistant shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
                 aria-label="Shop Now"
               >
                 <RiShoppingBag4Fill className="w-4 h-4" />
@@ -187,39 +239,44 @@ const Navbar = () => {
                   disabled={isLoading}
                   className={`
                     flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200
+                    backdrop-blur-sm border
                     ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
-                    ${isAuthenticated 
-                      ? 'bg-green-100 hover:bg-green-200' 
-                      : 'bg-white hover:bg-gray-50 border border-gray-200'
+                    ${isAuthenticated
+                      ? 'bg-green-100/50 hover:bg-green-200/50 border-green-200/50'
+                      : 'bg-white/50 hover:bg-white/80 border-gray-200/50'
                     }
                   `}
                   aria-label={isLoading ? 'Loading...' : (isAuthenticated ? 'User menu' : 'Sign in')}
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-                  ) : isAuthenticated && user?.picture ? (
+                  ) : isAuthenticated && user?.profilePicture ? (
                     <img
-                      src={user.picture}
-                      alt={user.name || user.email}
-                      className="w-7 h-7 rounded-full object-cover"
+                      src={user.profilePicture}
+                      alt={getUserDisplayName()}
+                      className="w-7 h-7 rounded-full object-cover ring-2 ring-white/60"
                     />
+                  ) : isAuthenticated && getUserAvatar() ? (
+                    <div className="w-7 h-7 rounded-full bg-green-600/90 text-white flex items-center justify-center text-xs font-semibold shadow-inner">
+                      {getUserAvatar()}
+                    </div>
                   ) : (
                     <FiUser className="w-5 h-5 text-gray-700" />
                   )}
                   {isAuthenticated && !isLoading && (
                     <span className="hidden md:block text-sm font-medium text-gray-800 max-w-[100px] truncate">
-                      {user?.name || user?.email || 'User'}
+                      {getUserDisplayName()}
                     </span>
                   )}
                 </button>
 
-                {/* Dropdown Menu */}
+                {/* Dropdown Menu - Glassmorphism */}
                 {showUserMenu && isAuthenticated && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute right-0 mt-2 w-56 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                     {/* User Info */}
-                    <div className="px-4 py-3 border-b border-gray-100">
+                    <div className="px-4 py-3 border-b border-gray-200/50">
                       <p className="text-sm font-semibold text-gray-900 truncate">
-                        {user?.name || 'User'}
+                        {getUserDisplayName()}
                       </p>
                       <p className="text-xs text-gray-500 truncate mt-0.5">
                         {user?.email}
@@ -229,18 +286,29 @@ const Navbar = () => {
                     {/* Menu Items */}
                     <button
                       onClick={() => {
-                        handleNavigate('/track-your-order');
+                        handleNavigate('/orders');
                         setShowUserMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-white/60 flex items-center gap-2 transition-colors"
                     >
-                      <MdLocalShipping className="w-4 h-4" />
+                      <PiPackageBold className="w-4 h-4" />
                       My Orders
                     </button>
 
                     <button
+                      onClick={() => {
+                        handleNavigate('/address');
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-white/60 flex items-center gap-2 transition-colors"
+                    >
+                      <FiMapPin className="w-4 h-4" />
+                      Address
+                    </button>
+
+                    <button
                       onClick={handleLogout}
-                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50/50 flex items-center gap-2 transition-colors"
                     >
                       <FiLogOut className="w-4 h-4" />
                       Sign Out
@@ -253,12 +321,12 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Bottom Navigation - Mobile Only */}
+      {/* Bottom Navigation - Mobile Only - Glassmorphism */}
       <nav
         className={`
           fixed bottom-0 left-0 right-0 z-50 md:hidden
-          bg-white/95 backdrop-blur-md
-          shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]
+          bg-white/95 backdrop-blur-lg border-t border-white/50
+          shadow-[0_-8px_32px_0_rgba(31,38,135,0.1)]
           transition-transform duration-300 ease-out
           ${isBottomNavVisible ? "translate-y-0" : "translate-y-full"}
         `}
@@ -272,11 +340,12 @@ const Navbar = () => {
               <button
                 key={path}
                 onClick={() => handleNavigate(path)}
+                // Removed focus:ring properties to prevent border lines on click
                 className={`
                   relative flex flex-col items-center justify-center gap-0.5
                   px-3 py-1.5 rounded-xl min-w-[60px]
                   transition-all duration-200 ease-out
-                  focus:outline-none focus:ring-2 focus:ring-green-500
+                  focus:outline-none
                   ${isActive ? "transform scale-105" : "active:scale-95"}
                 `}
                 aria-label={label}
@@ -285,29 +354,42 @@ const Navbar = () => {
                 {/* Icon Container */}
                 <div
                   className={`
-                  relative p-1.5 rounded-lg transition-all duration-200
-                  ${isActive ? "bg-green-50" : ""}
-                `}
+                    relative p-1.5 rounded-lg transition-all duration-200
+                    ${isActive ? "bg-green-100/60 backdrop-blur-sm" : ""}
+                  `}
                 >
-                  <Icon
-                    className={`
+                  {path === "/vegetables" ? (
+                    <div className="relative w-5 h-5">
+                      {vegetableImages.map((img, index) => (
+                        <img
+                          key={index}
+                          src={img}
+                          alt="Veg"
+                          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 ${index === currentImageIndex
+                            ? "opacity-100"
+                            : "opacity-0"
+                            }`}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <Icon
+                      className={`
                       w-5 h-5 transition-colors duration-200
-                      ${isActive ? "text-green-700" : "text-black"}
+                      ${isActive ? "text-green-700" : "text-black/70"}
                     `}
-                    aria-hidden="true"
-                  />
-                  {/* Active Indicator Dot */}
-                  {isActive && (
-                    <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-green-700 rounded-full" />
+                      aria-hidden="true"
+                    />
                   )}
+                  {/* Removed Active Indicator Dot */}
                 </div>
 
                 {/* Label */}
                 <span
                   className={`
-                  text-[10px] font-medium transition-all duration-200
-                  ${isActive ? "text-green-800 font-semibold" : "text-black"}
-                `}
+                    text-[10px] font-medium transition-all duration-200
+                    ${isActive ? "text-green-800 font-semibold" : "text-black/70"}
+                  `}
                 >
                   {label}
                 </span>

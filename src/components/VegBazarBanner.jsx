@@ -1,127 +1,236 @@
-import React, { useEffect, useState } from "react";
-import { Sparkles, PartyPopper, Sun } from "lucide-react";
-import kiteSvg from "../assets/vegbazarkite.svg";
+import React, { useState } from "react";
+import { MapPin, Truck, IndianRupee, Users, Leaf, RefreshCw, ShieldCheck } from "lucide-react";
+
 const vegbazarLogo = "/vegbazar.svg";
 
-export default function VegBazarMakarsankranti() {
-  const [kiteFly, setKiteFly] = useState(false);
+export default function VegBazarResponsiveBanner() {
+  const [hoveredFeature, setHoveredFeature] = useState(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setKiteFly(true), 800);
-    return () => clearTimeout(timer);
-  }, []);
+  const features = [
+    {
+      icon: MapPin,
+      title: "Doorstep Delivery",
+      shortTitle: "Delivery",
+      color: "#e64200",
+    },
+    {
+      icon: IndianRupee,
+      title: "Affordable Prices",
+      shortTitle: "Affordable",
+      color: "#0e540b",
+    },
+    {
+      icon: Users,
+      title: "Support Farmers",
+      shortTitle: "Farmers",
+      color: "#e64200",
+    },
+    {
+      icon: Leaf,
+      title: "Farm Fresh",
+      shortTitle: "Fresh",
+      color: "#0e540b",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Quality Assured",
+      shortTitle: "Quality",
+      color: "#e64200",
+    },
+    {
+      icon: RefreshCw,
+      title: "Returns & Refunds",
+      shortTitle: "Returns",
+      color: "#0e540b",
+    },
+  ];
 
   return (
-    <section className="relative mx-auto w-full overflow-hidden rounded-2xl bg-gradient-to-br from-[#fff7e6] via-[#fff1d6] to-[#ffe6b3] px-4 py-20 md:max-w-6xl">
-      {/* Background elements */}
+    <div 
+      className="relative overflow-hidden bg-gradient-to-br from-white via-[#fafbf9] to-white" 
+      style={{ 
+        minHeight: '250px',
+        fontFamily: "'Poppins', 'Assistant', sans-serif" 
+      }}
+    >
+      {/* Animated Background Elements */}
       <div className="pointer-events-none absolute inset-0">
-        <Sun className="absolute right-6 top-6 h-14 w-14 text-[#ff9f1c]/40 animate-pulse" />
-        <div className="absolute bottom-6 left-6 h-10 w-10 rounded-full border border-[#e63946]/30 animate-spin" />
+        <div className="absolute left-0 top-0 h-full w-1/2 sm:w-1/3 bg-gradient-to-r from-[#e64200]/5 to-transparent animate-pulse"></div>
+        <div className="absolute right-0 top-0 h-full w-1/2 sm:w-1/3 bg-gradient-to-l from-[#0e540b]/5 to-transparent animate-pulse delay-1000"></div>
       </div>
 
-      <div className="relative z-10 text-center">
-        {/* Logo */}
-        <div className="mb-2 flex items-center justify-center gap-2">
-          <img src={vegbazarLogo} className="w-8 sm:w-10" alt="VegBazar" />
-          <h1
-            className="font-extrabold text-[#0e540b]"
-            style={{ fontFamily: "Trirong, serif" }}
-          >
-            VegBazar
+      <div className="relative mx-auto flex flex-col lg:flex-row h-full max-w-7xl justify-center lg:items-center px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8 lg:py-10 gap-4 sm:gap-6 lg:gap-8">
+        
+        {/* Left Section - Logo & Hero Text */}
+        <div className="flex-1 w-full lg:max-w-lg opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards]">
+          <img 
+            src={vegbazarLogo} 
+            alt="VegBazar" 
+            className="mb-2 sm:mb-3 h-7 sm:h-8 md:h-10 lg:h-11 animate-bounce" 
+          />
+          <h1 className="mb-2 sm:mb-3 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight">
+            <span className="text-[#0e540b]">Fresh</span>{" "}
+            <span className="text-[#e64200]">Vegetables</span>
           </h1>
-        </div>
+          <p className="mb-3 sm:mb-4 max-w-md text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed opacity-0 animate-[fadeInUp_0.6s_ease-out_0.2s_forwards]">
+            Farm-fresh produce delivered to your doorstep in Valsad
+          </p>
+          
+          {/* Free Delivery Badge */}
+          <div className="mb-3 sm:mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#e64200] to-[#c73900] px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 shadow-lg transition-all hover:shadow-xl hover:scale-105 duration-300 opacity-0 animate-[fadeInUp_0.6s_ease-out_0.4s_forwards]">
+            <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 animate-bounce" />
+            <span className="text-xs sm:text-sm md:text-base font-bold text-white whitespace-nowrap">
+              ₹269+ FREE DELIVERY
+            </span>
+          </div>
 
-        {/* Greeting */}
-        <div className="mb-2 flex items-center justify-center gap-2">
-          <Sparkles className="h-4 w-4 text-[#e63946]" />
-          <h2
-            className="font-bold text-[#9c2a2a]"
-            style={{ fontFamily: "Poppins, sans-serif" }}
-          >
-            Happy Makarsankranti
-          </h2>
-          <Sparkles className="h-4 w-4 text-[#e63946]" />
-        </div>
-
-        {/* Kite Animation */}
-        {/* Kite Animation with PNG */}
-        <div className="relative mb-4 flex h-36 items-center justify-center overflow-hidden">
-          <div
-            className={`relative transition-all duration-1000 ease-out ${
-              kiteFly
-                ? "-translate-y-2 translate-x-6 rotate-6 opacity-100"
-                : "translate-y-24 -translate-x-6 -rotate-12 opacity-0"
-            }`}
-          >
-            {/* Kite PNG — FRONT */}
-            <img
-              src={kiteSvg}
-              alt="Makarsankranti Kite"
-              className="relative z-20 w-20 sm:w-24 drop-shadow-lg
-                 animate-[kite-float_3s_ease-in-out_infinite]"
-            />
-
-            {/* Manja — BEHIND but ATTACHED */}
-            <div
-              className="absolute z-10 left-1/2 top-full h-24 w-px
-                 -translate-x-1/2 bg-[#6d4c41]"
-            />
+          {/* CTA Button */}
+          <div className="opacity-0 animate-[fadeInUp_0.6s_ease-out_0.6s_forwards]">
+            <button
+              onClick={() => (window.location.href = "/vegetables")}
+              className="group inline-flex items-center justify-center gap-2 rounded-full px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base font-bold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 transform"
+              style={{ backgroundColor: "#0e540b" }}
+            >
+              Shop Now
+              <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+            </button>
           </div>
         </div>
 
-        {/* Text */}
-        <p
-          className="mb-1 font-semibold text-[#0e540b]"
-          style={{ fontFamily: "Assistant, sans-serif" }}
-        >
-          Til-Gud Ghya, God-God Bola 🍬🪁
-        </p>
-        <p
-          className="mb-3 text-[#e63946]"
-          style={{ fontFamily: "Assistant, sans-serif", fontSize: "0.9rem" }}
-        >
-          Fresh harvest • Sweet beginnings • Healthy homes
-        </p>
-
-        {/* Festive Highlights */}
-        <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-          {[
-            {
-              title: "Til & Groundnut",
-              desc: "Pure, festive quality",
-              color: "from-[#6d4c41] to-[#8d6e63]",
-            },
-            {
-              title: "Free Delivery",
-              desc: "Orders above ₹249",
-              color: "from-[#0e540b] to-[#166d12]",
-            },
-            {
-              title: "Fresh Veggies",
-              desc: "Same-day farm supply",
-              color: "from-[#ff9f1c] to-[#ffbf69]",
-            },
-          ].map((item, i) => (
-            <div key={i} className="rounded-xl bg-white/90 p-2 shadow-sm">
+        {/* Right Section - USP Icons Grid */}
+        <div className="flex-1 w-full lg:max-w-xl">
+          
+          {/* Desktop Grid (lg and up) - 3 columns */}
+          <div className="hidden lg:grid grid-cols-3 gap-3">
+            {features.map((feature, idx) => (
               <div
-                className={`mx-auto mb-1 h-7 w-7 rounded-full bg-gradient-to-br ${item.color}`}
-              />
-              <h3 className="text-xs font-bold text-[#0e540b]">{item.title}</h3>
-              <p className="text-[11px] text-black/70">{item.desc}</p>
-            </div>
-          ))}
-        </div>
+                key={idx}
+                onMouseEnter={() => setHoveredFeature(idx)}
+                onMouseLeave={() => setHoveredFeature(null)}
+                className="flex flex-col items-center gap-2.5 rounded-lg bg-gradient-to-br from-gray-50 to-white p-3 shadow-md border border-gray-100 hover:border-gray-200 hover:shadow-lg cursor-pointer transition-all duration-500 hover:scale-110 hover:-translate-y-1 opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]"
+                style={{
+                  animationDelay: `${idx * 0.1}s`,
+                  backgroundColor: hoveredFeature === idx ? '#f9fafb' : '#ffffff'
+                }}
+              >
+                <feature.icon 
+                  className="h-6 w-6 flex-shrink-0 transition-all duration-500"
+                  style={{ 
+                    color: feature.color,
+                    transform: hoveredFeature === idx ? 'scale(1.2) rotate(5deg)' : 'scale(1) rotate(0deg)'
+                  }} 
+                />
+                <span className="text-xs font-semibold text-gray-800 text-center transition-colors duration-300">
+                  {feature.title}
+                </span>
+              </div>
+            ))}
+          </div>
 
-        {/* CTA */}
-        <button
-          onClick={() => (window.location.href = "/vegetables")}
-          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#e63946] to-[#ff9f1c] px-5 py-1.5 text-xs font-bold text-white shadow hover:scale-105"
-          style={{ fontFamily: "Assistant, sans-serif" }}
-        >
-          <PartyPopper className="h-4 w-4" />
-          Order Festive Freshness
-        </button>
+          {/* Tablet Grid (md) - 3 columns */}
+          <div className="hidden md:grid lg:hidden grid-cols-3 gap-3">
+            {features.map((feature, idx) => (
+              <div
+                key={idx}
+                onMouseEnter={() => setHoveredFeature(idx)}
+                onMouseLeave={() => setHoveredFeature(null)}
+                className="flex flex-col items-center gap-2 rounded-lg bg-gradient-to-br from-gray-50 to-white p-2.5 shadow-md border border-gray-100 hover:border-gray-200 hover:shadow-lg cursor-pointer transition-all duration-400 hover:scale-105 opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]"
+                style={{
+                  animationDelay: `${idx * 0.08}s`
+                }}
+              >
+                <feature.icon 
+                  className="h-5 w-5 flex-shrink-0 transition-all duration-500"
+                  style={{ 
+                    color: feature.color,
+                    transform: hoveredFeature === idx ? 'scale(1.15) rotate(5deg)' : 'scale(1) rotate(0deg)'
+                  }} 
+                />
+                <span className="text-xs font-semibold text-gray-800 text-center">
+                  {feature.title}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Small Tablet Grid (sm) - 3 columns with compact layout */}
+          <div className="hidden sm:grid md:hidden grid-cols-3 gap-2.5">
+            {features.map((feature, idx) => (
+              <div
+                key={idx}
+                className="flex flex-col items-center gap-1.5 rounded-lg bg-gradient-to-br from-gray-50 to-white p-2.5 shadow-md border border-gray-100 transition-all duration-300 active:scale-95 opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]"
+                style={{
+                  animationDelay: `${idx * 0.08}s`
+                }}
+              >
+                <feature.icon 
+                  className="h-5 w-5 flex-shrink-0" 
+                  style={{ color: feature.color }} 
+                />
+                <span className="text-[10px] font-semibold text-gray-800 text-center">
+                  {feature.shortTitle}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile Grid (below sm) - 2 columns */}
+          <div className="grid sm:hidden grid-cols-2 gap-2.5">
+            {features.map((feature, idx) => (
+              <div
+                key={idx}
+                className="flex items-center gap-2 rounded-lg bg-gradient-to-br from-gray-50 to-white p-2.5 shadow-sm border border-gray-100 transition-all duration-300 active:scale-95 opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]"
+                style={{
+                  animationDelay: `${idx * 0.05}s`
+                }}
+              >
+                <feature.icon 
+                  className="h-5 w-5 flex-shrink-0" 
+                  style={{ color: feature.color }} 
+                />
+                <span className="text-[10px] font-semibold text-gray-800">
+                  {feature.shortTitle}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </section>
+
+      {/* Bottom Decorative Line - Animated */}
+      <div 
+        className="absolute bottom-0 left-0 right-0 h-1 animate-pulse" 
+        style={{ background: `linear-gradient(to right, #e64200, #ffffff, #0e540b)` }}
+      ></div>
+
+      {/* Tailwind Animation Keyframes */}
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .delay-1000 {
+          animation-delay: 1s;
+        }
+      `}</style>
+    </div>
   );
 }
