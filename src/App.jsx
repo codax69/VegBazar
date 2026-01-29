@@ -90,7 +90,7 @@ const AppWithOrderContext = () => {
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [vegetableOrder, setVegetableOrder] = useState([]);
-  console.log(import.meta.env.VITE_API_SERVER_URL)
+  console.log("API URL:", import.meta.env.VITE_API_SERVER_URL);
   // Setup axios interceptor for token management
   useEffect(() => {
     const requestInterceptor = axios.interceptors.request.use(
