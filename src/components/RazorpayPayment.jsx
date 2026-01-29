@@ -89,7 +89,7 @@ const RazorpayPayment = ({
     return 0;
   }, [isCustomOrder, isBasketOrder, vegetableOrder, selectedOffer, couponCode]);
 
-  console.log(deliveryAddress)
+  // console.log(deliveryAddress)
 
   const loadScript = useCallback((src) => {
     return new Promise((resolve) => {
@@ -353,7 +353,7 @@ const RazorpayPayment = ({
               { timeout: 15000 }
             );
 
-            console.log("verifyResult", verifyResult.data);
+            // console.log("verifyResult", verifyResult.data);
             if (verifyResult.data.success) {
               // Clear pending order data
               sessionStorage.removeItem('pendingOrderData');

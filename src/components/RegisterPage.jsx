@@ -11,6 +11,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useAuth } from "../Context/AuthProvider";
+import { Navigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const { register } = useAuth();
@@ -64,8 +65,29 @@ const RegisterPage = () => {
       newErrors.password = "Password must be at least 6 characters";
     }
 
-    if (formData.phone && formData.phone.length < 10) {
-      newErrors.phone = "Invalid phone number";
+    if (formData.phone) {
+      const phoneDigits = formData.phone.replace(/\D/g, "");
+      
+      if (phoneDigits.length < 10) {
+        newErrors.phone = "Phone number must be at least 10 digits";
+      } else if (/^(\d)\1{9,}$/.test(phoneDigits)) {
+        // Check for all same digits (e.g., 1111111111)
+        newErrors.phone = "Invalid phone number (repeated digits)";
+      } else if (/^(?:0(?:1(?:2(?:3(?:4(?:5(?:6(?:7(?:89)?)?)?)?)?)?)?)?)?|1(?:2(?:3(?:4(?:5(?:6(?:7(?:89)?)?)?)?)?)?)?)?|123456789\d)$/.test(phoneDigits) || 
+                 /^[0-9]{1}\d*$/.test(phoneDigits) && /^(\d)(\d)/.test(phoneDigits) && 
+                 phoneDigits.split('').every((digit, i, arr) => i === 0 || Math.abs(parseInt(digit) - parseInt(arr[i-1])) <= 1)) {
+        // Check for sequential digits (e.g., 1234567890, 9876543210)
+        const isSequential = phoneDigits.split('').every((digit, i, arr) => {
+          if (i === 0) return true;
+          const curr = parseInt(digit);
+          const prev = parseInt(arr[i - 1]);
+          return (curr === prev + 1) || (curr === prev - 1);
+        });
+        
+        if (isSequential && phoneDigits.length >= 5) {
+          newErrors.phone = "Invalid phone number (sequential digits)";
+        }
+      }
     }
 
     setErrors(newErrors);
@@ -104,7 +126,8 @@ const RegisterPage = () => {
   };
 
   const handleLogin = () => {
-    window.location.href = "/login";
+    window.scrollTo(0, 0);
+    Navigate("/login");
   };
 
   return (
@@ -157,7 +180,7 @@ const RegisterPage = () => {
                     className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm ${
                       errors.username ? "border-red-500" : "border-gray-300"
                     }`}
-                    placeholder="John Doe"
+                    placeholder="Mukesh Kumar"
                   />
                 </div>
                 {errors.username && (
@@ -183,7 +206,7 @@ const RegisterPage = () => {
                     className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm ${
                       errors.email ? "border-red-500" : "border-gray-300"
                     }`}
-                    placeholder="your@email.com"
+                    placeholder="mukesh123@gmail.com"
                   />
                 </div>
                 {errors.email && (
@@ -196,10 +219,7 @@ const RegisterPage = () => {
               {/* Phone */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                  Phone Number{" "}
-                  <span className="text-gray-400 font-normal text-xs">
-                    (Optional)
-                  </span>
+                  Phone Number
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -237,7 +257,7 @@ const RegisterPage = () => {
                     className={`w-full pl-10 pr-12 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm ${
                       errors.password ? "border-red-500" : "border-gray-300"
                     }`}
-                    placeholder="Min. 6 characters"
+                    placeholder="Min. 8 characters"
                   />
                   <button
                     type="button"
@@ -258,7 +278,7 @@ const RegisterPage = () => {
                 )}
                 {!errors.password && (
                   <p className="mt-1 text-xs text-gray-500">
-                    Must be at least 6 characters long
+                    Must be at least 8 characters long
                   </p>
                 )}
               </div>
