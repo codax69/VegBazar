@@ -130,10 +130,10 @@ const AppWithOrderContext = () => {
       }
 
       const response = await axios.get(`${API_URL}/api/offers`);
-      setOffers(response.data.data.offers);
+      setOffers(response.data?.data.offers);
       sessionStorage.setItem(
         "offers",
-        JSON.stringify(response.data.data.offers)
+        JSON.stringify(response.data?.data.offers)
       );
     } catch (error) {
       console.error("Error fetching offers:", error);
@@ -150,7 +150,7 @@ const AppWithOrderContext = () => {
       }
 
       const response = await axios.get(`${API_URL}/api/vegetables`);
-      const vegetables = response.data.data.map((v) => ({
+      const vegetables = response.data?.data.map((v) => ({
         name: v.name,
         image: v.image,
       }));
