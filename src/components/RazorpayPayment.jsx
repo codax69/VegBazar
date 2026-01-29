@@ -304,7 +304,7 @@ const RazorpayPayment = ({
       }
 
       const options = {
-        key: import.meta.env.KEY_ID || "rzp_test_S7GHftZNd3jIqe",
+        key: import.meta.env.KEY_ID ||"rzp_live_S9b62PxTC6AT2U",
         amount,
         currency,
         name: "VegBazar",
