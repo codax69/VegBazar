@@ -769,7 +769,7 @@ const CustomizedVegetableSelection = () => {
   }, [vegetables, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#ffffff] lg:py-4 md:pb-10 md:py-4">
+    <div className="min-h-screen bg-[#ffffff] pb-36 lg:py-4 md:pb-10 md:py-4">
       <div className="w-full max-w-7xl mx-auto mt-5 bg-[#ffffff] p-4 sm:p-1 md:p-8">
         {/* Header */}
         <div className="flex items-center md:justify-between gap-10 mb-8 pb-4 border-b-2 border-gray-100">

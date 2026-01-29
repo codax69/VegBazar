@@ -643,7 +643,7 @@ const VegetableCart = () => {
   }
 
   return (
-    <div className="min-h-screen max-w-7xl mx-auto bg-gray-50 pt-20 lg:pb-0">
+    <div className="min-h-screen max-w-7xl mx-auto bg-gray-50 pb-14 pt-4 lg:pb-0">
       <div className="container mx-auto px-4 md:py-4 lg:py-3">
         <div className="mb-4 md:mb-3">
           <div className="flex gap-1 flex-col items-center justify-baseline">
