@@ -130,7 +130,7 @@ const RazorpayPayment = ({
           `${import.meta.env.VITE_API_SERVER_URL}/api/orders/today/total`,
           { timeout: 10000 }
         );
-        setOrderCount(response.data.data.count + 1);
+        setOrderCount(response.data?.data.count + 1);
       } catch (error) {
         console.error("Error fetching order count:", error);
         setOrderCount(1);

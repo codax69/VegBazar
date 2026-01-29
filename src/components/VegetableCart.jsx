@@ -148,7 +148,7 @@ const VegetableCart = () => {
       try {
         const { data } = await axios.get(`${API_URL}/api/orders/today/total`);
         if (isMounted) {
-          setOrderCount(data.data.count + 1);
+          setOrderCount(data?.data.count + 1);
         }
       } catch (error) {
         console.error("❌ Error fetching order count:", error);

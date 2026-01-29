@@ -168,7 +168,7 @@ const BillingPage = () => {
       try {
         setIsLoadingOrderCount(true);
         const res = await axios.get(`${API_URL}/api/orders/all`);
-        setOrderCount(res.data.data.count + 1);
+        setOrderCount(res.data?.data.count + 1);
       } catch (err) {
         console.error("Error fetching order count:", err);
         // Fallback: use timestamp-based ID if fetch fails
