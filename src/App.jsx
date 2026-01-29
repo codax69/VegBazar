@@ -39,6 +39,7 @@ const VegetableCart = lazy(() => import("./components/VegetableCart"));
 const OrderTracking = lazy(() => import("./components/OrderTracking"));
 const BillingSuccess = lazy(() => import("./components/BillingSuccess"));
 const OrderFailed = lazy(() => import("./components/OrderFailed"));
+const ProfilePage = lazy(() => import("./components/ProfilePage"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -241,6 +242,7 @@ const AppWithOrderContext = () => {
     "/address",
     "/confirmation",
     "/order-failed",
+    "/profile"
   ];
 
   return (
@@ -291,6 +293,14 @@ const AppWithOrderContext = () => {
                   <Route path="/reset-password/:token" element={<RestPassword/>} />
                     <Route path="/forgot-password" element={<ForgotPassword/>}/>
                   {/* Protected Routes - Auth Required */}
+                  <Route
+                    path="/profile"
+                    element={
+                      <AuthProtectedRoute redirectTo="/login">
+                        <ProfilePage />
+                      </AuthProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/address"
                     element={

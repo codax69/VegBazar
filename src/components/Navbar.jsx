@@ -286,6 +286,17 @@ const Navbar = () => {
                     {/* Menu Items */}
                     <button
                       onClick={() => {
+                        handleNavigate('/profile');
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-white/60 flex items-center gap-2 transition-colors border-b border-gray-100"
+                    >
+                      <FiUser className="w-4 h-4" />
+                      My Profile
+                    </button>
+
+                    <button
+                      onClick={() => {
                         handleNavigate('/orders');
                         setShowUserMenu(false);
                       }}

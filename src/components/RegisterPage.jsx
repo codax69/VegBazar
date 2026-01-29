@@ -73,9 +73,7 @@ const RegisterPage = () => {
       } else if (/^(\d)\1{9,}$/.test(phoneDigits)) {
         // Check for all same digits (e.g., 1111111111)
         newErrors.phone = "Invalid phone number (repeated digits)";
-      } else if (/^(?:0(?:1(?:2(?:3(?:4(?:5(?:6(?:7(?:89)?)?)?)?)?)?)?)?)?|1(?:2(?:3(?:4(?:5(?:6(?:7(?:89)?)?)?)?)?)?)?)?|123456789\d)$/.test(phoneDigits) || 
-                 /^[0-9]{1}\d*$/.test(phoneDigits) && /^(\d)(\d)/.test(phoneDigits) && 
-                 phoneDigits.split('').every((digit, i, arr) => i === 0 || Math.abs(parseInt(digit) - parseInt(arr[i-1])) <= 1)) {
+      } else {
         // Check for sequential digits (e.g., 1234567890, 9876543210)
         const isSequential = phoneDigits.split('').every((digit, i, arr) => {
           if (i === 0) return true;
