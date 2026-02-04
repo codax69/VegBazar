@@ -21,15 +21,11 @@ const RazorpayPayment = ({
   } = useOrderContext();
 
   const { user } = useAuth();
-
-  const customerInfo = useMemo(
-    () => ({
-      name: user?.username || "",
-      mobile: user?.phone || "",
-      email: user?.email || "",
-    }),
-    [user]
-  );
+  const customerInfo = useMemo(() => ({
+    name: user?.username || "",
+    mobile: user?.phone || "",
+    email: user?.email || "",
+  }), [user]);
 
   const [orderCount, setOrderCount] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +42,8 @@ const RazorpayPayment = ({
   };
 
   const getOrderSummary = (order) => {
-    if (order && typeof order === "object" && order.summary) return order.summary;
+    if (order && typeof order === "object" && order.summary)
+      return order.summary;
     return null;
   };
 
@@ -61,7 +58,7 @@ const RazorpayPayment = ({
     );
   }, [orderType, selectedOffer, selectedVegetables]);
 
-  // Calculate total amount with proper coupon handling
+  // ✅ FIXED: Calculate total amount with proper coupon handling
   const totalAmount = useMemo(() => {
     if (isCustomOrder && vegetableOrder) {
       const items = getOrderItems(vegetableOrder);
@@ -72,7 +69,8 @@ const RazorpayPayment = ({
       }
 
       const subtotal = items.reduce((acc, item) => {
-        const price = parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
+        const price =
+          parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
         const qty = parseInt(item.quantity) || 0;
         return acc + price * qty;
       }, 0);
@@ -91,6 +89,8 @@ const RazorpayPayment = ({
     return 0;
   }, [isCustomOrder, isBasketOrder, vegetableOrder, selectedOffer, couponCode]);
 
+  // console.log(deliveryAddress)
+
   const loadScript = useCallback((src) => {
     return new Promise((resolve) => {
       if (window.Razorpay) {
@@ -101,15 +101,18 @@ const RazorpayPayment = ({
 
       const script = document.createElement("script");
       script.src = src;
+
       script.onload = () => {
         setScriptLoaded(true);
         resolve(true);
       };
+
       script.onerror = () => {
         console.error("❌ Razorpay script failed to load");
         setScriptLoaded(false);
         resolve(false);
       };
+
       document.body.appendChild(script);
     });
   }, []);
@@ -146,37 +149,36 @@ const RazorpayPayment = ({
     return `ORD${year}${month}${day}${orderNum}`;
   }, []);
 
-  // Build order data that matches backend expectations
+  // ✅ FIXED: Improved order data building with better error handling
   const buildOrderData = useCallback(
     (orderId) => {
       try {
-        // Extract coupon code properly
-        const extractedCouponCode =
-          typeof couponCode === "string" ? couponCode : couponCode?.code || null;
-
         if (isCustomOrder && vegetableOrder) {
           const items = getOrderItems(vegetableOrder);
           const summary = getOrderSummary(vegetableOrder);
 
-          // Map items to match backend's expected structure
-          const selectedVegetablesData = (items || []).map((item) => ({
-            vegetable: item.id || item.vegetableId,
-            weight: item.weight,
-            quantity: item.quantity,
-            pricePerUnit:
-              parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
-            subtotal:
-              (parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0) *
-              (item.quantity || 0),
-            isFromBasket: false,
-          }));
+          // Extract coupon code properly
+          const extractedCouponCode =
+            typeof couponCode === "string"
+              ? couponCode
+              : couponCode?.code || null;
 
           const orderData = {
             orderId,
             orderType: "custom",
             customerInfo: customerInfo || formData || {},
-            deliveryAddressId: deliveryAddress?._id || null,
-            selectedVegetables: selectedVegetablesData,
+            deliveryAddressId: deliveryAddress._id || null,
+            selectedVegetables: (items || []).map((item) => ({
+              vegetable: item.id || item.vegetableId,
+              weight: item.weight,
+              quantity: item.quantity,
+              pricePerUnit:
+                parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
+              subtotal:
+                (parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0) *
+                (item.quantity || 0),
+              isFromBasket: false,
+            })),
             vegetablesTotal:
               summary?.subtotal ||
               items.reduce((total, item) => {
@@ -197,11 +199,16 @@ const RazorpayPayment = ({
         }
 
         if (isBasketOrder) {
+          const extractedCouponCode =
+            typeof couponCode === "string"
+              ? couponCode
+              : couponCode?.code || null;
+
           const orderData = {
             orderId,
             orderType: "basket",
             customerInfo: customerInfo || formData || {},
-            deliveryAddressId: deliveryAddress?._id || null,
+            deliveryAddressId: deliveryAddress._id || null,
             selectedOffer: selectedOffer || {},
             selectedVegetables: selectedVegetables || [],
             orderDate: new Date().toISOString(),
@@ -236,7 +243,7 @@ const RazorpayPayment = ({
     ]
   );
 
-  // Improved payment handler
+  // ✅ FIXED: Improved payment handler with better error handling
   const createOrder = async () => {
     if (isLoading) return;
 
@@ -252,10 +259,6 @@ const RazorpayPayment = ({
       if (totalAmount <= 0) {
         throw new Error("Invalid order amount");
       }
-
-      // Extract coupon code once at the beginning
-      const extractedCouponCode =
-        typeof couponCode === "string" ? couponCode : couponCode?.code || null;
 
       // Ensure Razorpay script is loaded
       if (!scriptLoaded) {
@@ -273,7 +276,6 @@ const RazorpayPayment = ({
       setCurrentOrderId(orderId);
       const orderData = buildOrderData(orderId);
 
-      console.log("📦 Order Data being sent:", orderData);
 
       // Create order in backend
       const result = await axios.post(
@@ -282,7 +284,6 @@ const RazorpayPayment = ({
         { timeout: 15000 }
       );
 
-      console.log("✅ Backend response:", result.data);
 
       if (!result?.data?.data?.razorpayOrder?.id) {
         throw new Error("Failed to create order. Please try again.");
@@ -292,8 +293,8 @@ const RazorpayPayment = ({
       const amount = Math.round(totalAmount * 100);
       const currency = "INR";
 
-      // Store order data in sessionStorage for recovery
-      sessionStorage.setItem("pendingOrderData", JSON.stringify(orderData));
+      // ✅ FIXED: Store order data in sessionStorage for recovery
+      sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
 
       let description = "";
       if (isCustomOrder) {
@@ -303,7 +304,7 @@ const RazorpayPayment = ({
       }
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_S9xkjZZlpd8fka",
+        key: import.meta.env.KEY_ID ||"rzp_live_S9b62PxTC6AT2U",
         amount,
         currency,
         name: "VegBazar",
@@ -311,24 +312,23 @@ const RazorpayPayment = ({
         order_id: razorpayOrderId,
         handler: async function (response) {
           try {
-            console.log("💳 Payment response:", response);
 
-            // Now extractedCouponCode is available here
+            // Build verification data
             const verifyData = {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
               orderId: orderId,
-              orderType: isCustomOrder ? "custom" : "basket",
-              customerInfo: customerInfo,
+              couponCode:
+                typeof couponCode === "string" ? couponCode : couponCode?.code,
               deliveryAddressId: deliveryAddress?._id || null,
-              couponCode: extractedCouponCode,
-              totalAmount: totalAmount,
             };
 
             // Add order-specific data
             if (isCustomOrder && vegetableOrder) {
               const items = getOrderItems(vegetableOrder);
+              verifyData.orderType = "custom";
+              verifyData.customerInfo = customerInfo;
               verifyData.selectedVegetables = items.map((item) => ({
                 vegetable: item.id || item.vegetableId,
                 weight: item.weight,
@@ -336,29 +336,32 @@ const RazorpayPayment = ({
                 pricePerUnit:
                   parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
               }));
+              verifyData.totalAmount = totalAmount;
             } else if (isBasketOrder) {
+              verifyData.orderType = "basket";
+              verifyData.customerInfo = customerInfo;
               verifyData.selectedOffer = selectedOffer;
               verifyData.selectedVegetables = selectedVegetables;
+              verifyData.totalAmount = totalAmount;
             }
 
-            console.log("🔍 Verify Data being sent:", verifyData);
 
             const verifyResult = await axios.post(
-              `${import.meta.env.VITE_API_SERVER_URL}/api/orders/verify-payment`,
+              `${import.meta.env.VITE_API_SERVER_URL
+              }/api/orders/verify-payment`,
               verifyData,
               { timeout: 15000 }
             );
 
-            console.log("✅ Verification response:", verifyResult.data);
-
+            // console.log("verifyResult", verifyResult.data);
             if (verifyResult.data.success) {
               // Clear pending order data
-              sessionStorage.removeItem("pendingOrderData");
+              sessionStorage.removeItem('pendingOrderData');
               // Clear cart from localStorage
               localStorage.removeItem("orderSummary");
               localStorage.removeItem("vegbazar_cart");
-              setIsOrderPlaced(true);
 
+              setIsOrderPlaced(true);
               if (onSuccess) {
                 onSuccess();
               } else {
@@ -372,8 +375,10 @@ const RazorpayPayment = ({
           } catch (err) {
             console.error("❌ Payment verification error:", err);
             console.error("Error details:", err.response?.data);
+
+            // ✅ IMPORTANT: Show user-friendly error message
             setError(
-              `Payment received but verification failed. Your payment ID: ${response.razorpay_payment_id}. Please contact support.`
+              `Payment received but verification failed. Your payment ID: ${response.razorpay_payment_id}. Please contact support or try again.`
             );
           } finally {
             setIsLoading(false);
@@ -395,7 +400,9 @@ const RazorpayPayment = ({
           ondismiss: function () {
             setIsLoading(false);
             setError("Payment cancelled. Please try again when ready.");
-            sessionStorage.removeItem("pendingOrderData");
+
+            // Clear pending order data
+            sessionStorage.removeItem('pendingOrderData');
           },
         },
       };
@@ -407,7 +414,6 @@ const RazorpayPayment = ({
       console.error("Error details:", error.response?.data);
 
       let errorMessage = "Unable to initiate payment. Please try again.";
-
       if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
         errorMessage =
           "Request timed out. Please check your connection and try again.";
@@ -422,19 +428,16 @@ const RazorpayPayment = ({
     }
   };
 
-  // UI code remains the same...
   if (error) {
     return (
-      <div className="w-full max-w-md mx-auto p-4 sm:p-6">
-        <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 sm:p-6 mb-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <h3 className="font-bold text-red-900 mb-2 text-sm sm:text-base">
-                Payment Error
-              </h3>
-              <p className="text-red-700 text-xs sm:text-sm">{error}</p>
-            </div>
+      <div className="space-y-3">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-assistant text-red-800 font-medium mb-1">
+              Payment Error
+            </p>
+            <p className="text-xs text-red-700 break-words">{error}</p>
           </div>
         </div>
         <button
@@ -475,52 +478,52 @@ const RazorpayPayment = ({
             ) : (
               <>
                 <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
-                Pay Now ₹{totalAmount.toFixed(2)}
+                Pay Now
               </>
             )}
           </button>
 
           {!scriptLoaded && (
-            <div className="mt-2 text-center text-xs text-gray-500 flex items-center justify-center gap-2">
-              <Loader2 className="w-3 h-3 animate-spin" />
+            <p className="text-center font-assistant text-xs text-yellow-600">
               Loading payment gateway...
-            </div>
+            </p>
           )}
 
           {isBasketOrder && selectedOffer && (
-            <div className="mt-3 text-xs sm:text-sm text-gray-600 text-center space-y-1">
-              <div>
+            <div className="text-center space-y-1">
+              <p className="font-assistant text-xs sm:text-sm text-gray-600">
                 Package: ₹{selectedOffer.price}
                 {couponCode && couponCode.discount > 0 && (
-                  <span className="text-green-600 font-semibold">
-                    {" "}
+                  <span className="text-green-600 font-semibold ml-1">
                     - ₹{couponCode.discount} (Coupon)
                   </span>
                 )}
                 {" + ₹20 delivery"}
-              </div>
+              </p>
               {couponCode && couponCode.code && (
-                <div className="text-green-600 font-semibold">
+                <p className="text-xs text-green-600 font-semibold">
                   Coupon "{couponCode.code}" applied ✓
-                </div>
+                </p>
               )}
             </div>
           )}
 
           {isCustomOrder && (
-            <div className="mt-3 text-xs sm:text-sm text-gray-600 text-center space-y-1">
-              <div>
+            <div className="text-center space-y-1">
+              <p className="font-assistant text-xs sm:text-sm text-gray-600">
                 {vegetableOrder?.summary?.deliveryCharges === 0
                   ? "Free Delivery (Order above ₹250)"
                   : "Includes ₹20 delivery charge"}
-              </div>
+              </p>
               {couponCode &&
                 (typeof couponCode === "string" || couponCode.code) && (
-                  <div className="text-green-600 font-semibold">
+                  <p className="text-xs text-green-600 font-semibold">
                     Coupon "
-                    {typeof couponCode === "string" ? couponCode : couponCode.code}
+                    {typeof couponCode === "string"
+                      ? couponCode
+                      : couponCode.code}
                     " applied ✓
-                  </div>
+                  </p>
                 )}
             </div>
           )}
@@ -528,8 +531,9 @@ const RazorpayPayment = ({
       ) : (
         <button
           disabled
-          className="w-full font-assistant py-3 sm:py-4 rounded-xl bg-gray-300 text-gray-500 cursor-not-allowed font-bold text-sm sm:text-base"
+          className="w-full font-assistant py-3 sm:py-4 rounded-xl bg-gray-300 text-gray-600 cursor-not-allowed text-sm sm:text-base flex items-center justify-center gap-2"
         >
+          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
           Invalid Order Amount
         </button>
       )}

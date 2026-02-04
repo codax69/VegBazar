@@ -199,8 +199,8 @@ const VegetableCard = memo(
     return (
       <div
         className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${isCompletelyOutOfStock
-          ? "bg-gray-100 border-gray-300 opacity-75"
-          : "bg-[#ffffff] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
+            ? "bg-gray-100 border-gray-300 opacity-75"
+            : "bg-[#ffffff] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
           }`}
       >
         {/* Vegetable Image */}
@@ -220,14 +220,14 @@ const VegetableCard = memo(
             ) : (
               <div
                 className={`w-full h-full bg-gradient-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${isCompletelyOutOfStock
-                  ? "from-gray-200 to-gray-300"
-                  : "from-gray-50 to-[#ffffff]"
+                    ? "from-gray-200 to-gray-300"
+                    : "from-gray-50 to-[#ffffff]"
                   }`}
               >
                 <Leaf
                   className={`w-8 h-8 sm:w-10 sm:h-10 ${isCompletelyOutOfStock
-                    ? "text-gray-400"
-                    : "text-[#0e540b]/30"
+                      ? "text-gray-400"
+                      : "text-[#0e540b]/30"
                     }`}
                 />
               </div>
@@ -390,7 +390,7 @@ const OfferCard = memo(({ offer, onNavigate }) => {
           </h3>
           <div className="flex font-assistant items-center justify-center gap-1 text-gray-600 text-xs">
             <Leaf className="w-3 h-3" />
-            <span>{offer.vegetables?.length || 0} vegetables</span>
+            {/* <span>{offer.vegetables?.length / 2 || 0} vegetables</span> */}
           </div>
         </div>
       </div>
@@ -427,7 +427,7 @@ const OfferCard = memo(({ offer, onNavigate }) => {
                   className="text-xs text-gray-700 flex items-center gap-1.5"
                 >
                   <div className="w-1 h-1 rounded-full bg-[#0e540b] flex-shrink-0"></div>
-                  <span className="truncate font-assistant">{veg.vegetable?.name || veg.name || 'Vegetable'}</span>
+                  <span className="truncate font-assistant">{veg.name}</span>
                 </li>
               ))}
               {offer.vegetables.length > 3 && (
@@ -471,7 +471,7 @@ const Homepage = () => {
   const [cartItems, setCartItems] = useState({});
   const [selectedWeights, setSelectedWeights] = useState({});
   const [selectedSets, setSelectedSets] = useState({});
-  const { setVegetableOrder, navigate, setSelectedOffer, setSelectedVegetables } = useOrderContext();
+  const { setVegetableOrder, navigate } = useOrderContext();
   const [topSellingVegetables, setTopSellingVegetables] = useState([]);
   const [suggestedVegetables, setSuggestedVegetables] = useState([]);
 
@@ -487,7 +487,7 @@ const Homepage = () => {
           axios
             .get(
               `${import.meta.env.VITE_API_SERVER_URL
-              }/api/baskets/top-baskets/suggestion`
+              }/api/offers/Top-offers/suggestion`
             )
             .catch(() => ({ data: { data: [] } })),
           axios
@@ -811,20 +811,6 @@ const Homepage = () => {
     () => Object.values(cartItems).reduce((sum, qty) => sum + qty, 0),
     [cartItems]
   );
-
-  // Track offer/basket click
-  const handleOfferClick = useCallback(async (offer) => {
-    try {
-      // Increment click count on backend
-      await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/baskets/click/${offer._id}`
-      );
-    } catch (error) {
-      console.error("Error tracking offer click:", error);
-      // Continue with navigation even if tracking fails
-    }
-  }, []);
-
   const handleNavigateToOffers = useCallback(() => {
     window.scrollTo(0, 0);
     navigate("/offers");
@@ -842,24 +828,6 @@ const Homepage = () => {
     window.scrollTo(0, 0);
     navigate("/cart");
   }, [navigate]);
-
-  // Handle offer/basket selection with click tracking
-  const handleOfferSelect = useCallback(async (offer) => {
-    window.scrollTo(0, 0);
-
-    // Clear previous selections
-    setVegetableOrder([]);
-    setSelectedVegetables([]);
-
-    // Set the selected offer
-    setSelectedOffer(offer);
-
-    // Track the click asynchronously
-    handleOfferClick(offer);
-
-    // Navigate to vegetable selection
-    navigate("/select-vegetables");
-  }, [navigate, setSelectedOffer, setSelectedVegetables, setVegetableOrder, handleOfferClick]);
 
   return (
     <div className="min-h-screen bg-[#ffffff] md:pt-10">
@@ -973,7 +941,10 @@ const Homepage = () => {
                   <OfferCard
                     key={offer._id || offer.id}
                     offer={offer}
-                    onNavigate={() => handleOfferSelect(offer)}
+                    onNavigate={() => {
+                      navigate(`/offers/${offer._id || offer.id}`);
+                      window.scrollTo(0, 0);
+                    }}
                   />
                 ))}
               </div>

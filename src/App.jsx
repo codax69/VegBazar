@@ -20,7 +20,6 @@ import RegisterPage from "./components/RegisterPage";
 import RestPassword from "./components/ResetPassword"
 import ForgotPassword from "./components/ForgotPassword"
 import PWAInstallBanner from "./components/PWAInstallBanner";
-import OrderSuccess from "./components/OrderSuccess";
 
 const API_URL = import.meta.env.VITE_API_SERVER_URL;
 
@@ -119,24 +118,24 @@ const AppWithOrderContext = () => {
     };
   }, []);
 
-  // Fetch baskets with caching
-  const fetchBaskets = async () => {
+  // Fetch offers with caching
+  const fetchOffers = async () => {
     try {
-      const cached = sessionStorage.getItem("baskets");
+      const cached = sessionStorage.getItem("offers");
       if (cached) {
         setOffers(JSON.parse(cached));
         return;
       }
 
-      const response = await axios.get(`${API_URL}/api/baskets`);
-      setOffers(response.data?.data.baskets);
+      const response = await axios.get(`${API_URL}/api/offers`);
+      setOffers(response.data?.data.offers);
       console.log(offers)
       sessionStorage.setItem(
-        "baskets",
-        JSON.stringify(response.data?.data.baskets)
+        "offers",
+        JSON.stringify(response.data?.data.offers)
       );
     } catch (error) {
-      console.error("Error fetching baskets:", error);
+      console.error("Error fetching offers:", error);
     }
   };
 
@@ -163,7 +162,7 @@ const AppWithOrderContext = () => {
   };
 
   useEffect(() => {
-    fetchBaskets();
+    fetchOffers();
     fetchVegetables();
   }, []);
 
@@ -250,7 +249,7 @@ const AppWithOrderContext = () => {
         <BillProvider>
           <BackButtonHandler />
           <div className="min-h-screen bg-[#ffffff] flex flex-col">
-            <PWAInstallBanner />
+            <PWAInstallBanner/>
             <Navbar />
             <div className="pt-10 flex-1 container max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-2">
               {!hideProgressRoutes.includes(location.pathname) && (
@@ -289,8 +288,8 @@ const AppWithOrderContext = () => {
                     path="/select-vegetables"
                     element={<VegetableSelection />}
                   />
-                  <Route path="/reset-password/:token" element={<RestPassword />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password/:token" element={<RestPassword/>} />
+                    <Route path="/forgot-password" element={<ForgotPassword/>}/>
                   {/* Protected Routes - Auth Required */}
                   <Route
                     path="/address"

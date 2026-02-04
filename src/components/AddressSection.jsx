@@ -2,20 +2,13 @@ import React from "react";
 import { MapPin, Plus, Edit, CheckCircle } from "lucide-react";
 
 const AddressSection = React.memo(
-  ({ defaultAddress, onChangeAddress, user, isLoading = false }) => (
+  ({ defaultAddress, onChangeAddress, user }) => (
     <div className="bg-[#f0fcf6] p-4 md:p-3 rounded-lg shadow-md">
       <h3 className="font-poppins text-base md:text-sm font-bold text-gray-800 mb-3 md:mb-2 flex items-center gap-2">
         <MapPin size={18} className="text-[#0e540b] md:w-4 md:h-4" />
         Delivery Address
       </h3>
-      {isLoading ? (
-        <div className="text-center py-6 md:py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-4 border-green-200 border-t-[#0e540b] mx-auto mb-2"></div>
-          <p className="font-assistant text-gray-600 text-sm md:text-xs">
-            Loading address...
-          </p>
-        </div>
-      ) : !defaultAddress ? (
+      {!defaultAddress ? (
         <div className="text-center py-6 md:py-4">
           <MapPin
             size={48}

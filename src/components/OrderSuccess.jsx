@@ -13,38 +13,33 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
-import { useAuth } from "../Context/AuthProvider";
 
 const OrderSuccess = ({ orderData, onNewOrder }) => {
   const [copied, setCopied] = useState(false);
   const { navigate } = useOrderContext();
-  const { user } = useAuth();
 
+  // Extract customer info from orderData (single source of truth)
   const customerInfo = useMemo(() => {
-    if (user) {
-      return {
-        name: user.username || user.name || orderData?.customerInfo?.name || "N/A",
-        mobile: user.phone || user.mobile || orderData?.customerInfo?.mobile || "N/A",
-        email: user.email || orderData?.customerInfo?.email || null,
-        address: orderData?.customerInfo?.address || null,
-        area: orderData?.customerInfo?.area || null,
-        city: orderData?.customerInfo?.city || null,
-      };
-    }
     return orderData?.customerInfo || {};
-  }, [user, orderData]);
+  }, [orderData]);
 
+  // Helper function to safely get vegetable name
   const getVegetableName = (veg) => {
     if (!veg) return "Unknown";
-
+    
+    // Check if name exists at top level
     if (veg.name) return veg.name;
-
+    
+    // Check if vegetable object exists with name
     if (veg.vegetable && veg.vegetable.name) return veg.vegetable.name;
-
+    
+    // Check if it's a string
     if (typeof veg === "string") return veg;
-
+    
     return "Unknown Vegetable";
   };
+
+  // Calculate order summary from orderData
   const orderInfo = useMemo(() => {
     if (!orderData) {
       return {
@@ -75,8 +70,8 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
       orderType === "custom"
         ? "Custom Selection"
         : orderType === "basket"
-          ? selectedOffer?.title || "Basket Package"
-          : "N/A";
+        ? selectedOffer?.title || "Basket Package"
+        : "N/A";
 
     return {
       orderId,
@@ -99,7 +94,7 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
     return vegsToDisplay.map((veg, index) => {
       // Handle nested vegetable object structure from API
       const vegData = veg.vegetable || veg;
-
+      
       return {
         key: `veg-${index}`,
         name: getVegetableName(veg),
@@ -263,7 +258,7 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
             <p className="text-xs sm:text-sm font-assistant text-yellow-700">
-              <strong>Important:</strong> Please save your Order ID for tracking.
+              <strong>Important:</strong> Please save your Order ID for tracking. 
               We do not send order confirmations via email.
             </p>
           </div>
@@ -406,8 +401,8 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
                       {orderData.paymentMethod === "COD"
                         ? "Cash on Delivery"
                         : orderData.paymentMethod === "ONLINE"
-                          ? "Online Payment"
-                          : orderData.paymentMethod}
+                        ? "Online Payment"
+                        : orderData.paymentMethod}
                     </span>
                   </p>
                 )}

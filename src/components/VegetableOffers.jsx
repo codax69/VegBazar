@@ -1,36 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Package, Check, ShoppingCart, Leaf, Tag } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
 
 const VegetableOffers = () => {
-  const { setSelectedOffer, setVegetableOrder, setSelectedVegetables, navigate } =
+  const { offers, setSelectedOffer, setVegetableOrder,setSelectedVegetables ,navigate } =
     useOrderContext();
-  const [offers, setOffers] = useState([]);
-
-  useEffect(() => {
-    const fetchOffers = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_SERVER_URL}/api/baskets`
-        );
-        console.log("API Response:", response.data);
-        // Access baskets from data.data.baskets based on API structure
-        const basketsData = response.data.data?.baskets || response.data.baskets || [];
-        setOffers(basketsData);
-      } catch (error) {
-        console.error("Error fetching offers:", error);
-      }
-    };
-    fetchOffers();
-  }, [])
 
   // Track offer click
   const handleOfferClick = async (offer) => {
     try {
       // Increment click count on backend
       await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/baskets/click/${offer._id}`
+        `${import.meta.env.VITE_API_SERVER_URL}/api/offers/click/${offer._id}`
       );
     } catch (error) {
       console.error("Error tracking offer click:", error);
@@ -98,7 +80,7 @@ const VegetableOffers = () => {
                       <div className="flex font-assistant items-center justify-center gap-1 text-gray-600 text-xs">
                         <Leaf className="w-3 h-3" />
                         <span>
-                          {offer.vegetables?.length || 0} vegetables
+                          {offer.vegetables?.length / 2 || 0} vegetables
                         </span>
                       </div>
                     </div>
@@ -141,7 +123,7 @@ const VegetableOffers = () => {
                             >
                               <div className="w-1 h-1 rounded-full bg-[#0e540b] flex-shrink-0"></div>
                               <span className="truncate font-assistant">
-                                {veg.vegetable?.name || veg.name || 'Vegetable'}
+                                {veg.name}
                               </span>
                             </li>
                           ))}

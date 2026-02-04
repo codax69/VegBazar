@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback, memo, useState, useEffect } from "react";
 import { useOrderContext } from "../Context/OrderContext";
+
 import { useBillContext } from "../Context/BillContext";
 import { useAuth } from "../Context/AuthProvider";
 import RazorpayPayment from "./RazorpayPayment";
@@ -113,123 +114,39 @@ const BillingPage = () => {
   const { user } = useAuth();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [defaultAddress, setDefaultAddress] = useState(null);
-  const [isLoadingAddress, setIsLoadingAddress] = useState(true);
 
   // Fetch default address from API
   useEffect(() => {
     let isMounted = true;
 
     const fetchDefaultAddress = async () => {
-
-
       const userId = user?._id || user?.id;
       if (!userId) {
-        console.log("⚠️ No user ID found, skipping address fetch");
-        setIsLoadingAddress(false);
         return;
       }
 
       try {
-        setIsLoadingAddress(true);
-        console.log("🔄 Fetching addresses for user:", userId);
-
         const { data } = await axios.get(
           `${API_URL}/api/addresses/active`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+              Authorization: `Bearer ${localStorage.getItem('token')}`
             }
           }
         );
-
-        console.log("📦 API Response:", data);
-        console.log("📍 Default Address:", data?.data?.defaultAddress);
-        console.log("📍 All Addresses:", data?.data?.addresses);
-        console.log("📊 Total Addresses:", data?.data?.total);
-
-        if (isMounted) {
-          // First try to use the default address
-          if (data?.data?.defaultAddress) {
-            console.log("✅ Setting default address:", data.data.defaultAddress);
-            setDefaultAddress(data.data.defaultAddress);
-            setSelectedAddress(data.data.defaultAddress);
-          }
-          // If no default but there are addresses, use the first one
-          else if (data?.data?.addresses && data.data.addresses.length > 0) {
-            console.log("⚠️ No default address, using first address:", data.data.addresses[0]);
-            setDefaultAddress(data.data.addresses[0]);
-            setSelectedAddress(data.data.addresses[0]);
-          }
-          // No addresses at all
-          else {
-            console.log("❌ No addresses found for user");
-            setDefaultAddress(null);
-            setSelectedAddress(null);
-          }
+        if (isMounted && data?.data.defaultAddress) {
+          setDefaultAddress(data.data.defaultAddress);
+          setSelectedAddress(data.data.defaultAddress);
         }
       } catch (error) {
         console.error("❌ Error fetching default address:", error);
-        console.error("❌ Error details:", error.response?.data);
-        if (isMounted) {
-          setDefaultAddress(null);
-          setSelectedAddress(null);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingAddress(false);
-        }
+        setDefaultAddress(null);
       }
     };
 
     fetchDefaultAddress();
     return () => {
       isMounted = false;
-    };
-  }, [user]);
-
-  // Refetch address when returning from address page
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && user?._id) {
-        // Refetch address when user returns to the page
-        const refetchAddress = async () => {
-          try {
-            console.log("🔄 Refetching addresses...");
-            const { data } = await axios.get(
-              `${API_URL}/api/addresses/active`,
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-                }
-              }
-            );
-
-            console.log("📦 Refetch API Response:", data.data);
-
-            // First try to use the default address
-            if (data?.data?.defaultAddress) {
-              console.log("✅ Refetch: Setting default address");
-              setDefaultAddress(data.data.defaultAddress);
-              setSelectedAddress(data.data.defaultAddress);
-            }
-            // If no default but there are addresses, use the first one
-            else if (data?.data?.addresses && data.data.addresses.length > 0) {
-              console.log("⚠️ Refetch: No default, using first address");
-              setDefaultAddress(data.data.addresses[0]);
-              setSelectedAddress(data.data.addresses[0]);
-            }
-          } catch (error) {
-            console.error("❌ Error refetching address:", error);
-          }
-        };
-
-        refetchAddress();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [user]);
 
@@ -250,7 +167,7 @@ const BillingPage = () => {
     const fetchOrderCount = async () => {
       try {
         setIsLoadingOrderCount(true);
-        const res = await axios.get(`${API_URL}/api/orders/today/total`);
+        const res = await axios.get(`${API_URL}/api/orders/all`);
         setOrderCount(res.data?.data.count + 1);
       } catch (err) {
         console.error("Error fetching order count:", err);
@@ -277,22 +194,12 @@ const BillingPage = () => {
   // Order Data - Memoized with all dependencies
   const orderData = useMemo(() => {
     if (!orderCount) return null;
-    if (!user) {
-      console.log("⚠️ User not loaded yet, orderData is null");
-      return null;
-    }
-
-    const userId = user._id || user.id;
-    if (!userId) {
-      console.log("⚠️ No user ID found in user object");
-      return null;
-    }
 
     const orderId = generateOrderId(orderCount);
     return {
       orderId,
-      customerInfo: userId,
-      selectedBasket: selectedOffer || {},
+      customerInfo: formData || {},
+      selectedOffer: selectedOffer || {},
       orderType: "basket",
       selectedVegetables: selectedVegetables || [],
       orderDate: new Date().toISOString(),
@@ -308,7 +215,6 @@ const BillingPage = () => {
     };
   }, [
     orderCount,
-    user,
     formData,
     selectedOffer,
     selectedVegetables,
@@ -352,7 +258,7 @@ const BillingPage = () => {
         if (res.status >= 200 && res.status < 300) {
           setIsOrderPlaced(true);
           // Navigate with order data in state
-          navigate("/order-success", {
+          navigate("/billing-success", {
             state: { orderData: orderData }
           });
         } else {
@@ -410,7 +316,7 @@ const BillingPage = () => {
         }}
       />
     );
-  console.log(defaultAddress);
+
   return (
     <div className="min-h-screen bg-[#ffffff] pt-8 md:pt-20 pb-20 lg:pb-0">
       <div className="max-w-6xl mx-auto px-4">
@@ -580,20 +486,19 @@ const BillingPage = () => {
               </div>
             </div>
 
-            {/* Delivery Address */}
-            <AddressSection
-              defaultAddress={defaultAddress}
-              onChangeAddress={handleChangeAddress}
-              user={user}
-              isLoading={isLoadingAddress}
-            />
-
             {/* Payment Method */}
             <div className="bg-[#ffffff] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
               <h2 className="text-base font-poppins font-bold text-gray-800 mb-2 flex items-center gap-1.5">
                 <FiCreditCard className="size-4 text-[#0e540b]" />
                 Payment Method
               </h2>
+              <div className="space-y-2 mb-4">
+                <AddressSection
+                  defaultAddress={defaultAddress}
+                  onChangeAddress={handleChangeAddress}
+                  user={user}
+                />
+              </div>
 
               <div className="space-y-2">
                 <PaymentMethodButton
