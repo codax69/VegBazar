@@ -10,7 +10,6 @@ const RazorpayPayment = ({
   vegetableOrder,
   couponCode,
   deliveryAddress,
-  isCheckoutDisabled,
 }) => {
   const {
     selectedOffer,
@@ -453,33 +452,25 @@ const RazorpayPayment = ({
   }
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 sm:p-6">
+    <div className="space-y-3">
       {isCheckoutDisabled && (
-        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-xs sm:text-sm">
-          ⚠️ Please select delivery address and payment method to proceed
+        <div className="mb-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+          <p className="font-assistant text-xs text-orange-700 font-semibold">
+            ⚠️ Please select delivery address and payment method to proceed
+          </p>
         </div>
       )}
-
       {totalAmount > 0 ? (
         <>
           <button
             onClick={createOrder}
-            disabled={isCheckoutDisabled || isLoading}
-            className={`w-full font-assistant py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${
-              isCheckoutDisabled || isLoading
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
-            }`}
+            disabled={isLoading || isCheckoutDisabled}
+            className="w-full py-3 font-assistant sm:py-4 rounded-xl bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                 Processing...
-              </>
-            ) : isCheckoutDisabled ? (
-              <>
-                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                Select Address & Payment
               </>
             ) : (
               <>

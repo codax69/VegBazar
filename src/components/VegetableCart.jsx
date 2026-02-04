@@ -705,10 +705,10 @@ const VegetableCart = () => {
                   </span>
                 </div>
 
-                {deliveryCharge > 0 && subtotal < 269 && (
+                {deliveryCharge > 0 && subtotal < 250 && (
                   <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
                     <p className="font-assistant text-xs text-green-700 font-semibold">
-                      🎉 Add ₹{(269 - subtotal).toFixed(2)} more for FREE
+                      🎉 Add ₹{(250 - subtotal).toFixed(2)} more for FREE
                       delivery!
                     </p>
                   </div>
@@ -1011,10 +1011,10 @@ const PriceSummary = React.memo(
               </span>
             </div>
 
-            {deliveryCharge > 0 && subtotal < 269 && (
+            {deliveryCharge > 0 && subtotal < 250 && (
               <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
                 <p className="font-assistant text-xs text-green-700 font-semibold">
-                  🎉 Add ₹{(269 - subtotal).toFixed(2)} more for FREE delivery!
+                  🎉 Add ₹{(250 - subtotal).toFixed(2)} more for FREE delivery!
                 </p>
               </div>
             )}
@@ -1043,7 +1043,6 @@ const PriceSummary = React.memo(
               couponCode={appliedCoupon}
               customerInfo={customerInfo}
               deliveryAddress={selectedAddress}
-              isCheckoutDisabled={isCheckoutDisabled}
             />
           ) : (
             <button
@@ -1084,7 +1083,6 @@ const MobileCheckoutButton = React.memo(
               couponCode={appliedCoupon}
               customerInfo={customerInfo}
               deliveryAddress={selectedAddress}
-              isCheckoutDisabled={isCheckoutDisabled}
             />
           </div>
         ) : (

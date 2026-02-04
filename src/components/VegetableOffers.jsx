@@ -49,7 +49,7 @@ const VegetableOffers = () => {
     // Track the click asynchronously
     handleOfferClick(offer);
 
-    navigate("/select-vegetables");
+    navigate("/vegetables");
   };
 
   return (

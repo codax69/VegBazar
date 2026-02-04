@@ -94,39 +94,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Update profile function
-  const updateProfile = useCallback(async (profileData) => {
-    try {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        credentials: 'include',
-        body: JSON.stringify(profileData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.data) {
-        const updatedUser = {
-          ...user,
-          ...profileData
-        };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        setUser(updatedUser);
-        return { success: true, data: updatedUser };
-      } else {
-        return { success: false, message: data.message };
-      }
-    } catch (error) {
-      console.error('Profile update error:', error);
-      return { success: false, message: 'Network error' };
-    }
-  }, [user]);
-
   // Login function
   const login = useCallback(async (identifier, password) => {
     try {
@@ -293,8 +260,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    refreshAccessToken,
-    updateProfile
+    refreshAccessToken
   };
 
   return (
