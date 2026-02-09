@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from "react";
 import { FiPercent, FiCheck, FiX, FiTag, FiAlertCircle } from "react-icons/fi";
 
-const CouponCodeSection = ({ 
-  onApplyCoupon, 
-  appliedCoupon = null, 
+const CouponCodeSection = ({
+  onApplyCoupon,
+  appliedCoupon = null,
   onRemoveCoupon,
   subtotal = 0,
-  isMobile = false 
+  isMobile = false
 }) => {
   const [couponCode, setCouponCode] = useState("");
   const [isApplying, setIsApplying] = useState(false);
@@ -56,14 +56,14 @@ const CouponCodeSection = ({
           <div className="bg-green-100 p-1.5 rounded-lg">
             <FiTag className={`${isMobile ? 'size-4' : 'size-5'} text-green-700`} />
           </div>
-          <h3 className={`font-poppins font-bold text-gray-800 ${isMobile ? 'text-sm' : 'text-base'}`}>
+          <h3 className={`font-funnel font-bold text-gray-800 ${isMobile ? 'text-sm' : 'text-base'}`}>
             Apply Coupon
           </h3>
         </div>
         {appliedCoupon && (
           <div className="bg-green-600 text-white px-2.5 py-1 rounded-full flex items-center gap-1">
             <FiCheck className="size-3" />
-            <span className="text-[10px] font-semibold font-assistant">Applied</span>
+            <span className="text-[10px] font-semibold font-funnel">Applied</span>
           </div>
         )}
       </div>
@@ -77,10 +77,10 @@ const CouponCodeSection = ({
                 <FiPercent className="size-4 text-green-700" />
               </div>
               <div>
-                <p className={`font-bold text-green-700 font-assistant ${isMobile ? 'text-sm' : 'text-base'}`}>
+                <p className={`font-bold text-green-700 font-funnel ${isMobile ? 'text-sm' : 'text-base'}`}>
                   {appliedCoupon.code}
                 </p>
-                <p className={`text-gray-600 font-assistant ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+                <p className={`text-gray-600 font-funnel ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
                   {appliedCoupon.discountType === "percentage"
                     ? `${appliedCoupon.discountValue}% OFF`
                     : `₹${appliedCoupon.discountValue} OFF`}
@@ -95,13 +95,13 @@ const CouponCodeSection = ({
               <FiX className={`${isMobile ? 'size-4' : 'size-5'}`} />
             </button>
           </div>
-          
+
           {/* Discount Amount */}
           <div className="bg-[#ffffff] text-white rounded-lg p-2 flex justify-between items-center">
-            <span className={`font-semibold font-assistant ${isMobile ? 'text-xs' : 'text-sm'}`}>
+            <span className={`font-semibold font-funnel ${isMobile ? 'text-xs' : 'text-sm'}`}>
               You save
             </span>
-            <span className={`font-bold font-assistant ${isMobile ? 'text-base' : 'text-lg'}`}>
+            <span className={`font-bold font-funnel ${isMobile ? 'text-base' : 'text-lg'}`}>
               ₹{appliedCoupon.discount?.toFixed(2) || "0.00"}
             </span>
           </div>
@@ -118,7 +118,7 @@ const CouponCodeSection = ({
                 onKeyPress={handleKeyPress}
                 placeholder="Enter coupon code"
                 disabled={isApplying}
-                className={`w-full ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2.5'} bg-white border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all font-assistant font-semibold text-gray-800 placeholder-gray-400 uppercase disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                className={`w-full ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2.5'} bg-white border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all font-funnel font-semibold text-gray-800 placeholder-gray-400 uppercase disabled:bg-gray-100 disabled:cursor-not-allowed`}
               />
               {couponCode && !isApplying && (
                 <button
@@ -135,7 +135,7 @@ const CouponCodeSection = ({
             <button
               onClick={handleApplyCoupon}
               disabled={isApplying || !couponCode.trim()}
-              className={`${isMobile ? 'px-4 py-2 text-sm' : 'px-5 py-2.5'} bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-md hover:shadow-lg disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed disabled:shadow-none font-assistant whitespace-nowrap`}
+              className={`${isMobile ? 'px-4 py-2 text-sm' : 'px-5 py-2.5'} bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-md hover:shadow-lg disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed disabled:shadow-none font-funnel whitespace-nowrap`}
             >
               {isApplying ? (
                 <div className="flex items-center gap-1.5">
@@ -152,7 +152,7 @@ const CouponCodeSection = ({
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-2 flex items-start gap-2">
               <FiAlertCircle className="size-4 text-red-600 shrink-0 mt-0.5" />
-              <p className={`text-red-600 font-assistant ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+              <p className={`text-red-600 font-funnel ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
                 {error}
               </p>
             </div>
@@ -161,7 +161,7 @@ const CouponCodeSection = ({
           {/* Info Text */}
           <div className="flex items-center gap-1.5 text-gray-500">
             <FiPercent className={`${isMobile ? 'size-3' : 'size-3.5'}`} />
-            <p className={`font-assistant ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+            <p className={`font-funnel ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
               Enter your coupon code to get instant discount
             </p>
           </div>

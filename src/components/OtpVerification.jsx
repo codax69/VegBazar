@@ -30,7 +30,7 @@ const OtpVerification = ({ onSuccess }) => {
   const handleOtpChange = (index, value) => {
     // Only allow numbers
     if (!/^\d*$/.test(value)) return;
-    
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
@@ -54,14 +54,14 @@ const OtpVerification = ({ onSuccess }) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text");
     const digits = pastedData.replace(/\D/g, "").slice(0, 6);
-    
+
     if (digits.length > 0) {
       const newOtp = [...otp];
       for (let i = 0; i < 6; i++) {
         newOtp[i] = digits[i] || "";
       }
       setOtp(newOtp);
-      
+
       // Focus the last filled input or first empty one
       const nextEmptyIndex = newOtp.findIndex(digit => digit === "");
       const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex;
@@ -78,7 +78,7 @@ const OtpVerification = ({ onSuccess }) => {
     }
     setLoading(true);
     setError("");
-    
+
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/otp/verify`, {
         email: formData.email,
@@ -106,12 +106,12 @@ const OtpVerification = ({ onSuccess }) => {
   const handleResendOtp = async () => {
     setResending(true);
     setError("");
-    
+
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/otp/resend`, {
         email: formData.email,
       });
-      
+
       if (response.data.success) {
         setTimer(60);
         setCanResend(false);
@@ -144,11 +144,11 @@ const OtpVerification = ({ onSuccess }) => {
         >
           <ArrowLeft size={20} className="mr-1" /> Back
         </button>
-        
+
         <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
           <Smartphone className="text-green-600" size={28} />
         </div>
-        
+
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Verify Your Email</h2>
         <p className="text-gray-600 text-sm">
           We've sent a verification code to
@@ -171,18 +171,17 @@ const OtpVerification = ({ onSuccess }) => {
               onChange={(e) => handleOtpChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
-              className={`w-12 h-12 text-center text-xl font-semibold border-2 rounded-lg transition-all duration-200 ${
-                digit
+              className={`w-12 h-12 text-center text-xl font-semibold border-2 rounded-lg transition-all duration-200 ${digit
                   ? "border-green-500 bg-green-50 text-green-700"
                   : error
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-300 bg-white hover:border-gray-400 focus:border-green-500"
-              } focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-20`}
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300 bg-white hover:border-gray-400 focus:border-green-500"
+                } focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-20`}
               autoComplete="off"
             />
           ))}
         </div>
-        
+
         {error && (
           <div className="text-red-600 text-sm text-center bg-red-50 p-2 rounded-lg">
             {error}
@@ -194,11 +193,10 @@ const OtpVerification = ({ onSuccess }) => {
       <button
         onClick={handleVerifyOtp}
         disabled={loading || otp.join("").length !== 6}
-        className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
-          loading || otp.join("").length !== 6
+        className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 ${loading || otp.join("").length !== 6
             ? "bg-gray-300 cursor-not-allowed"
             : "bg-green-600 hover:bg-green-700 transform hover:scale-[1.02] active:scale-[0.98]"
-        }`}
+          }`}
       >
         {loading ? (
           <div className="flex items-center justify-center">

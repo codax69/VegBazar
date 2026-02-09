@@ -7,11 +7,10 @@ import {
   AlertCircle,
   CheckCircle,
   LogIn,
-  Leaf,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/AuthProvider";
-import vegbazarLogo from"../assets/vegbazar.svg";
+import { useAuth } from "../Context/AuthContext.jsx";
+import vegbazarLogo from "../assets/vegbazar.svg";
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -38,16 +37,34 @@ const LoginPage = () => {
     setLoading(true);
     setMessage({ type: "", text: "" });
 
-    const result = await login(formData.email, formData.password);
+    try {
+      const result = await login(formData.email, formData.password);
 
-    if (result.success) {
-      setMessage({ type: "success", text: "Login successful! Redirecting..." });
-      navigate("/");
-    } else {
-      setMessage({ type: "error", text: result.message || "Login failed" });
+      if (result.success) {
+        setMessage({ type: "success", text: "Login successful! Redirecting..." });
+
+        // Get redirect path from result
+        const redirectPath = result.redirectTo || "/";
+
+        // Small delay to show success message, then redirect
+        setTimeout(() => {
+          navigate(redirectPath, { replace: true });
+        }, 500);
+      } else {
+        setMessage({
+          type: "error",
+          text: result.message || "Login failed. Please try again."
+        });
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setMessage({
+        type: "error",
+        text: "An unexpected error occurred. Please try again."
+      });
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleForgotPassword = () => {
@@ -59,14 +76,14 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 font-poppins">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 font-funnel">
       <div className="w-full max-w-sm">
         {/* Main Card */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
           {/* Header Section */}
           <div className="bg-[#0e540b] p-6 text-white text-center relative">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-full mb-3 backdrop-blur-sm">
-             <img src={vegbazarLogo} className="w-12 h-12" alt="vegbazar logo" />
+              <img src={vegbazarLogo} className="w-12 h-12" alt="vegbazar logo" />
             </div>
             <h1 className="text-2xl font-bold mb-1">Welcome Back!</h1>
             <p className="text-white/80 text-xs">Sign in to continue to VegBazar</p>
@@ -77,11 +94,10 @@ const LoginPage = () => {
             {/* Message Alert */}
             {message.text && (
               <div
-                className={`mb-4 p-3 rounded-lg flex items-start gap-2 text-sm ${
-                  message.type === "success"
-                    ? "bg-green-50 text-green-800 border border-green-200"
-                    : "bg-red-50 text-red-800 border border-red-200"
-                }`}
+                className={`mb-4 p-3 rounded-lg flex items-start gap-2 text-sm ${message.type === "success"
+                  ? "bg-green-50 text-green-800 border border-green-200"
+                  : "bg-red-50 text-red-800 border border-red-200"
+                  }`}
               >
                 {message.type === "success" ? (
                   <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -106,7 +122,8 @@ const LoginPage = () => {
                     required
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm"
+                    disabled={loading}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="yourname@email.com"
                   />
                 </div>
@@ -121,7 +138,8 @@ const LoginPage = () => {
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    className="text-xs text-[#e24100] hover:text-[#c93800] font-medium transition-colors"
+                    disabled={loading}
+                    className="text-xs text-[#e24100] hover:text-[#c93800] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Forgot Password?
                   </button>
@@ -134,13 +152,15 @@ const LoginPage = () => {
                     required
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm"
+                    disabled={loading}
+                    className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    disabled={loading}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors disabled:cursor-not-allowed"
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -202,7 +222,8 @@ const LoginPage = () => {
             <button
               type="button"
               onClick={handleSignUp}
-              className="w-full border-2 border-[#0e540b] text-[#0e540b] hover:bg-[#0e540b] hover:text-white font-semibold py-2.5 rounded-lg transition-all duration-200 text-sm"
+              disabled={loading}
+              className="w-full border-2 border-[#0e540b] text-[#0e540b] hover:bg-[#0e540b] hover:text-white font-semibold py-2.5 rounded-lg transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Create New Account
             </button>

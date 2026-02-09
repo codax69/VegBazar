@@ -18,7 +18,7 @@ import { useBillContext } from "../Context/BillContext";
 import OrderSuccess from "./OrderSuccess";
 import OrderFailed from "./OrderFailed";
 import OrderLoading from "./OrderLoading";
-import { useAuth } from "../Context/AuthProvider";
+import { useAuth } from "../Context/AuthContext.jsx";
 
 const OrderConfirmation = () => {
   const {
@@ -258,7 +258,7 @@ const OrderConfirmation = () => {
           className="flex items-center gap-2 mb-3 text-gray-700 hover:text-[#0e540b] transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium font-assistant text-sm">Back</span>
+          <span className="font-medium font-funnel text-sm">Back</span>
         </button>
 
         <div className="bg-[#f0fcf6] rounded-xl shadow-lg overflow-hidden">
@@ -269,7 +269,7 @@ const OrderConfirmation = () => {
                 Confirm Your Order
               </h2>
             </div>
-            <p className="text-center text-green-100 text-xs font-assistant">
+            <p className="text-center text-green-100 text-xs font-funnel">
               Review your order details before confirmation
             </p>
           </div>
@@ -282,10 +282,10 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <Package className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">
+                      <p className="text-xs text-gray-500 font-funnel">
                         Order ID
                       </p>
-                      <p className="font-semibold text-gray-800 font-assistant text-sm">
+                      <p className="font-semibold text-gray-800 font-funnel text-sm">
                         {orderData?.orderId || "N/A"}
                       </p>
                     </div>
@@ -293,10 +293,10 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <User className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">
+                      <p className="text-xs text-gray-500 font-funnel">
                         Full Name
                       </p>
-                      <p className="font-semibold text-gray-800 font-assistant text-sm">
+                      <p className="font-semibold text-gray-800 font-funnel text-sm">
                         {formData?.name || "N/A"}
                       </p>
                     </div>
@@ -304,10 +304,10 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <Phone className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">
+                      <p className="text-xs text-gray-500 font-funnel">
                         Mobile Number
                       </p>
-                      <p className="font-semibold text-gray-800 font-assistant text-sm">
+                      <p className="font-semibold text-gray-800 font-funnel text-sm">
                         {formData?.mobile || "N/A"}
                       </p>
                     </div>
@@ -316,10 +316,10 @@ const OrderConfirmation = () => {
                     <div className="flex items-start gap-2">
                       <Mail className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-xs text-gray-500 font-poppins">
+                        <p className="text-xs text-gray-500 font-funnel">
                           Email
                         </p>
-                        <p className="font-semibold text-gray-800 font-assistant text-sm truncate">
+                        <p className="font-semibold text-gray-800 font-funnel text-sm truncate">
                           {formData.email}
                         </p>
                       </div>
@@ -331,10 +331,10 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <ShoppingBag className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">
+                      <p className="text-xs text-gray-500 font-funnel">
                         {isCustomOrder ? "Order Type" : "Package"}
                       </p>
-                      <p className="font-semibold text-gray-800 font-assistant text-sm">
+                      <p className="font-semibold text-gray-800 font-funnel text-sm">
                         {packageName || "N/A"}
                       </p>
                     </div>
@@ -342,7 +342,7 @@ const OrderConfirmation = () => {
                   <div className="flex items-start gap-2">
                     <CreditCard className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-gray-500 font-poppins">
+                      <p className="text-xs text-gray-500 font-funnel">
                         Total Amount
                       </p>
                       <p className="font-bold text-[#0e540b] text-lg">
@@ -354,10 +354,10 @@ const OrderConfirmation = () => {
                     <div className="flex items-start gap-2">
                       <MapPin className="w-4 h-4 text-[#0e540b] mt-0.5 flex-shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-xs text-gray-500 font-poppins">
+                        <p className="text-xs text-gray-500 font-funnel">
                           Delivery Address
                         </p>
-                        <p className="font-semibold text-gray-800 font-assistant text-sm break-words">
+                        <p className="font-semibold text-gray-800 font-funnel text-sm break-words">
                           {formData.address}
                           {formData.area && `, ${formData.area}`}
                           {formData.city && `, ${formData.city}`}
@@ -375,17 +375,17 @@ const OrderConfirmation = () => {
                 <div className="bg-green-50 p-3 rounded-lg border border-green-200 mb-4">
                   <div className="flex items-center gap-2">
                     <div className="flex-1">
-                      <p className="text-xs text-gray-600 font-assistant">
+                      <p className="text-xs text-gray-600 font-funnel">
                         Coupon Applied
                       </p>
-                      <p className="font-semibold text-green-700 font-assistant text-sm">
+                      <p className="font-semibold text-green-700 font-funnel text-sm">
                         {orderData?.couponCode ||
                           appliedCoupon?.code ||
                           "Discount Applied"}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-600 font-assistant">
+                      <p className="text-xs text-gray-600 font-funnel">
                         Discount
                       </p>
                       <p className="font-bold text-green-700 text-sm">
@@ -423,7 +423,7 @@ const OrderConfirmation = () => {
                           className="flex justify-between items-center p-2 bg-gray-50 rounded-lg text-sm"
                         >
                           <div className="flex-1">
-                            <span className="font-medium text-gray-800 font-assistant">
+                            <span className="font-medium text-gray-800 font-funnel">
                               {vegName}
                             </span>
                             {vegWeight && (
@@ -452,7 +452,7 @@ const OrderConfirmation = () => {
 
             {/* reCAPTCHA Notice */}
             <div className="bg-gray-50 p-2 rounded-lg mb-4 border border-gray-200">
-              <div className="flex items-center gap-1.5 text-xs text-gray-600 font-assistant">
+              <div className="flex items-center gap-1.5 text-xs text-gray-600 font-funnel">
                 <Shield className="w-3.5 h-3.5 text-green-600" />
                 <span>
                   Protected by reCAPTCHA v3.
@@ -480,7 +480,7 @@ const OrderConfirmation = () => {
             <button
               onClick={handleSubmitOrder}
               disabled={isSubmitting}
-              className="w-full bg-gradient-to-r font-assistant from-[#0e540b] to-green-700 text-white font-bold py-3 px-5 rounded-lg hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-gradient-to-r font-funnel from-[#0e540b] to-green-700 text-white font-bold py-3 px-5 rounded-lg hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <CheckCircle className="w-5 h-5" />
               Confirm & Place Order
@@ -490,7 +490,7 @@ const OrderConfirmation = () => {
 
         <div className="mt-3 text-center text-xs text-gray-600">
           <p className="flex items-center justify-center gap-1.5">
-            <CheckCircle className="w-3.5 h-3.5 text-[#0e540b] font-assistant" />
+            <CheckCircle className="w-3.5 h-3.5 text-[#0e540b] font-funnel" />
             Your order information is secure and encrypted
           </p>
         </div>

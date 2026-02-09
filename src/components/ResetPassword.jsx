@@ -8,9 +8,11 @@ import {
     Key,
     Leaf,
 } from "lucide-react";
-import vegbazarLogo from"../assets/vegbazar.svg";
+import { useNavigate } from "react-router-dom";
+import vegbazarLogo from "../assets/vegbazar.svg";
 
 const ResetPassword = () => {
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -70,7 +72,7 @@ const ResetPassword = () => {
                     text: "Password reset successful! Redirecting to login...",
                 });
                 setTimeout(() => {
-                    window.location.href = '/login';
+                    navigate('/login');
                 }, 2000);
             } else {
                 setMessage({
@@ -89,13 +91,13 @@ const ResetPassword = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 font-poppins">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 font-funnel">
             <div className="w-full max-w-sm">
                 <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
                     {/* Header Section */}
                     <div className="bg-[#0e540b] p-6 text-white text-center relative">
                         <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-full mb-3 backdrop-blur-sm">
-                            <img src={vegbazarLogo} alt="VegBazar Logo" className="w-12 h-12"  />
+                            <img src={vegbazarLogo} alt="VegBazar Logo" className="w-12 h-12" />
                         </div>
                         <h1 className="text-2xl font-bold mb-1">Reset Password</h1>
                         <p className="text-white/80 text-xs">
@@ -107,11 +109,10 @@ const ResetPassword = () => {
                         {/* Message Alert */}
                         {message.text && (
                             <div
-                                className={`mb-4 p-3 rounded-lg flex items-start gap-2 text-sm ${
-                                    message.type === "success"
-                                        ? "bg-green-50 text-green-800 border border-green-200"
-                                        : "bg-red-50 text-red-800 border border-red-200"
-                                }`}
+                                className={`mb-4 p-3 rounded-lg flex items-start gap-2 text-sm ${message.type === "success"
+                                    ? "bg-green-50 text-green-800 border border-green-200"
+                                    : "bg-red-50 text-red-800 border border-red-200"
+                                    }`}
                             >
                                 {message.type === "success" ? (
                                     <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -136,7 +137,7 @@ const ResetPassword = () => {
                                             name="password"
                                             value={formData.password}
                                             onChange={handleInputChange}
-                                            className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm"
+                                            className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm"
                                             placeholder="Enter new password"
                                         />
                                         <button
@@ -165,7 +166,7 @@ const ResetPassword = () => {
                                             name="confirmPassword"
                                             value={formData.confirmPassword}
                                             onChange={handleInputChange}
-                                            className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm"
+                                            className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm"
                                             placeholder="Confirm new password"
                                         />
                                         <button
@@ -235,7 +236,7 @@ const ResetPassword = () => {
                 <p className="text-center text-xs text-gray-600 mt-4 px-4">
                     Remember your password?{" "}
                     <button
-                        onClick={() => window.location.href = '/login'}
+                        onClick={() => navigate('/login')}
                         className="text-[#e24100] hover:underline font-medium"
                     >
                         Sign in

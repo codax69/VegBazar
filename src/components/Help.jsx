@@ -66,7 +66,7 @@ const Help = () => {
         feedback
       );
       const data = await submitTestimonial.data;
-      
+
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);
@@ -92,16 +92,16 @@ const Help = () => {
     <div className="min-h-screen pt-6 md:pt-24 pb-10 px-3 bg-[#ffffff]">
       <div className="max-w-2xl mx-auto space-y-6 md:space-y-8">
         <div className="text-center mb-4">
-          <h1 className="text-2xl md:text-3xl font-poppins font-semibold text-[#0e540b] mb-1">
+          <h1 className="text-2xl md:text-3xl font-funnel font-semibold text-[#0e540b] mb-1">
             Help & Support
           </h1>
-          <p className="text-gray-700 text-xs md:text-sm font-assistant">
+          <p className="text-gray-700 text-xs md:text-sm font-funnel">
             We're here to help with your orders, deliveries, and feedback.
           </p>
         </div>
 
         <div className="bg-[#f0fcf6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
-          <h2 className="text-xl md:text-2xl font-poppins font-semibold mb-3 flex items-center gap-2 text-[#0e540b]">
+          <h2 className="text-xl md:text-2xl font-funnel font-semibold mb-3 flex items-center gap-2 text-[#0e540b]">
             <MessageSquare className="w-5 h-5" /> Get in Touch
           </h2>
 
@@ -116,7 +116,7 @@ const Help = () => {
                 <Phone className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-[11px] text-gray-600 font-assistant">Call or WhatsApp</p>
+                <p className="text-[11px] text-gray-600 font-funnel">Call or WhatsApp</p>
                 <p className="text-sm font-amiko text-[#0e540b] font-semibold">+91 8780564115</p>
               </div>
             </a>
@@ -129,7 +129,7 @@ const Help = () => {
                 <Mail className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-[11px] text-gray-600 font-assistant">Email Us</p>
+                <p className="text-[11px] text-gray-600 font-funnel">Email Us</p>
                 <p className="text-sm font-amiko text-[#0e540b] font-semibold">info.vegbazar@gmail.com</p>
               </div>
             </a>
@@ -143,24 +143,24 @@ const Help = () => {
             >
               📝 Complete Our Survey
             </button>
-            <p className="text-gray-600 text-[11px] mt-2 font-assistant italic">
+            <p className="text-gray-600 text-[11px] mt-2 font-funnel italic">
               Note: Give feedback and we'll serve you better.
             </p>
           </div>
         </div>
 
         <div className="bg-[#ffffff] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
-          <h2 className="text-xl font-poppins font-semibold mb-3 text-[#0e540b]">
+          <h2 className="text-xl font-funnel font-semibold mb-3 text-[#0e540b]">
             Quick Feedback
           </h2>
 
           {submitted ? (
             <div className="rounded-md p-4 text-center bg-gray-50">
               <div className="text-3xl mb-2 text-[#0e540b]">✓</div>
-              <p className="text-sm md:text-base font-poppins font-semibold text-[#0e540b]">
+              <p className="text-sm md:text-base font-funnel font-semibold text-[#0e540b]">
                 Thank you for your feedback!
               </p>
-              <p className="text-gray-600 text-xs md:text-sm font-assistant">
+              <p className="text-gray-600 text-xs md:text-sm font-funnel">
                 We appreciate your time and will use it to improve VegBazar.
               </p>
             </div>
@@ -173,15 +173,14 @@ const Help = () => {
                     placeholder="Your Name"
                     value={feedback.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-assistant ${
-                      errors.name ? "border-red-500" : ""
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-funnel ${errors.name ? "border-red-500" : ""
+                      }`}
                     style={{ borderColor: errors.name ? "#ef4444" : "#dcdcdc" }}
                     onFocus={(e) => !errors.name && (e.target.style.borderColor = "#0e540b")}
                     onBlur={(e) => !errors.name && (e.target.style.borderColor = "#dcdcdc")}
                   />
                   {errors.name && (
-                    <p className="text-red-500 text-[10px] mt-1 font-assistant">{errors.name}</p>
+                    <p className="text-red-500 text-[10px] mt-1 font-funnel">{errors.name}</p>
                   )}
                 </div>
 
@@ -191,21 +190,20 @@ const Help = () => {
                     placeholder="Your Email"
                     value={feedback.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-assistant ${
-                      errors.email ? "border-red-500" : ""
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-funnel ${errors.email ? "border-red-500" : ""
+                      }`}
                     style={{ borderColor: errors.email ? "#ef4444" : "#dcdcdc" }}
                     onFocus={(e) => !errors.email && (e.target.style.borderColor = "#0e540b")}
                     onBlur={(e) => !errors.email && (e.target.style.borderColor = "#dcdcdc")}
                   />
                   {errors.email && (
-                    <p className="text-red-500 text-[10px] mt-1 font-assistant">{errors.email}</p>
+                    <p className="text-red-500 text-[10px] mt-1 font-funnel">{errors.email}</p>
                   )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold mb-1 text-gray-700 font-assistant">
+                <label className="block text-[11px] font-semibold mb-1 text-gray-700 font-funnel">
                   Rate Your Experience
                 </label>
                 <div className="flex gap-1.5">
@@ -217,9 +215,8 @@ const Help = () => {
                       className="focus:outline-none transform hover:scale-110 transition-transform"
                     >
                       <svg
-                        className={`w-5 h-5 ${
-                          star <= feedback.rating ? "fill-current" : ""
-                        }`}
+                        className={`w-5 h-5 ${star <= feedback.rating ? "fill-current" : ""
+                          }`}
                         style={{
                           color: star <= feedback.rating ? "#0e540b" : "#cbd5e0",
                         }}
@@ -231,7 +228,7 @@ const Help = () => {
                   ))}
                 </div>
                 {errors.rating && (
-                  <p className="text-red-500 text-[10px] mt-1 font-assistant">{errors.rating}</p>
+                  <p className="text-red-500 text-[10px] mt-1 font-funnel">{errors.rating}</p>
                 )}
               </div>
 
@@ -241,20 +238,18 @@ const Help = () => {
                   placeholder="Tell us about your experience... (minimum 10 characters)"
                   value={feedback.comment}
                   onChange={(e) => handleInputChange("comment", e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-assistant resize-none ${
-                    errors.comment ? "border-red-500" : ""
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none text-xs md:text-sm font-funnel resize-none ${errors.comment ? "border-red-500" : ""
+                    }`}
                   style={{ borderColor: errors.comment ? "#ef4444" : "#dcdcdc" }}
                   onFocus={(e) => !errors.comment && (e.target.style.borderColor = "#0e540b")}
                   onBlur={(e) => !errors.comment && (e.target.style.borderColor = "#dcdcdc")}
                 ></textarea>
                 <div className="flex justify-between items-center mt-1">
                   {errors.comment && (
-                    <p className="text-red-500 text-[10px] font-assistant">{errors.comment}</p>
+                    <p className="text-red-500 text-[10px] font-funnel">{errors.comment}</p>
                   )}
-                  <p className={`text-[10px] font-assistant ml-auto ${
-                    feedback.comment.length >= 10 ? "text-green-600" : "text-gray-500"
-                  }`}>
+                  <p className={`text-[10px] font-funnel ml-auto ${feedback.comment.length >= 10 ? "text-green-600" : "text-gray-500"
+                    }`}>
                     {feedback.comment.length}/10 characters
                   </p>
                 </div>
@@ -282,7 +277,7 @@ const Help = () => {
         </div>
 
         <div className="bg-[#ffffff] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
-          <h2 className="text-xl font-poppins font-semibold mb-3 text-[#0e540b]">
+          <h2 className="text-xl font-funnel font-semibold mb-3 text-[#0e540b]">
             FAQs
           </h2>
           <div className="space-y-3">
@@ -305,7 +300,7 @@ const Help = () => {
               },
             ].map((item, i) => (
               <div key={i} className="border-l-4 pl-3 py-1" style={{ borderColor: "#0e540b" }}>
-                <h3 className="font-poppins text-sm text-gray-800 mb-0.5">
+                <h3 className="font-funnel text-sm text-gray-800 mb-0.5">
                   {item.q}
                 </h3>
                 <p className="text-[11px] text-gray-600 font-assistant">{item.a}</p>

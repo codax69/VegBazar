@@ -13,7 +13,7 @@ import {
   CloudCog,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
-import { useAuth } from "../Context/AuthProvider.jsx";
+import { useAuth } from "../Context/AuthContext.jsx";
 import axios from "axios";
 import RazorpayPayment from "./RazorpayPayment";
 import CouponCodeSection from "./CouponCodeSection";
@@ -56,7 +56,6 @@ const VegetableCart = () => {
   const {
     vegetableOrder,
     setVegetableOrder,
-    formData,
     navigate,
     setPaymentMethod,
     paymentMethod,
@@ -123,7 +122,7 @@ const VegetableCart = () => {
             }
           }
         );
-        
+
         if (isMounted && data?.data.defaultAddress) {
           setDefaultAddress(data.data.defaultAddress);
           setSelectedAddress(data.data.defaultAddress);
@@ -611,7 +610,7 @@ const VegetableCart = () => {
             <div className="flex gap-1 flex-col items-center justify-between">
               <button
                 onClick={handleContinueShopping}
-                className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-[#0e540b] hover:bg-green-50 rounded-lg transition font-assistant text-sm font-semibold"
+                className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-[#0e540b] hover:bg-green-50 rounded-lg transition font-funnel text-sm font-semibold"
               >
                 <ArrowLeft size={16} className="mr-1" />
                 Continue Shopping
@@ -624,15 +623,15 @@ const VegetableCart = () => {
           </div>
           <div className="bg-[#f0fcf6] p-8 md:p-6 rounded-lg shadow-md text-center">
             <ShoppingBag size={48} className="mx-auto text-gray-300 mb-2" />
-            <h3 className="font-poppins text-lg md:text-base font-semibold text-gray-600 mb-1">
+            <h3 className="font-funnel text-lg md:text-base font-semibold text-gray-600 mb-1">
               Your cart is empty
             </h3>
-            <p className="font-assistant text-gray-500 mb-4 text-sm">
+            <p className="font-funnel text-gray-500 mb-4 text-sm">
               Add fresh vegetables to get started!
             </p>
             <button
               onClick={handleBrowseVegetables}
-              className="font-assistant px-4 py-2 bg-[#0e540b] text-white rounded-lg font-semibold text-sm hover:bg-green-800 transition"
+              className="font-funnel px-4 py-2 bg-[#0e540b] text-white rounded-lg font-semibold text-sm hover:bg-green-800 transition"
             >
               Browse Vegetables
             </button>
@@ -649,7 +648,7 @@ const VegetableCart = () => {
           <div className="flex gap-1 flex-col items-center justify-baseline">
             <button
               onClick={handleContinueShopping}
-              className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-[#0e540b] hover:bg-green-50 rounded-lg transition font-assistant text-sm font-semibold"
+              className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-[#0e540b] hover:bg-green-50 rounded-lg transition font-funnel text-sm font-semibold"
             >
               <ArrowLeft size={16} className="mr-1" />
               Continue Shopping
@@ -674,48 +673,48 @@ const VegetableCart = () => {
             </div>
 
             <div className="lg:hidden bg-[#f0fcf6] p-4 rounded-lg shadow-md">
-              <h3 className="font-poppins text-base font-bold text-gray-800 mb-3 border-b pb-2">
+              <h3 className="font-funnel text-base font-bold text-gray-800 mb-3 border-b pb-2">
                 Bill Summary
               </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="font-assistant text-gray-600">Subtotal</span>
-                  <span className="font-assistant font-semibold text-gray-800">
+                  <span className="font-funnel text-gray-600">Subtotal</span>
+                  <span className="font-funnel font-semibold text-gray-800">
                     ₹{subtotal.toFixed(2)}
                   </span>
                 </div>
 
                 {couponDiscount > 0 && (
                   <div className="flex justify-between items-center text-green-600">
-                    <span className="font-assistant">Coupon Discount</span>
-                    <span className="font-assistant font-semibold">
+                    <span className="font-funnel">Coupon Discount</span>
+                    <span className="font-funnel font-semibold">
                       -₹{couponDiscount.toFixed(2)}
                     </span>
                   </div>
                 )}
 
                 <div className="flex justify-between items-center">
-                  <span className="font-assistant text-gray-600">
+                  <span className="font-funnel text-gray-600">
                     Delivery Charge
                   </span>
-                  <span className="font-assistant font-semibold text-gray-800">
+                  <span className="font-funnel font-semibold text-gray-800">
                     {deliveryCharge === 0
                       ? "FREE"
                       : `₹${deliveryCharge.toFixed(2)}`}
                   </span>
                 </div>
 
-                {deliveryCharge > 0 && subtotal < 250 && (
+                {deliveryCharge > 0 && subtotal < 269 && (
                   <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="font-assistant text-xs text-green-700 font-semibold">
-                      🎉 Add ₹{(250 - subtotal).toFixed(2)} more for FREE
+                    <p className="font-funnel text-xs text-green-700 font-semibold">
+                      🎉 Add ₹{(269 - subtotal).toFixed(2)} more for FREE
                       delivery!
                     </p>
                   </div>
                 )}
                 <div className="border-t border-gray-200 pt-2 mt-2">
                   <div className="flex justify-between items-center">
-                    <span className="font-poppins font-bold text-gray-800">
+                    <span className="font-funnel font-bold text-gray-800">
                       Total Amount
                     </span>
                     <span className="font-amiko font-bold text-[#0e540b] text-lg">
@@ -726,7 +725,7 @@ const VegetableCart = () => {
               </div>
               {isCheckoutDisabled && (
                 <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="font-assistant text-xs text-orange-700 font-semibold">
+                  <p className="font-funnel text-xs text-orange-700 font-semibold">
                     ⚠️ Please select delivery address and payment method below
                     to proceed
                   </p>
@@ -786,7 +785,7 @@ const VegetableCart = () => {
 
 const CartItems = React.memo(({ items, updateQuantity, removeItem }) => (
   <div className="bg-[#f0fcf6] p-3 md:p-2.5 rounded-lg shadow-md">
-    <h3 className="font-poppins text-base md:text-sm font-bold text-gray-800 mb-2 md:mb-1.5 border-b pb-1.5 md:pb-1">
+    <h3 className="font-funnel text-base md:text-sm font-bold text-gray-800 mb-2 md:mb-1.5 border-b pb-1.5 md:pb-1">
       Order Items ({items.length} items,{" "}
       {items.reduce((sum, item) => sum + item.quantity, 0)} total quantity)
     </h3>
@@ -826,21 +825,21 @@ const CartItem = React.memo(({ item, index, updateQuantity, removeItem }) => {
       />
       <div className="flex-1 flex flex-col justify-between">
         <div>
-          <h4 className="font-assistant font-semibold text-gray-800 text-sm md:text-xs">
+          <h4 className="font-funnel font-semibold text-gray-800 text-sm md:text-xs">
             {item.name} ({item.weight})
           </h4>
           <div className="flex items-center gap-1.5 md:gap-1 mt-0.5">
-            <p className="font-assistant text-sm md:text-xs font-semibold text-[#0e540b]">
+            <p className="font-funnel text-sm md:text-xs font-semibold text-[#0e540b]">
               ₹{itemPrice.toFixed(2)} per {item.weight}
             </p>
             {marketPriceForWeight && marketPriceForWeight > itemPrice && (
-              <p className="font-assistant text-xs md:text-[10px] line-through text-gray-400">
+              <p className="font-funnel text-xs md:text-[10px] line-through text-gray-400">
                 ₹{marketPriceForWeight.toFixed(2)}
               </p>
             )}
           </div>
           {marketPriceForWeight && marketPriceForWeight > itemPrice && (
-            <p className="font-assistant text-[10px] md:text-[9px] text-green-600 font-semibold mt-0.5">
+            <p className="font-funnel text-[10px] md:text-[9px] text-green-600 font-semibold mt-0.5">
               Save ₹{(marketPriceForWeight - itemPrice).toFixed(2)} per{" "}
               {item.weight}
             </p>
@@ -855,7 +854,7 @@ const CartItem = React.memo(({ item, index, updateQuantity, removeItem }) => {
             >
               <Minus size={12} className="text-gray-700 md:w-2.5 md:h-2.5" />
             </button>
-            <span className="font-assistant font-semibold text-gray-800 text-sm md:text-xs w-7 md:w-6 text-center">
+            <span className="font-funnel font-semibold text-gray-800 text-sm md:text-xs w-7 md:w-6 text-center">
               {item.quantity}
             </span>
             <button
@@ -867,7 +866,7 @@ const CartItem = React.memo(({ item, index, updateQuantity, removeItem }) => {
             </button>
           </div>
           <div className="flex items-center gap-2 md:gap-1.5">
-            <p className="font-assistant font-bold text-gray-800 text-sm md:text-xs">
+            <p className="font-funnel font-bold text-gray-800 text-sm md:text-xs">
               ₹{itemTotal.toFixed(2)}
             </p>
             <button
@@ -887,7 +886,7 @@ const CartItem = React.memo(({ item, index, updateQuantity, removeItem }) => {
 const PaymentMethodSection = React.memo(
   ({ paymentMethod, setPaymentMethod }) => (
     <div className="bg-[#f0fcf6] p-4 md:p-3 rounded-lg shadow-md">
-      <h3 className="font-poppins text-base md:text-sm font-bold text-gray-800 mb-3 md:mb-2 flex items-center gap-2">
+      <h3 className="font-funnel text-base md:text-sm font-bold text-gray-800 mb-3 md:mb-2 flex items-center gap-2">
         <CreditCard size={18} className="text-[#0e540b] md:w-4 md:h-4" />
         Select Payment Method
       </h3>
@@ -908,10 +907,10 @@ const PaymentMethodSection = React.memo(
           />
           <Banknote size={22} className="text-gray-600 md:w-5 md:h-5" />
           <div className="flex-1">
-            <p className="font-poppins font-semibold text-gray-800 text-sm md:text-xs">
+            <p className="font-funnel font-semibold text-gray-800 text-sm md:text-xs">
               Cash on Delivery
             </p>
-            <p className="font-assistant text-xs md:text-[10px] text-gray-600">
+            <p className="font-funnel text-xs md:text-[10px] text-gray-600">
               Pay when you receive
             </p>
           </div>
@@ -935,10 +934,10 @@ const PaymentMethodSection = React.memo(
           />
           <CreditCard size={22} className="text-gray-600 md:w-5 md:h-5" />
           <div className="flex-1">
-            <p className="font-poppins font-semibold text-gray-800 text-sm md:text-xs">
+            <p className="font-funnel font-semibold text-gray-800 text-sm md:text-xs">
               Online Payment
             </p>
-            <p className="font-assistant text-xs md:text-[10px] text-gray-600">
+            <p className="font-funnel text-xs md:text-[10px] text-gray-600">
               UPI, Card, Net Banking
             </p>
           </div>
@@ -978,49 +977,49 @@ const PriceSummary = React.memo(
         />
 
         <div>
-          <h3 className="font-poppins text-sm font-bold text-gray-800 mb-2.5 border-b pb-1.5">
+          <h3 className="font-funnel text-sm font-bold text-gray-800 mb-2.5 border-b pb-1.5">
             Price Summary
           </h3>
           <div className="space-y-2 mb-3">
             <div className="flex justify-between items-center">
-              <span className="font-assistant text-xs text-gray-600">
+              <span className="font-funnel text-xs text-gray-600">
                 Subtotal
               </span>
-              <span className="font-assistant font-semibold text-gray-800 text-sm">
+              <span className="font-funnel font-semibold text-gray-800 text-sm">
                 ₹{subtotal.toFixed(2)}
               </span>
             </div>
 
             {couponDiscount > 0 && (
               <div className="flex justify-between items-center text-green-600">
-                <span className="font-assistant text-xs">Coupon Discount</span>
-                <span className="font-assistant font-semibold text-sm">
+                <span className="font-funnel text-xs">Coupon Discount</span>
+                <span className="font-funnel font-semibold text-sm">
                   -₹{couponDiscount.toFixed(2)}
                 </span>
               </div>
             )}
 
             <div className="flex justify-between items-center">
-              <span className="font-assistant text-xs text-gray-600">
+              <span className="font-funnel text-xs text-gray-600">
                 Delivery Charge
               </span>
-              <span className="font-assistant font-semibold text-gray-800 text-sm">
+              <span className="font-funnel font-semibold text-gray-800 text-sm">
                 {deliveryCharge === 0
                   ? "FREE"
                   : `₹${deliveryCharge.toFixed(2)}`}
               </span>
             </div>
 
-            {deliveryCharge > 0 && subtotal < 250 && (
+            {deliveryCharge > 0 && subtotal < 269 && (
               <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
-                <p className="font-assistant text-xs text-green-700 font-semibold">
-                  🎉 Add ₹{(250 - subtotal).toFixed(2)} more for FREE delivery!
+                <p className="font-funnel text-xs text-green-700 font-semibold">
+                  🎉 Add ₹{(269 - subtotal).toFixed(2)} more for FREE delivery!
                 </p>
               </div>
             )}
             <div className="border-t border-gray-200 pt-2">
               <div className="flex justify-between items-center">
-                <span className="font-poppins font-bold text-gray-800 text-sm">
+                <span className="font-funnel font-bold text-gray-800 text-sm">
                   Total Amount
                 </span>
                 <span className="font-amiko font-bold text-[#0e540b] text-base">
@@ -1031,7 +1030,7 @@ const PriceSummary = React.memo(
           </div>
           {isCheckoutDisabled && (
             <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded-lg">
-              <p className="font-assistant text-[10px] text-orange-700 font-semibold">
+              <p className="font-funnel text-[10px] text-orange-700 font-semibold">
                 ⚠️ Please select delivery address and payment method to proceed
               </p>
             </div>
@@ -1043,14 +1042,15 @@ const PriceSummary = React.memo(
               couponCode={appliedCoupon}
               customerInfo={customerInfo}
               deliveryAddress={selectedAddress}
+              isCheckoutDisabled={isCheckoutDisabled}
             />
           ) : (
             <button
               onClick={handleCheckout}
               disabled={isCheckoutDisabled}
-              className={`font-assistant w-full py-2 rounded-lg font-bold text-sm transition transform shadow-md ${isCheckoutDisabled
+              className={`w-full font-funnel py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${isCheckoutDisabled
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-green-700 text-white hover:bg-green-800 hover:scale-[1.02]"
+                : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
                 }`}
             >
               {isCheckoutDisabled ? "Complete Selection" : "Place Order"}
@@ -1083,15 +1083,16 @@ const MobileCheckoutButton = React.memo(
               couponCode={appliedCoupon}
               customerInfo={customerInfo}
               deliveryAddress={selectedAddress}
+              isCheckoutDisabled={isCheckoutDisabled}
             />
           </div>
         ) : (
           <button
             onClick={handleCheckout}
             disabled={isCheckoutDisabled}
-            className={`font-assistant w-full py-3 rounded-lg font-bold text-sm transition shadow-lg active:scale-95 ${isCheckoutDisabled
+            className={`w-full font-funnel py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${isCheckoutDisabled
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-green-700 text-white hover:bg-green-800"
+              : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
               }`}
           >
             {isCheckoutDisabled

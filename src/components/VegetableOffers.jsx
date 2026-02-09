@@ -1,18 +1,36 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Package, Check, ShoppingCart, Leaf, Tag } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
 
 const VegetableOffers = () => {
-  const { offers, setSelectedOffer, setVegetableOrder,setSelectedVegetables ,navigate } =
+  const { setSelectedOffer, setVegetableOrder, setSelectedVegetables, navigate } =
     useOrderContext();
+  const [offers, setOffers] = useState([]);
+
+  useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_SERVER_URL}/api/baskets`
+        );
+        console.log("API Response:", response.data);
+        // Access baskets from data.data.baskets based on API structure
+        const basketsData = response.data.data?.baskets || response.data.baskets || [];
+        setOffers(basketsData);
+      } catch (error) {
+        console.error("Error fetching offers:", error);
+      }
+    };
+    fetchOffers();
+  }, [])
 
   // Track offer click
   const handleOfferClick = async (offer) => {
     try {
       // Increment click count on backend
       await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/offers/click/${offer._id}`
+        `${import.meta.env.VITE_API_SERVER_URL}/api/baskets/click/${offer._id}`
       );
     } catch (error) {
       console.error("Error tracking offer click:", error);
@@ -31,7 +49,7 @@ const VegetableOffers = () => {
     // Track the click asynchronously
     handleOfferClick(offer);
 
-    navigate("/vegetables");
+    navigate("/select-vegetables");
   };
 
   return (
@@ -46,7 +64,7 @@ const VegetableOffers = () => {
             <h2 className="text-lg font-amiko sm:text-xl md:text-2xl font-bold text-[#0e540b] mb-1">
               Choose Your Basket
             </h2>
-            <p className="text-gray-600 text-xs font-assistant sm:text-sm px-4">
+            <p className="text-gray-600 text-xs font-funnel sm:text-sm px-4">
               Select the best vegetable package that suits your needs
             </p>
           </div>
@@ -74,13 +92,13 @@ const VegetableOffers = () => {
                       <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#f0fcf6] rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
                         <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-[#0e540b]" />
                       </div>
-                      <h3 className="text-base font-poppins sm:text-lg font-bold text-gray-800 mb-1">
+                      <h3 className="text-base font-funnel sm:text-lg font-bold text-gray-800 mb-1">
                         {offer.title}
                       </h3>
-                      <div className="flex font-assistant items-center justify-center gap-1 text-gray-600 text-xs">
+                      <div className="flex font-funnel items-center justify-center gap-1 text-gray-600 text-xs">
                         <Leaf className="w-3 h-3" />
                         <span>
-                          {offer.vegetables?.length / 2 || 0} vegetables
+                          {offer.vegetables?.length || 0} vegetables
                         </span>
                       </div>
                     </div>
@@ -92,18 +110,18 @@ const VegetableOffers = () => {
                     <div className="text-center mb-3 flex-shrink-0">
                       <div className="flex items-center justify-center gap-1.5 mb-1">
                         <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0e540b]" />
-                        <span className="text-xs font-medium font-assistant text-gray-600">
+                        <span className="text-xs font-medium font-funnel text-gray-600">
                           Price
                         </span>
                       </div>
-                      <p className="text-2xl sm:text-3xl font-assistant font-bold text-[#0e540b]">
+                      <p className="text-2xl sm:text-3xl font-funnel font-bold text-[#0e540b]">
                         ₹{offer.price}
                       </p>
                     </div>
 
                     {/* Description */}
                     {offer.description && (
-                      <p className="text-gray-900 font-assistant text-sm font-bold text-center mb-3 leading-relaxed flex-shrink-0 px-2">
+                      <p className="text-gray-900 font-funnel text-sm font-bold text-center mb-3 leading-relaxed flex-shrink-0 px-2">
                         {offer.description}
                       </p>
                     )}
@@ -112,24 +130,24 @@ const VegetableOffers = () => {
                     {offer.vegetables && offer.vegetables.length > 0 && (
                       <div className="bg-green-50 rounded-lg p-2.5 sm:p-3 mb-3 border border-green-100 flex-shrink-0">
                         <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
-                          <Check className="w-3.5 h-3.5 font-assistant text-[#0e540b]" />
+                          <Check className="w-3.5 h-3.5 font-funnel text-[#0e540b]" />
                           What's Included:
                         </p>
-                        <ul className="space-y-1.5 font-assistant">
+                        <ul className="space-y-1.5 font-funnel">
                           {offer.vegetables.slice(0, 3).map((veg, index) => (
                             <li
                               key={veg._id || index}
                               className="text-xs text-gray-700 flex items-center gap-1.5"
                             >
                               <div className="w-1 h-1 rounded-full bg-[#0e540b] flex-shrink-0"></div>
-                              <span className="truncate font-assistant">
-                                {veg.name}
+                              <span className="truncate font-funnel">
+                                {veg.vegetable?.name || veg.name || 'Vegetable'}
                               </span>
                             </li>
                           ))}
                           {offer.vegetables.length > 3 && (
                             <li className="text-xs text-[#0e540b] font-medium flex items-center gap-1.5">
-                              <div className="w-1 h-1 rounded-full font-assistant bg-[#0e540b] flex-shrink-0"></div>
+                              <div className="w-1 h-1 rounded-full font-funnel bg-[#0e540b] flex-shrink-0"></div>
                               +{offer.vegetables.length - 3} more vegetables
                             </li>
                           )}
@@ -140,7 +158,7 @@ const VegetableOffers = () => {
                     {/* Select Button */}
                     <button
                       aria-label={`Select ${offer.title} package`}
-                      className="w-full font-assistant bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2.5 sm:py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 group-hover:scale-105 text-xs sm:text-sm mt-auto"
+                      className="w-full font-funnel bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2.5 sm:py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 group-hover:scale-105 text-xs sm:text-sm mt-auto"
                     >
                       <ShoppingCart className="w-4 h-4" />
                       Select Package

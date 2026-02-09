@@ -17,6 +17,7 @@ import { useOrderContext } from "../Context/OrderContext";
 import axios from "axios";
 import VegBazarBanner from "./VegBazarBanner";
 import TestimonialsCarousel from "./TestimonialsCarousel";
+import Footer from "./Footer";
 
 // Updated VegetableCard component supporting both weight and set pricing
 const hasEnoughStock = (veg, option, isSetModel) => {
@@ -199,8 +200,8 @@ const VegetableCard = memo(
     return (
       <div
         className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${isCompletelyOutOfStock
-            ? "bg-gray-100 border-gray-300 opacity-75"
-            : "bg-[#ffffff] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
+          ? "bg-gray-100 border-gray-300 opacity-75"
+          : "bg-[#ffffff] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
           }`}
       >
         {/* Vegetable Image */}
@@ -220,14 +221,14 @@ const VegetableCard = memo(
             ) : (
               <div
                 className={`w-full h-full bg-gradient-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${isCompletelyOutOfStock
-                    ? "from-gray-200 to-gray-300"
-                    : "from-gray-50 to-[#ffffff]"
+                  ? "from-gray-200 to-gray-300"
+                  : "from-gray-50 to-[#ffffff]"
                   }`}
               >
                 <Leaf
                   className={`w-8 h-8 sm:w-10 sm:h-10 ${isCompletelyOutOfStock
-                      ? "text-gray-400"
-                      : "text-[#0e540b]/30"
+                    ? "text-gray-400"
+                    : "text-[#0e540b]/30"
                     }`}
                 />
               </div>
@@ -332,7 +333,7 @@ const VegetableCard = memo(
           </div>
         ) : isCurrentOptionOutOfStock ? (
           <div className="w-full bg-orange-100 text-orange-700 font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm text-center cursor-not-allowed">
-            Out of Stock
+            SOLD OUT
           </div>
         ) : quantity === 0 ? (
           <button
@@ -385,12 +386,12 @@ const OfferCard = memo(({ offer, onNavigate }) => {
           <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#ffffff] rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
             <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-[#0e540b]" />
           </div>
-          <h3 className="text-base font-poppins sm:text-lg font-bold text-gray-800 mb-1">
+          <h3 className="text-base font-funnel sm:text-lg font-bold text-gray-800 mb-1">
             {offer.title}
           </h3>
-          <div className="flex font-assistant items-center justify-center gap-1 text-gray-600 text-xs">
+          <div className="flex font-funnel items-center justify-center gap-1 text-gray-600 text-xs">
             <Leaf className="w-3 h-3" />
-            {/* <span>{offer.vegetables?.length / 2 || 0} vegetables</span> */}
+            <span>{offer.vegetables?.length || 0} vegetables</span>
           </div>
         </div>
       </div>
@@ -399,17 +400,17 @@ const OfferCard = memo(({ offer, onNavigate }) => {
         <div className="text-center mb-3 flex-shrink-0">
           <div className="flex items-center justify-center gap-1.5 mb-1">
             <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0e540b]" />
-            <span className="text-xs font-medium font-assistant text-gray-600">
+            <span className="text-xs font-medium font-funnel text-gray-600">
               Price
             </span>
           </div>
-          <p className="text-2xl sm:text-3xl font-assistant font-bold text-[#0e540b]">
+          <p className="text-2xl sm:text-3xl font-funnel font-bold text-[#0e540b]">
             ₹{offer.price}
           </p>
         </div>
 
         {offer.description && (
-          <p className="text-gray-900 font-assistant text-sm font-bold text-center mb-3 leading-relaxed flex-shrink-0 px-2">
+          <p className="text-gray-900 font-funnel text-sm font-bold text-center mb-3 leading-relaxed flex-shrink-0 px-2">
             {offer.description}
           </p>
         )}
@@ -417,22 +418,22 @@ const OfferCard = memo(({ offer, onNavigate }) => {
         {offer.vegetables && offer.vegetables.length > 0 && (
           <div className="bg-green-50 rounded-lg p-2.5 sm:p-3 mb-3 border border-green-100 flex-shrink-0">
             <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 font-assistant text-[#0e540b]" />
+              <Check className="w-3.5 h-3.5 font-funnel text-[#0e540b]" />
               What's Included:
             </p>
-            <ul className="space-y-1.5 font-assistant">
+            <ul className="space-y-1.5 font-funnel">
               {offer.vegetables.slice(0, 3).map((veg, index) => (
                 <li
                   key={veg._id || index}
                   className="text-xs text-gray-700 flex items-center gap-1.5"
                 >
                   <div className="w-1 h-1 rounded-full bg-[#0e540b] flex-shrink-0"></div>
-                  <span className="truncate font-assistant">{veg.name}</span>
+                  <span className="truncate font-funnel">{veg.vegetable?.name || veg.name || 'Vegetable'}</span>
                 </li>
               ))}
               {offer.vegetables.length > 3 && (
                 <li className="text-xs text-[#0e540b] font-medium flex items-center gap-1.5">
-                  <div className="w-1 h-1 rounded-full font-assistant bg-[#0e540b] flex-shrink-0"></div>
+                  <div className="w-1 h-1 rounded-full font-funnel bg-[#0e540b] flex-shrink-0"></div>
                   +{offer.vegetables.length - 3} more vegetables
                 </li>
               )}
@@ -442,7 +443,7 @@ const OfferCard = memo(({ offer, onNavigate }) => {
 
         <button
           aria-label={`Select ${offer.title} package`}
-          className="w-full font-assistant bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2.5 sm:py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 group-hover:scale-105 text-xs sm:text-sm mt-auto"
+          className="w-full font-funnel bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2.5 sm:py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 group-hover:scale-105 text-xs sm:text-sm mt-auto"
         >
           <ShoppingCart className="w-4 h-4" />
           Select
@@ -471,7 +472,7 @@ const Homepage = () => {
   const [cartItems, setCartItems] = useState({});
   const [selectedWeights, setSelectedWeights] = useState({});
   const [selectedSets, setSelectedSets] = useState({});
-  const { setVegetableOrder, navigate } = useOrderContext();
+  const { setVegetableOrder, navigate, setSelectedOffer, setSelectedVegetables } = useOrderContext();
   const [topSellingVegetables, setTopSellingVegetables] = useState([]);
   const [suggestedVegetables, setSuggestedVegetables] = useState([]);
 
@@ -487,7 +488,7 @@ const Homepage = () => {
           axios
             .get(
               `${import.meta.env.VITE_API_SERVER_URL
-              }/api/offers/Top-offers/suggestion`
+              }/api/baskets/top-baskets/suggestion`
             )
             .catch(() => ({ data: { data: [] } })),
           axios
@@ -811,6 +812,20 @@ const Homepage = () => {
     () => Object.values(cartItems).reduce((sum, qty) => sum + qty, 0),
     [cartItems]
   );
+
+  // Track offer/basket click
+  const handleOfferClick = useCallback(async (offer) => {
+    try {
+      // Increment click count on backend
+      await axios.post(
+        `${import.meta.env.VITE_API_SERVER_URL}/api/baskets/click/${offer._id}`
+      );
+    } catch (error) {
+      console.error("Error tracking offer click:", error);
+      // Continue with navigation even if tracking fails
+    }
+  }, []);
+
   const handleNavigateToOffers = useCallback(() => {
     window.scrollTo(0, 0);
     navigate("/offers");
@@ -828,6 +843,24 @@ const Homepage = () => {
     window.scrollTo(0, 0);
     navigate("/cart");
   }, [navigate]);
+
+  // Handle offer/basket selection with click tracking
+  const handleOfferSelect = useCallback(async (offer) => {
+    window.scrollTo(0, 0);
+
+    // Clear previous selections
+    setVegetableOrder([]);
+    setSelectedVegetables([]);
+
+    // Set the selected offer
+    setSelectedOffer(offer);
+
+    // Track the click asynchronously
+    handleOfferClick(offer);
+
+    // Navigate to vegetable selection
+    navigate("/select-vegetables");
+  }, [navigate, setSelectedOffer, setSelectedVegetables, setVegetableOrder, handleOfferClick]);
 
   return (
     <div className="min-h-screen bg-[#ffffff] md:pt-10">
@@ -941,10 +974,7 @@ const Homepage = () => {
                   <OfferCard
                     key={offer._id || offer.id}
                     offer={offer}
-                    onNavigate={() => {
-                      navigate(`/offers/${offer._id || offer.id}`);
-                      window.scrollTo(0, 0);
-                    }}
+                    onNavigate={() => handleOfferSelect(offer)}
                   />
                 ))}
               </div>
@@ -1006,6 +1036,7 @@ const Homepage = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   CheckCircle,
   Package,
@@ -13,33 +13,54 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
+import { useAuth } from "../Context/AuthContext.jsx";
+import { useWallet } from "../Context/WalletContext";
+import CashbackModal from "./CashbackModal";
 
 const OrderSuccess = ({ orderData, onNewOrder }) => {
   const [copied, setCopied] = useState(false);
+  const [showCashbackModal, setShowCashbackModal] = useState(false);
   const { navigate } = useOrderContext();
+  const { user } = useAuth();
+  const { balance, refreshBalance } = useWallet();
 
-  // Extract customer info from orderData (single source of truth)
+  // Show cashback modal if cashback exists
+  useEffect(() => {
+    if (orderData?.cashbackAmount && orderData.cashbackAmount > 0) {
+      // Refresh wallet balance to get updated amount
+      refreshBalance();
+      // Show modal after a short delay
+      setTimeout(() => {
+        setShowCashbackModal(true);
+      }, 500);
+    }
+  }, [orderData, refreshBalance]);
+
   const customerInfo = useMemo(() => {
+    if (user) {
+      return {
+        name: user.username || user.name || orderData?.customerInfo?.name || "N/A",
+        mobile: user.phone || user.mobile || orderData?.customerInfo?.mobile || "N/A",
+        email: user.email || orderData?.customerInfo?.email || null,
+        address: orderData?.customerInfo?.address || null,
+        area: orderData?.customerInfo?.area || null,
+        city: orderData?.customerInfo?.city || null,
+      };
+    }
     return orderData?.customerInfo || {};
-  }, [orderData]);
+  }, [user, orderData]);
 
-  // Helper function to safely get vegetable name
   const getVegetableName = (veg) => {
     if (!veg) return "Unknown";
-    
-    // Check if name exists at top level
+
     if (veg.name) return veg.name;
-    
-    // Check if vegetable object exists with name
+
     if (veg.vegetable && veg.vegetable.name) return veg.vegetable.name;
-    
-    // Check if it's a string
+
     if (typeof veg === "string") return veg;
-    
+
     return "Unknown Vegetable";
   };
-
-  // Calculate order summary from orderData
   const orderInfo = useMemo(() => {
     if (!orderData) {
       return {
@@ -70,8 +91,8 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
       orderType === "custom"
         ? "Custom Selection"
         : orderType === "basket"
-        ? selectedOffer?.title || "Basket Package"
-        : "N/A";
+          ? selectedOffer?.title || "Basket Package"
+          : "N/A";
 
     return {
       orderId,
@@ -94,7 +115,7 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
     return vegsToDisplay.map((veg, index) => {
       // Handle nested vegetable object structure from API
       const vegData = veg.vegetable || veg;
-      
+
       return {
         key: `veg-${index}`,
         name: getVegetableName(veg),
@@ -137,14 +158,14 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
           <h2 className="text-xl font-amiko sm:text-2xl md:text-3xl font-bold text-[#0e540b] mb-2">
             Order Placed Successfully!
           </h2>
-          <p className="text-sm sm:text-base font-assistant text-gray-600">
+          <p className="text-sm sm:text-base font-funnel text-gray-600">
             Thank you for your order
           </p>
         </div>
 
         {/* Order Summary Card */}
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 sm:p-6 rounded-xl mb-6 border border-green-200">
-          <h3 className="font-bold text-base font-poppins sm:text-lg mb-4 text-[#0e540b] flex items-center gap-2">
+          <h3 className="font-bold text-base font-funnel sm:text-lg mb-4 text-[#0e540b] flex items-center gap-2">
             <Package className="w-5 h-5 flex-shrink-0" />
             Order Summary
           </h3>
@@ -155,11 +176,11 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
             <div className="flex items-start gap-2 sm:col-span-2">
               <Package className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                <p className="text-xs sm:text-sm font-funnel text-gray-500">
                   Order ID
                 </p>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-800 font-assistant break-all">
+                  <span className="font-semibold text-gray-800 font-funnel break-all">
                     {orderInfo.orderId}
                   </span>
                   {orderInfo.orderId && orderInfo.orderId !== "N/A" && (
@@ -178,7 +199,7 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
                   )}
                 </div>
                 {copied && (
-                  <p className="text-xs text-green-600 font-assistant mt-1 flex items-center gap-1">
+                  <p className="text-xs text-green-600 font-funnel mt-1 flex items-center gap-1">
                     <Check className="w-3 h-3" />
                     Order ID copied!
                   </p>
@@ -190,10 +211,10 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
             <div className="flex items-start gap-2">
               <User className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                <p className="text-xs sm:text-sm font-funnel text-gray-500">
                   Customer Name
                 </p>
-                <p className="font-semibold text-gray-800 font-assistant break-words">
+                <p className="font-semibold text-gray-800 font-funnel break-words">
                   {customerInfo?.name || "N/A"}
                 </p>
               </div>
@@ -203,10 +224,10 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
             <div className="flex items-start gap-2">
               <Phone className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                <p className="text-xs sm:text-sm font-funnel text-gray-500">
                   Mobile
                 </p>
-                <p className="font-semibold text-gray-800 font-assistant">
+                <p className="font-semibold text-gray-800 font-funnel">
                   {customerInfo?.mobile || "N/A"}
                 </p>
               </div>
@@ -217,10 +238,10 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
               <div className="flex items-start gap-2">
                 <Mail className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                  <p className="text-xs sm:text-sm font-funnel text-gray-500">
                     Email
                   </p>
-                  <p className="font-semibold text-gray-800 font-assistant truncate">
+                  <p className="font-semibold text-gray-800 font-funnel truncate">
                     {customerInfo.email}
                   </p>
                 </div>
@@ -231,10 +252,10 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
             <div className="flex items-start gap-2">
               <ShoppingBag className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                <p className="text-xs sm:text-sm font-funnel text-gray-500">
                   {orderInfo.orderType === "custom" ? "Order Type" : "Package"}
                 </p>
-                <p className="font-semibold text-gray-800 font-assistant break-words">
+                <p className="font-semibold text-gray-800 font-funnel break-words">
                   {orderInfo.packageTitle}
                 </p>
               </div>
@@ -244,7 +265,7 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
             <div className="flex items-start gap-2">
               <CreditCard className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-poppins text-gray-500">
+                <p className="text-xs sm:text-sm font-funnel text-gray-500">
                   Total Amount
                 </p>
                 <p className="font-bold text-[#0e540b] text-lg sm:text-xl">
@@ -257,8 +278,8 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
           {/* Important Notice */}
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-            <p className="text-xs sm:text-sm font-assistant text-yellow-700">
-              <strong>Important:</strong> Please save your Order ID for tracking. 
+            <p className="text-xs sm:text-sm font-funnel text-yellow-700">
+              <strong>Important:</strong> Please save your Order ID for tracking.
               We do not send order confirmations via email.
             </p>
           </div>
@@ -267,16 +288,16 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
           <div className="mt-4 pt-4 border-t border-green-200">
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center">
-                <span className="font-assistant text-gray-600">Subtotal</span>
-                <span className="font-assistant font-semibold text-gray-800">
+                <span className="font-funnel text-gray-600">Subtotal</span>
+                <span className="font-funnel font-semibold text-gray-800">
                   ₹{orderInfo.subtotal.toFixed(2)}
                 </span>
               </div>
 
               {orderInfo.discount > 0 && (
                 <div className="flex justify-between items-center text-green-600">
-                  <span className="font-assistant">Coupon Discount</span>
-                  <span className="font-assistant font-semibold">
+                  <span className="font-funnel">Coupon Discount</span>
+                  <span className="font-funnel font-semibold">
                     -₹{orderInfo.discount.toFixed(2)}
                   </span>
                 </div>
@@ -295,7 +316,7 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
 
               <div className="border-t border-green-200 pt-2 mt-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-poppins font-bold text-gray-800">
+                  <span className="font-funnel font-bold text-gray-800">
                     Total
                   </span>
                   <span className="font-amiko font-bold text-[#0e540b] text-lg">
@@ -312,7 +333,7 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-poppins text-gray-500 mb-1">
+                  <p className="text-xs sm:text-sm font-funnel text-gray-500 mb-1">
                     Delivery Address
                   </p>
                   <p className="text-sm font-assistant text-gray-700 break-words">
@@ -328,7 +349,7 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
           {/* Selected Vegetables Section */}
           {displayVegetables.length > 0 && (
             <div className="mt-4 pt-4 border-t border-green-200">
-              <p className="font-semibold font-poppins text-gray-700 mb-3 flex items-center gap-2 text-sm sm:text-base">
+              <p className="font-semibold font-funnel text-gray-700 mb-3 flex items-center gap-2 text-sm sm:text-base">
                 <ShoppingBag className="w-4 h-4 text-[#0e540b] flex-shrink-0" />
                 Selected Vegetables ({displayVegetables.length})
               </p>
@@ -370,7 +391,7 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
                   {displayVegetables.map((veg) => (
                     <span
                       key={veg.key}
-                      className="bg-green-100 font-assistant text-green-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-poppins font-medium border border-green-200"
+                      className="bg-green-100 font-assistant text-green-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-funnel font-medium border border-green-200"
                     >
                       {veg.name}
                       {veg.weight && veg.weight !== "N/A" && ` (${veg.weight})`}
@@ -401,8 +422,8 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
                       {orderData.paymentMethod === "COD"
                         ? "Cash on Delivery"
                         : orderData.paymentMethod === "ONLINE"
-                        ? "Online Payment"
-                        : orderData.paymentMethod}
+                          ? "Online Payment"
+                          : orderData.paymentMethod}
                     </span>
                   </p>
                 )}
@@ -445,6 +466,14 @@ const OrderSuccess = ({ orderData, onNewOrder }) => {
           Place Another Order
         </button>
       </div>
+
+      {/* Cashback Modal */}
+      <CashbackModal
+        isOpen={showCashbackModal}
+        cashbackAmount={orderData?.cashbackAmount || 0}
+        newBalance={balance}
+        onClose={() => setShowCashbackModal(false)}
+      />
     </div>
   );
 };

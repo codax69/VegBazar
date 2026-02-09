@@ -127,10 +127,10 @@ const PWAInstallBanner = () => {
 
                     {/* Text Content */}
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-[#2d3748] font-poppins font-bold text-sm sm:text-base">
+                        <h3 className="text-[#2d3748] font-funnel font-bold text-sm sm:text-base">
                             Install <span className="text-[#0e540b]">VegBazar</span> App
                         </h3>
-                        <p className="text-[#718096] font-poppins text-xs sm:text-sm mt-0.5">
+                        <p className="text-[#718096] font-funnel text-xs sm:text-sm mt-0.5">
                             Get existing offers & faster checkout! 🚀
                         </p>
                     </div>
@@ -139,7 +139,7 @@ const PWAInstallBanner = () => {
                     <div className="flex items-center gap-3 flex-shrink-0">
                         <button
                             onClick={handleInstallClick}
-                            className="bg-[#0e540b] text-white hover:bg-[#0a3d08] px-5 py-2.5 rounded-lg font-poppins font-semibold text-xs sm:text-sm transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 transform hover:-translate-y-0.5"
+                            className="bg-[#0e540b] text-white hover:bg-[#0a3d08] px-5 py-2.5 rounded-lg font-funnel font-semibold text-xs sm:text-sm transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 transform hover:-translate-y-0.5"
                         >
                             <Download className="w-4 h-4" />
                             <span className="hidden sm:inline">Install App</span>

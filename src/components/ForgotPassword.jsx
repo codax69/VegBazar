@@ -7,12 +7,14 @@ import {
   Send,
   Leaf,
 } from "lucide-react";
-import vegbazarLogo from"../assets/vegbazar.svg";
+import { useNavigate } from "react-router-dom";
+import vegbazarLogo from "../assets/vegbazar.svg";
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [emailSent, setEmailSent] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -55,7 +57,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 font-poppins">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 font-funnel">
       <div className="w-full max-w-sm">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
           {/* Header Section */}
@@ -73,11 +75,10 @@ const ForgotPassword = () => {
             {/* Message Alert */}
             {message.text && (
               <div
-                className={`mb-4 p-3 rounded-lg flex items-start gap-2 text-sm ${
-                  message.type === "success"
-                    ? "bg-green-50 text-green-800 border border-green-200"
-                    : "bg-red-50 text-red-800 border border-red-200"
-                }`}
+                className={`mb-4 p-3 rounded-lg flex items-start gap-2 text-sm ${message.type === "success"
+                  ? "bg-green-50 text-green-800 border border-green-200"
+                  : "bg-red-50 text-red-800 border border-red-200"
+                  }`}
               >
                 {message.type === "success" ? (
                   <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -101,7 +102,7 @@ const ForgotPassword = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm"
                       placeholder="yourname@email.com"
                     />
                   </div>
@@ -173,7 +174,7 @@ const ForgotPassword = () => {
 
             {/* Back to Login Button */}
             <button
-              onClick={() => (window.location.href = "/login")}
+              onClick={() => navigate("/login")}
               className="w-full mt-4 flex items-center justify-center gap-2 text-[#0e540b] hover:text-[#0a3708] font-semibold py-2.5 rounded-lg hover:bg-green-50 transition-all duration-200 text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -186,7 +187,7 @@ const ForgotPassword = () => {
         <p className="text-center text-xs text-gray-600 mt-4 px-4">
           Remember your password?{" "}
           <button
-            onClick={() => (window.location.href = "/login")}
+            onClick={() => navigate("/login")}
             className="text-[#e24100] hover:underline font-medium"
           >
             Sign in

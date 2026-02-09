@@ -100,11 +100,10 @@ const TestimonialsCarousel = ({ testimonials }) => {
               {/* Main Testimonial */}
               <div className="md:col-span-2">
                 <div
-                  className={`bg-white rounded-lg p-6 shadow-sm h-full flex flex-col justify-between transition-all duration-300 ${
-                    isTransitioning
+                  className={`bg-white rounded-lg p-6 shadow-sm h-full flex flex-col justify-between transition-all duration-300 ${isTransitioning
                       ? "opacity-0 scale-95"
                       : "opacity-100 scale-100"
-                  }`}
+                    }`}
                 >
                   <div>
                     <p className="text-lg font-semibold text-gray-900 mb-2">
@@ -119,11 +118,10 @@ const TestimonialsCarousel = ({ testimonials }) => {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-5 h-5 ${
-                          i < (active.rating ?? 0)
+                        className={`w-5 h-5 ${i < (active.rating ?? 0)
                             ? "text-yellow-400 fill-yellow-400"
                             : "text-gray-300"
-                        }`}
+                          }`}
                       />
                     ))}
                   </div>
@@ -133,11 +131,10 @@ const TestimonialsCarousel = ({ testimonials }) => {
               {/* Side Card */}
               <div className="hidden md:block">
                 <div
-                  className={`bg-white rounded-lg p-6 shadow-sm h-full flex flex-col justify-center items-center transition-all duration-300 ${
-                    isTransitioning
+                  className={`bg-white rounded-lg p-6 shadow-sm h-full flex flex-col justify-center items-center transition-all duration-300 ${isTransitioning
                       ? "opacity-0 scale-95"
                       : "opacity-100 scale-100"
-                  }`}
+                    }`}
                 >
                   <div className="w-16 h-16 rounded-full bg-[#f54a00] flex items-center justify-center text-white text-xl font-bold shadow-lg">
                     {active.initial ??
@@ -163,11 +160,10 @@ const TestimonialsCarousel = ({ testimonials }) => {
                 <button
                   key={index}
                   onClick={() => handleDotClick(index)}
-                  className={`transition-all duration-300 rounded-full ${
-                    index === currentTestimonial
+                  className={`transition-all duration-300 rounded-full ${index === currentTestimonial
                       ? "w-8 h-3 bg-[#0e540b]"
                       : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
-                  }`}
+                    }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
               ))}

@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { MapPin, Truck, IndianRupee, Users, Leaf, RefreshCw, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const vegbazarLogo = "/vegbazar.svg";
 
 export default function VegBazarResponsiveBanner() {
   const [hoveredFeature, setHoveredFeature] = useState(null);
+  const navigate = useNavigate();
 
   const features = [
     {
@@ -46,11 +48,11 @@ export default function VegBazarResponsiveBanner() {
   ];
 
   return (
-    <div 
-      className="relative overflow-hidden bg-gradient-to-br from-white via-[#fafbf9] to-white" 
-      style={{ 
+    <div
+      className="relative overflow-hidden bg-gradient-to-br from-white via-[#fafbf9] to-white"
+      style={{
         minHeight: '250px',
-        fontFamily: "'Poppins', 'Assistant', sans-serif" 
+        fontFamily: "'funnel', 'Assistant', sans-serif"
       }}
     >
       {/* Animated Background Elements */}
@@ -60,26 +62,26 @@ export default function VegBazarResponsiveBanner() {
       </div>
 
       <div className="relative mx-auto flex flex-col lg:flex-row h-full max-w-7xl justify-center lg:items-center px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8 lg:py-10 gap-4 sm:gap-6 lg:gap-8">
-        
+
         {/* Left Section - Logo & Hero Text */}
         <div className="flex-1 w-full lg:max-w-lg opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards]">
-          <img 
-            src={vegbazarLogo} 
-            alt="VegBazar" 
-            className="mb-2 sm:mb-3 h-7 sm:h-8 md:h-10 lg:h-11 animate-bounce" 
+          <img
+            src={vegbazarLogo}
+            alt="VegBazar"
+            className="mb-2 sm:mb-3 h-7 sm:h-8 md:h-10 lg:h-11 animate-bounce"
           />
-          <h1 className="mb-2 sm:mb-3 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black leading-tight">
+          <h1 className="mb-2 font-poppins font-bold sm:mb-3 text-2xl sm:text-2xl md:text-3xl lg:text-5xl font-black leading-tight">
             <span className="text-[#0e540b]">Fresh</span>{" "}
             <span className="text-[#e64200]">Vegetables</span>
           </h1>
-          <p className="mb-3 sm:mb-4 max-w-md text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed opacity-0 animate-[fadeInUp_0.6s_ease-out_0.2s_forwards]">
+          <p className="mb-3 sm:mb-4 max-w-md text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed font-funnel opacity-0 animate-[fadeInUp_0.6s_ease-out_0.2s_forwards]">
             Farm-fresh produce delivered to your doorstep in Valsad
           </p>
-          
+
           {/* Free Delivery Badge */}
           <div className="mb-3 sm:mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#e64200] to-[#c73900] px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 shadow-lg transition-all hover:shadow-xl hover:scale-105 duration-300 opacity-0 animate-[fadeInUp_0.6s_ease-out_0.4s_forwards]">
             <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 animate-bounce" />
-            <span className="text-xs sm:text-sm md:text-base font-bold text-white whitespace-nowrap">
+            <span className="text-xs font-funnel sm:text-sm md:text-base font-bold text-white whitespace-nowrap">
               ₹269+ FREE DELIVERY
             </span>
           </div>
@@ -87,8 +89,8 @@ export default function VegBazarResponsiveBanner() {
           {/* CTA Button */}
           <div className="opacity-0 animate-[fadeInUp_0.6s_ease-out_0.6s_forwards]">
             <button
-              onClick={() => (window.location.href = "/vegetables")}
-              className="group inline-flex items-center justify-center gap-2 rounded-full px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base font-bold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 transform"
+              onClick={() => navigate("/vegetables")}
+              className="group inline-flex items-center justify-center gap-2 rounded-full px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 font-funnnel text-xs sm:text-sm md:text-base font-bold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 transform"
               style={{ backgroundColor: "#0e540b" }}
             >
               Shop Now
@@ -99,7 +101,7 @@ export default function VegBazarResponsiveBanner() {
 
         {/* Right Section - USP Icons Grid */}
         <div className="flex-1 w-full lg:max-w-xl">
-          
+
           {/* Desktop Grid (lg and up) - 3 columns */}
           <div className="hidden lg:grid grid-cols-3 gap-3">
             {features.map((feature, idx) => (
@@ -113,14 +115,14 @@ export default function VegBazarResponsiveBanner() {
                   backgroundColor: hoveredFeature === idx ? '#f9fafb' : '#ffffff'
                 }}
               >
-                <feature.icon 
+                <feature.icon
                   className="h-6 w-6 flex-shrink-0 transition-all duration-500"
-                  style={{ 
+                  style={{
                     color: feature.color,
                     transform: hoveredFeature === idx ? 'scale(1.2) rotate(5deg)' : 'scale(1) rotate(0deg)'
-                  }} 
+                  }}
                 />
-                <span className="text-xs font-semibold text-gray-800 text-center transition-colors duration-300">
+                <span className="text-xs font-semibold font-funnel text-gray-800 text-center transition-colors duration-300">
                   {feature.title}
                 </span>
               </div>
@@ -139,14 +141,14 @@ export default function VegBazarResponsiveBanner() {
                   animationDelay: `${idx * 0.08}s`
                 }}
               >
-                <feature.icon 
+                <feature.icon
                   className="h-5 w-5 flex-shrink-0 transition-all duration-500"
-                  style={{ 
+                  style={{
                     color: feature.color,
                     transform: hoveredFeature === idx ? 'scale(1.15) rotate(5deg)' : 'scale(1) rotate(0deg)'
-                  }} 
+                  }}
                 />
-                <span className="text-xs font-semibold text-gray-800 text-center">
+                <span className="text-xs font-semibold font-funnel text-gray-800 text-center">
                   {feature.title}
                 </span>
               </div>
@@ -163,11 +165,11 @@ export default function VegBazarResponsiveBanner() {
                   animationDelay: `${idx * 0.08}s`
                 }}
               >
-                <feature.icon 
-                  className="h-5 w-5 flex-shrink-0" 
-                  style={{ color: feature.color }} 
+                <feature.icon
+                  className="h-5 w-5 flex-shrink-0"
+                  style={{ color: feature.color }}
                 />
-                <span className="text-[10px] font-semibold text-gray-800 text-center">
+                <span className="text-[10px] font-semibold font-funnel  text-gray-800 text-center">
                   {feature.shortTitle}
                 </span>
               </div>
@@ -184,11 +186,11 @@ export default function VegBazarResponsiveBanner() {
                   animationDelay: `${idx * 0.05}s`
                 }}
               >
-                <feature.icon 
-                  className="h-5 w-5 flex-shrink-0" 
-                  style={{ color: feature.color }} 
+                <feature.icon
+                  className="h-5 w-5 flex-shrink-0"
+                  style={{ color: feature.color }}
                 />
-                <span className="text-[10px] font-semibold text-gray-800">
+                <span className="text-[10px] font-semibold font-funnel  text-gray-800">
                   {feature.shortTitle}
                 </span>
               </div>
@@ -198,8 +200,8 @@ export default function VegBazarResponsiveBanner() {
       </div>
 
       {/* Bottom Decorative Line - Animated */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-1 animate-pulse" 
+      <div
+        className="absolute bottom-0 left-0 right-0 h-1 animate-pulse"
         style={{ background: `linear-gradient(to right, #e64200, #ffffff, #0e540b)` }}
       ></div>
 

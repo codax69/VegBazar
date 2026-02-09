@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo, memo } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useOrderContext } from "../Context/OrderContext.jsx";
-import { useAuth } from "../Context/AuthProvider.jsx";
+import { useAuth } from "../Context/AuthContext.jsx";
 import {
   FiUser,
   FiMapPin,

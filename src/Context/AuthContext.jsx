@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { Navigate } from 'react-router-dom';
 
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || 'http://localhost:4000/api';
 
@@ -23,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   // Decode JWT token to check expiration
   const isTokenExpired = (token) => {
     if (!token) return true;
-    
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const expirationTime = payload.exp * 1000; // Convert to milliseconds
@@ -37,7 +38,7 @@ export const AuthProvider = ({ children }) => {
   // Get time until token expires (in milliseconds)
   const getTokenExpiryTime = (token) => {
     if (!token) return 0;
-    
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const expirationTime = payload.exp * 1000;
@@ -155,7 +156,7 @@ export const AuthProvider = ({ children }) => {
   // Setup automatic token refresh before expiration
   const setupTokenRefresh = useCallback((token) => {
     const timeUntilExpiry = getTokenExpiryTime(token);
-    
+
     if (timeUntilExpiry <= 0) {
       // Token already expired, try to refresh immediately
       refreshAccessToken().then(newToken => {
@@ -202,16 +203,16 @@ export const AuthProvider = ({ children }) => {
       // Check if token is expired
       if (isTokenExpired(token)) {
         console.log('Access token expired, attempting refresh...');
-        
+
         // Try to refresh the token
         const newToken = await refreshAccessToken();
-        
+
         if (newToken) {
           // Token refreshed successfully
           const user = JSON.parse(storedUser);
           setUser(user);
           setIsAuthenticated(true);
-          
+
           // Setup auto-refresh for new token
           setupTokenRefresh(newToken);
         } else {
@@ -223,7 +224,7 @@ export const AuthProvider = ({ children }) => {
         const user = JSON.parse(storedUser);
         setUser(user);
         setIsAuthenticated(true);
-        
+
         // Setup auto-refresh
         setupTokenRefresh(token);
       }
@@ -239,7 +240,7 @@ export const AuthProvider = ({ children }) => {
     const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible' && isAuthenticated) {
         const token = localStorage.getItem('accessToken');
-        
+
         if (isTokenExpired(token)) {
           const newToken = await refreshAccessToken();
           if (!newToken) {
@@ -260,7 +261,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    refreshAccessToken
+    refreshAccessToken,
+    setUser
   };
 
   return (
@@ -286,8 +288,7 @@ export const ProtectedRoute = ({ children, redirectTo = '/login' }) => {
   }
 
   if (!isAuthenticated) {
-    window.location.href = redirectTo;
-    return null;
+    return <Navigate to={redirectTo} replace />;
   }
 
   return children;
@@ -309,8 +310,7 @@ export const PublicRoute = ({ children, redirectTo = '/' }) => {
   }
 
   if (isAuthenticated) {
-    window.location.href = redirectTo;
-    return null;
+    return <Navigate to={redirectTo} replace />;
   }
 
   return children;

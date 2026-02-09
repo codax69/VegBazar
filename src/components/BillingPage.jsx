@@ -1,8 +1,7 @@
 import React, { useMemo, useCallback, memo, useState, useEffect } from "react";
 import { useOrderContext } from "../Context/OrderContext";
-
 import { useBillContext } from "../Context/BillContext";
-import { useAuth } from "../Context/AuthProvider";
+import { useAuth } from "../Context/AuthContext.jsx";
 import RazorpayPayment from "./RazorpayPayment";
 import CouponCodeSection from "./CouponCodeSection";
 import AddressSection from "./AddressSection";
@@ -69,15 +68,15 @@ PaymentMethodButton.displayName = "PaymentMethodButton";
 const TrustBadge = memo(({ icon: Icon, title, desc }) => (
   <div className="space-y-1">
     <Icon className="size-6 text-green-600 mx-auto" />
-    <p className="text-xs font-semibold font-poppins text-gray-800">{title}</p>
-    <p className="text-[10px] font-assistant text-gray-500">{desc}</p>
+    <p className="text-xs font-semibold font-funnel text-gray-800">{title}</p>
+    <p className="text-[10px] font-funnel text-gray-500">{desc}</p>
   </div>
 ));
 
 TrustBadge.displayName = "TrustBadge";
 
 const VegetableTag = memo(({ name, price }) => (
-  <div className="bg-gradient-to-r font-assistant from-green-100 to-emerald-100 text-[#0e540b] px-2.5 py-1 rounded-lg font-medium text-xs border border-green-200">
+  <div className="bg-gradient-to-r font-funnel from-green-100 to-emerald-100 text-[#0e540b] px-2.5 py-1 rounded-lg font-medium text-xs border border-green-200">
     {name} - ₹{price}
   </div>
 ));
@@ -114,39 +113,123 @@ const BillingPage = () => {
   const { user } = useAuth();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [defaultAddress, setDefaultAddress] = useState(null);
+  const [isLoadingAddress, setIsLoadingAddress] = useState(true);
 
   // Fetch default address from API
   useEffect(() => {
     let isMounted = true;
 
     const fetchDefaultAddress = async () => {
+
+
       const userId = user?._id || user?.id;
       if (!userId) {
+        console.log("⚠️ No user ID found, skipping address fetch");
+        setIsLoadingAddress(false);
         return;
       }
 
       try {
+        setIsLoadingAddress(true);
+        console.log("🔄 Fetching addresses for user:", userId);
+
         const { data } = await axios.get(
           `${API_URL}/api/addresses/active`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`
             }
           }
         );
-        if (isMounted && data?.data.defaultAddress) {
-          setDefaultAddress(data.data.defaultAddress);
-          setSelectedAddress(data.data.defaultAddress);
+
+        console.log("📦 API Response:", data);
+        console.log("📍 Default Address:", data?.data?.defaultAddress);
+        console.log("📍 All Addresses:", data?.data?.addresses);
+        console.log("📊 Total Addresses:", data?.data?.total);
+
+        if (isMounted) {
+          // First try to use the default address
+          if (data?.data?.defaultAddress) {
+            console.log("✅ Setting default address:", data.data.defaultAddress);
+            setDefaultAddress(data.data.defaultAddress);
+            setSelectedAddress(data.data.defaultAddress);
+          }
+          // If no default but there are addresses, use the first one
+          else if (data?.data?.addresses && data.data.addresses.length > 0) {
+            console.log("⚠️ No default address, using first address:", data.data.addresses[0]);
+            setDefaultAddress(data.data.addresses[0]);
+            setSelectedAddress(data.data.addresses[0]);
+          }
+          // No addresses at all
+          else {
+            console.log("❌ No addresses found for user");
+            setDefaultAddress(null);
+            setSelectedAddress(null);
+          }
         }
       } catch (error) {
         console.error("❌ Error fetching default address:", error);
-        setDefaultAddress(null);
+        console.error("❌ Error details:", error.response?.data);
+        if (isMounted) {
+          setDefaultAddress(null);
+          setSelectedAddress(null);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingAddress(false);
+        }
       }
     };
 
     fetchDefaultAddress();
     return () => {
       isMounted = false;
+    };
+  }, [user]);
+
+  // Refetch address when returning from address page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && user?._id) {
+        // Refetch address when user returns to the page
+        const refetchAddress = async () => {
+          try {
+            console.log("🔄 Refetching addresses...");
+            const { data } = await axios.get(
+              `${API_URL}/api/addresses/active`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+                }
+              }
+            );
+
+            console.log("📦 Refetch API Response:", data.data);
+
+            // First try to use the default address
+            if (data?.data?.defaultAddress) {
+              console.log("✅ Refetch: Setting default address");
+              setDefaultAddress(data.data.defaultAddress);
+              setSelectedAddress(data.data.defaultAddress);
+            }
+            // If no default but there are addresses, use the first one
+            else if (data?.data?.addresses && data.data.addresses.length > 0) {
+              console.log("⚠️ Refetch: No default, using first address");
+              setDefaultAddress(data.data.addresses[0]);
+              setSelectedAddress(data.data.addresses[0]);
+            }
+          } catch (error) {
+            console.error("❌ Error refetching address:", error);
+          }
+        };
+
+        refetchAddress();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [user]);
 
@@ -167,7 +250,7 @@ const BillingPage = () => {
     const fetchOrderCount = async () => {
       try {
         setIsLoadingOrderCount(true);
-        const res = await axios.get(`${API_URL}/api/orders/all`);
+        const res = await axios.get(`${API_URL}/api/orders/today/total`);
         setOrderCount(res.data?.data.count + 1);
       } catch (err) {
         console.error("Error fetching order count:", err);
@@ -194,12 +277,22 @@ const BillingPage = () => {
   // Order Data - Memoized with all dependencies
   const orderData = useMemo(() => {
     if (!orderCount) return null;
+    if (!user) {
+      console.log("⚠️ User not loaded yet, orderData is null");
+      return null;
+    }
+
+    const userId = user._id || user.id;
+    if (!userId) {
+      console.log("⚠️ No user ID found in user object");
+      return null;
+    }
 
     const orderId = generateOrderId(orderCount);
     return {
       orderId,
-      customerInfo: formData || {},
-      selectedOffer: selectedOffer || {},
+      customerInfo: userId,
+      selectedBasket: selectedOffer || {},
       orderType: "basket",
       selectedVegetables: selectedVegetables || [],
       orderDate: new Date().toISOString(),
@@ -215,6 +308,7 @@ const BillingPage = () => {
     };
   }, [
     orderCount,
+    user,
     formData,
     selectedOffer,
     selectedVegetables,
@@ -257,9 +351,14 @@ const BillingPage = () => {
 
         if (res.status >= 200 && res.status < 300) {
           setIsOrderPlaced(true);
-          // Navigate with order data in state
-          navigate("/billing-success", {
-            state: { orderData: orderData }
+          // Navigate with order data from response (includes cashback info)
+          navigate("/order-success", {
+            state: {
+              orderData: {
+                ...orderData,
+                ...res.data.data // Assuming API returns { data: { ...order } }
+              }
+            }
           });
         } else {
           setSubmitError("Order save failed. Try again.");
@@ -316,7 +415,7 @@ const BillingPage = () => {
         }}
       />
     );
-
+  console.log(defaultAddress);
   return (
     <div className="min-h-screen bg-[#ffffff] pt-8 md:pt-20 pb-20 lg:pb-0">
       <div className="max-w-6xl mx-auto px-4">
@@ -327,7 +426,7 @@ const BillingPage = () => {
           aria-label="Go back to select vegetables"
         >
           <FiArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium font-assistant text-sm">Back</span>
+          <span className="font-medium font-funnel text-sm">Back</span>
         </button>
 
         {/* Header */}
@@ -335,7 +434,7 @@ const BillingPage = () => {
           <h1 className="text-xl font-amiko sm:text-2xl font-bold text-[#0e540b] mb-1">
             Checkout
           </h1>
-          <p className="text-xs font-assistant text-gray-600">
+          <p className="text-xs font-funnel text-gray-600">
             Review your order and complete payment
           </p>
         </div>
@@ -354,7 +453,7 @@ const BillingPage = () => {
         {/* Top Bill Summary - Prominent Display */}
         <div className="md:hidden lg:hidden bg-gradient-to-r from-[#0e540b] to-green-700 text-white rounded-2xl shadow-2xl p-6 mb-6 border-2 border-green-600">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold font-poppins flex items-center gap-2">
+            <h2 className="text-lg font-bold font-funnel flex items-center gap-2">
               <FiShield className="size-5" />
               Order Summary
             </h2>
@@ -371,10 +470,10 @@ const BillingPage = () => {
           <div className="space-y-3">
             {/* Plan Price */}
             <div className="flex justify-between items-center">
-              <span className="text-sm font-assistant opacity-90">
+              <span className="text-sm font-funnel opacity-90">
                 Plan Price
               </span>
-              <span className="text-lg font-bold font-assistant">
+              <span className="text-lg font-bold font-funnel">
                 ₹{calculations.vegBazarTotal}
               </span>
             </div>
@@ -382,10 +481,10 @@ const BillingPage = () => {
             {/* Market Price */}
             {calculations.marketTotal > calculations.vegBazarTotal && (
               <div className="flex justify-between items-center">
-                <span className="text-sm font-assistant opacity-90">
+                <span className="text-sm font-funnel opacity-90">
                   Market Price
                 </span>
-                <span className="text-base font-assistant line-through opacity-75">
+                <span className="text-base font-funnel line-through opacity-75">
                   ₹{calculations.marketTotal.toFixed(2)}
                 </span>
               </div>
@@ -394,10 +493,10 @@ const BillingPage = () => {
             {/* Coupon Discount */}
             {couponDiscount > 0 && (
               <div className="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
-                <span className="text-sm font-assistant font-semibold">
+                <span className="text-sm font-funnel font-semibold">
                   Coupon Discount
                 </span>
-                <span className="text-lg font-bold font-assistant text-green-200">
+                <span className="text-lg font-bold font-funnel text-green-200">
                   -₹{couponDiscount.toFixed(2)}
                 </span>
               </div>
@@ -446,11 +545,11 @@ const BillingPage = () => {
             {/* Selected Plan */}
             <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
               <div className="flex justify-between items-center mb-2">
-                <h2 className="text-base font-poppins font-bold text-gray-800 flex items-center gap-1.5">
+                <h2 className="text-base font-funnel font-bold text-gray-800 flex items-center gap-1.5">
                   <FiPackage className="size-4 text-[#0e540b]" />
                   Your Plan
                 </h2>
-                <span className="bg-green-100 font-poppins text-green-800 px-2.5 py-0.5 rounded-full text-sm font-semibold">
+                <span className="bg-green-100 font-funnel text-green-800 px-2.5 py-0.5 rounded-full text-sm font-semibold">
                   {selectedOffer.title}
                 </span>
               </div>
@@ -467,7 +566,7 @@ const BillingPage = () => {
             {/* Vegetables */}
             <div className="bg-[#f5f5f5] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-base font-poppins font-bold text-gray-800 flex items-center gap-1.5">
+                <h2 className="text-base font-funnel font-bold text-gray-800 flex items-center gap-1.5">
                   <BiLeaf className="size-4 text-[#0e540b]" />
                   Selected Vegetables
                 </h2>
@@ -486,19 +585,20 @@ const BillingPage = () => {
               </div>
             </div>
 
+            {/* Delivery Address */}
+            <AddressSection
+              defaultAddress={defaultAddress}
+              onChangeAddress={handleChangeAddress}
+              user={user}
+              isLoading={isLoadingAddress}
+            />
+
             {/* Payment Method */}
             <div className="bg-[#ffffff] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
-              <h2 className="text-base font-poppins font-bold text-gray-800 mb-2 flex items-center gap-1.5">
+              <h2 className="text-base font-funnel font-bold text-gray-800 mb-2 flex items-center gap-1.5">
                 <FiCreditCard className="size-4 text-[#0e540b]" />
                 Payment Method
               </h2>
-              <div className="space-y-2 mb-4">
-                <AddressSection
-                  defaultAddress={defaultAddress}
-                  onChangeAddress={handleChangeAddress}
-                  user={user}
-                />
-              </div>
 
               <div className="space-y-2">
                 <PaymentMethodButton
@@ -538,7 +638,7 @@ const BillingPage = () => {
 
               {/* Quick Summary */}
               <div>
-                <h2 className="text-base font-poppins font-bold text-gray-800 mb-3 flex items-center gap-1.5">
+                <h2 className="text-base font-funnel font-bold text-gray-800 mb-3 flex items-center gap-1.5">
                   <FiShield className="size-4 text-[#0e540b]" />
                   Quick Summary
                 </h2>

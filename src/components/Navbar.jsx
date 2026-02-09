@@ -4,9 +4,11 @@ import { FiHome, FiShoppingCart, FiPhone, FiUser, FiLogOut, FiMapPin } from "rea
 import { RiShoppingBag4Fill } from "react-icons/ri";
 import { GiBasket } from "react-icons/gi";
 import { PiPackageBold } from "react-icons/pi";
+import { Wallet } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import { useLocation } from "react-router-dom";
-import { useAuth } from "../Context/AuthProvider";
+import { useAuth } from "../Context/AuthContext.jsx";
+import { useWallet } from "../Context/WalletContext";
 import lettuce from "../assets/lettuce_17024589.png";
 import veg1 from "../assets/vegetable_12439915.png";
 import veg2 from "../assets/vegetable_5029309.png";
@@ -24,6 +26,18 @@ const Navbar = () => {
   const { navigate } = useOrderContext();
   const { pathname: currentPath } = useLocation();
   const { isAuthenticated, user, logout, isLoading } = useAuth();
+
+  // Safely access wallet context with fallback
+  let balance = 0;
+  let hasWallet = false;
+  try {
+    const walletContext = useWallet();
+    balance = walletContext.balance;
+    hasWallet = walletContext.hasWallet;
+  } catch (error) {
+    // Wallet context not available yet, use defaults
+  }
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
@@ -160,7 +174,7 @@ const Navbar = () => {
             {/* Logo */}
             <button
               onClick={() => handleNavigate("/")}
-              className="flex flex-col items-center justify-center cursor-pointer select-none transition-transform hover:scale-105"
+              className="flex flex-col items-center justify-center text-2xl cursor-pointer select-none transition-transform hover:scale-105"
               style={{ fontFamily: "Trirong, serif" }}
               aria-label="VegBazar Home"
             >
@@ -214,7 +228,7 @@ const Navbar = () => {
                         aria-hidden="true"
                       />
                     )}
-                    <span className="font-assistant">{label}</span>
+                    <span className="font-funnel">{label}</span>
                   </button>
                 );
               })}
@@ -225,7 +239,7 @@ const Navbar = () => {
               {/* Shop Now Button */}
               <button
                 onClick={handleShopNow}
-                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-orange-500/90 to-orange-600/90 backdrop-blur-sm hover:from-orange-600 hover:to-orange-700 text-white px-5 py-2 rounded-full text-sm font-semibold font-assistant shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-orange-500/90 to-orange-600/90 backdrop-blur-sm hover:from-orange-600 hover:to-orange-700 text-white px-5 py-2 rounded-full text-sm font-semibold font-funnel shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
                 aria-label="Shop Now"
               >
                 <RiShoppingBag4Fill className="w-4 h-4" />
@@ -284,6 +298,33 @@ const Navbar = () => {
                     </div>
 
                     {/* Menu Items */}
+                    <button
+                      onClick={() => {
+                        handleNavigate('/profile');
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-white/60 flex items-center gap-2 transition-colors border-b border-gray-100"
+                    >
+                      <FiUser className="w-4 h-4" />
+                      My Profile
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        handleNavigate('/wallet');
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-white/60 flex items-center gap-2 transition-colors"
+                    >
+                      <Wallet className="w-4 h-4" />
+                      <span>My Wallet</span>
+                      {hasWallet && (
+                        <span className="ml-auto text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                          ₹{balance?.toFixed(2) || '0.00'}
+                        </span>
+                      )}
+                    </button>
+
                     <button
                       onClick={() => {
                         handleNavigate('/orders');

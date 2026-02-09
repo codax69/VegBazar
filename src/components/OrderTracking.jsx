@@ -12,7 +12,8 @@ import {
   Truck,
   Loader,
 } from "lucide-react";
-import { useAuth } from "../Context/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext.jsx";
 
 // API call function (Unchanged)
 const fetchOrderHistory = async (params, token) => {
@@ -55,6 +56,7 @@ const fetchOrderHistory = async (params, token) => {
 
 const OrderHistory = () => {
   const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState("list");
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -121,7 +123,7 @@ const OrderHistory = () => {
         ) {
           setTimeout(() => {
             logout();
-            window.location.href = "/login";
+            navigate("/login");
           }, 2000);
         }
       } finally {
@@ -178,7 +180,7 @@ const OrderHistory = () => {
 
     return (
       <span
-        className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-poppins font-medium whitespace-nowrap ${config.color}`}
+        className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-funnel font-medium whitespace-nowrap ${config.color}`}
       >
         <Icon size={12} className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
         <span className="hidden xs:inline">{config.label}</span>
@@ -230,10 +232,10 @@ const OrderHistory = () => {
     <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
       {/* Header */}
       <div className="mb-4 sm:mb-6">
-        <h1 className="font-poppins text-xl sm:text-2xl font-bold text-[#2d3748]">
+        <h1 className="font-funnel text-xl sm:text-2xl font-bold text-[#2d3748]">
           Order History
         </h1>
-        <p className="font-poppins text-[#718096] text-xs sm:text-sm mt-1">
+        <p className="font-funnel text-[#718096] text-xs sm:text-sm mt-1">
           View and track all your recent orders
         </p>
       </div>
@@ -244,7 +246,7 @@ const OrderHistory = () => {
           {/* Filter Button */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="font-poppins text-xs sm:text-sm flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 hover:bg-gray-100 text-[#2d3748] rounded-lg transition-all border border-gray-200 font-medium w-full sm:w-auto"
+            className="font-funnel text-xs sm:text-sm flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 hover:bg-gray-100 text-[#2d3748] rounded-lg transition-all border border-gray-200 font-medium w-full sm:w-auto"
           >
             <Filter size={16} className="sm:w-[18px] sm:h-[18px]" />
             <span>Filters</span>
@@ -260,13 +262,13 @@ const OrderHistory = () => {
         {showFilters && (
           <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div>
-              <label className="font-poppins text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
+              <label className="font-funnel text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
                 Status
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="font-poppins text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
+                className="font-funnel text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
               >
                 <option value="">All Statuses</option>
                 <option value="placed">Placed</option>
@@ -278,13 +280,13 @@ const OrderHistory = () => {
             </div>
 
             <div>
-              <label className="font-poppins text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
+              <label className="font-funnel text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
                 Sort By
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="font-poppins text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
+                className="font-funnel text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
               >
                 <option value="date">Date</option>
                 <option value="status">Status</option>
@@ -293,39 +295,39 @@ const OrderHistory = () => {
             </div>
 
             <div>
-              <label className="font-poppins text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
+              <label className="font-funnel text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
                 Start Date
               </label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="font-poppins text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
+                className="font-funnel text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="font-poppins text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
+              <label className="font-funnel text-[10px] sm:text-xs font-semibold text-[#2d3748] mb-1 sm:mb-1.5 block">
                 End Date
               </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="font-poppins text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
+                className="font-funnel text-xs sm:text-sm w-full px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:outline-none"
               />
             </div>
 
             <div className="sm:col-span-2 lg:col-span-4 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end mt-1 sm:mt-2">
               <button
                 onClick={resetFilters}
-                className="font-poppins text-xs sm:text-sm px-4 py-2 text-[#718096] hover:bg-gray-50 rounded-lg border border-gray-200 transition-all w-full sm:w-auto"
+                className="font-funnel text-xs sm:text-sm px-4 py-2 text-[#718096] hover:bg-gray-50 rounded-lg border border-gray-200 transition-all w-full sm:w-auto"
               >
                 Reset
               </button>
               <button
                 onClick={applyFilters}
-                className="font-poppins text-xs sm:text-sm px-4 sm:px-5 py-2 bg-[#0e540b] hover:bg-[#0a3d08] text-white rounded-lg transition-all shadow-sm font-medium w-full sm:w-auto"
+                className="font-funnel text-xs sm:text-sm px-4 sm:px-5 py-2 bg-[#0e540b] hover:bg-[#0a3d08] text-white rounded-lg transition-all shadow-sm font-medium w-full sm:w-auto"
               >
                 Apply Filters
               </button>
@@ -342,7 +344,7 @@ const OrderHistory = () => {
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
-          <p className="font-poppins text-xs sm:text-sm text-red-800 font-medium">
+          <p className="font-funnel text-xs sm:text-sm text-red-800 font-medium">
             {error}
           </p>
         </div>
@@ -353,10 +355,10 @@ const OrderHistory = () => {
           {filteredOrders.length === 0 ? (
             <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-8 sm:p-10 text-center">
               <Package className="mx-auto text-gray-300 mb-2 sm:mb-3" size={36} />
-              <h3 className="font-poppins text-sm sm:text-base font-bold text-[#2d3748]">
+              <h3 className="font-funnel text-sm sm:text-base font-bold text-[#2d3748]">
                 No orders found
               </h3>
-              <p className="font-poppins text-xs sm:text-sm text-[#718096] mt-1">
+              <p className="font-funnel text-xs sm:text-sm text-[#718096] mt-1">
                 Try adjusting your filters
               </p>
             </div>
@@ -371,7 +373,7 @@ const OrderHistory = () => {
                   <div className="flex flex-col gap-3 sm:gap-4">
                     {/* Top Row: Order ID & Status */}
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="font-poppins text-sm sm:text-base lg:text-lg font-bold text-[#2d3748] group-hover:text-[#0e540b] transition-colors truncate flex-1">
+                      <h3 className="font-funnel text-sm sm:text-base lg:text-lg font-bold text-[#2d3748] group-hover:text-[#0e540b] transition-colors truncate flex-1">
                         {order.orderId || `#${order._id.slice(-6)}`}
                       </h3>
                       {getStatusBadge(order.orderStatus)}
@@ -379,17 +381,17 @@ const OrderHistory = () => {
 
                     {/* Middle Row: Order Info */}
                     <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 sm:gap-y-2 text-[#718096]">
-                      <div className="flex items-center gap-1 sm:gap-1.5 font-poppins text-[10px] sm:text-xs lg:text-sm">
+                      <div className="flex items-center gap-1 sm:gap-1.5 font-funnel text-[10px] sm:text-xs lg:text-sm">
                         <Calendar size={12} className="sm:w-[14px] sm:h-[14px] flex-shrink-0" />
                         <span className="whitespace-nowrap">{formatDate(order.orderDate)}</span>
                       </div>
-                      <div className="flex items-center gap-1 sm:gap-1.5 font-poppins text-[10px] sm:text-xs lg:text-sm">
+                      <div className="flex items-center gap-1 sm:gap-1.5 font-funnel text-[10px] sm:text-xs lg:text-sm">
                         <Package size={12} className="sm:w-[14px] sm:h-[14px] flex-shrink-0" />
                         <span className="whitespace-nowrap">
                           {order.selectedVegetables?.length || 0} items
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 sm:gap-1.5 font-poppins text-xs sm:text-sm font-semibold text-[#2d3748]">
+                      <div className="flex items-center gap-1 sm:gap-1.5 font-funnel text-xs sm:text-sm font-semibold text-[#2d3748]">
                         <span className="whitespace-nowrap">{formatCurrency(order.totalAmount)}</span>
                       </div>
                     </div>
@@ -440,7 +442,7 @@ const OrderHistory = () => {
                 <ChevronLeft size={18} className="text-gray-600 sm:w-5 sm:h-5" />
               </button>
 
-              <span className="font-poppins text-xs sm:text-sm font-medium text-[#2d3748]">
+              <span className="font-funnel text-xs sm:text-sm font-medium text-[#2d3748]">
                 Page {page} of {pagination.totalPages}
               </span>
 
@@ -468,7 +470,7 @@ const OrderHistory = () => {
       <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
         <button
           onClick={backToList}
-          className="font-poppins text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 text-[#718096] hover:text-[#0e540b] mb-4 sm:mb-5 transition-colors font-medium"
+          className="font-funnel text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 text-[#718096] hover:text-[#0e540b] mb-4 sm:mb-5 transition-colors font-medium"
         >
           <ChevronLeft size={16} className="sm:w-[18px] sm:h-[18px]" /> Back to Orders
         </button>
@@ -479,20 +481,20 @@ const OrderHistory = () => {
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
-                  <h1 className="font-poppins text-lg sm:text-xl lg:text-2xl font-bold text-[#2d3748] truncate">
+                  <h1 className="font-funnel text-lg sm:text-xl lg:text-2xl font-bold text-[#2d3748] truncate">
                     {order.orderId || `Order #${order._id.slice(-6)}`}
                   </h1>
                   {getStatusBadge(order.orderStatus)}
                 </div>
-                <p className="font-poppins text-[10px] sm:text-xs lg:text-sm text-[#718096]">
+                <p className="font-funnel text-[10px] sm:text-xs lg:text-sm text-[#718096]">
                   Placed on {formatDate(order.orderDate)}
                 </p>
               </div>
               <div className="text-left sm:text-right">
-                <p className="font-poppins text-xs sm:text-sm text-[#718096]">
+                <p className="font-funnel text-xs sm:text-sm text-[#718096]">
                   Total Amount
                 </p>
-                <p className="font-poppins text-lg sm:text-xl lg:text-2xl font-bold text-[#0e540b]">
+                <p className="font-funnel text-lg sm:text-xl lg:text-2xl font-bold text-[#0e540b]">
                   {formatCurrency(order.totalAmount)}
                 </p>
               </div>
@@ -501,13 +503,13 @@ const OrderHistory = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <p className="font-poppins text-[10px] sm:text-xs font-bold uppercase text-[#718096] mb-1">
+              <p className="font-funnel text-[10px] sm:text-xs font-bold uppercase text-[#718096] mb-1">
                 Payment
               </p>
-              <p className="font-poppins text-xs sm:text-sm font-medium text-[#2d3748]">
+              <p className="font-funnel text-xs sm:text-sm font-medium text-[#2d3748]">
                 {order.paymentMethod}
               </p>
-              <p className="font-poppins text-[10px] sm:text-xs text-[#718096] capitalize mt-0.5">
+              <p className="font-funnel text-[10px] sm:text-xs text-[#718096] capitalize mt-0.5">
                 Status: {order.paymentStatus}
               </p>
             </div>
@@ -520,7 +522,7 @@ const OrderHistory = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
           {/* Items List */}
           <div className="lg:col-span-2 bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
-            <h2 className="font-poppins text-xs sm:text-sm font-bold text-[#2d3748] mb-3 sm:mb-4">
+            <h2 className="font-funnel text-xs sm:text-sm font-bold text-[#2d3748] mb-3 sm:mb-4">
               Order Items ({order.selectedVegetables?.length})
             </h2>
             <div className="space-y-2 sm:space-y-3">
@@ -537,18 +539,18 @@ const OrderHistory = () => {
                     />
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-poppins text-xs sm:text-sm lg:text-base font-bold text-[#2d3748] truncate">
+                    <h3 className="font-funnel text-xs sm:text-sm lg:text-base font-bold text-[#2d3748] truncate">
                       {item.vegetable?.name}
                     </h3>
-                    <p className="font-poppins text-[10px] sm:text-xs lg:text-sm text-[#718096] mt-0.5">
+                    <p className="font-funnel text-[10px] sm:text-xs lg:text-sm text-[#718096] mt-0.5">
                       {item.quantity} × {item.weight}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="font-poppins text-xs sm:text-sm lg:text-base font-bold text-[#2d3748]">
+                    <p className="font-funnel text-xs sm:text-sm lg:text-base font-bold text-[#2d3748]">
                       {formatCurrency(item.subtotal)}
                     </p>
-                    <p className="font-poppins text-[10px] sm:text-xs text-[#718096]">
+                    <p className="font-funnel text-[10px] sm:text-xs text-[#718096]">
                       {formatCurrency(item.pricePerUnit)}/unit
                     </p>
                   </div>
@@ -559,11 +561,11 @@ const OrderHistory = () => {
 
           {/* Summary Box */}
           <div className="h-fit bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5">
-            <h2 className="font-poppins text-xs sm:text-sm font-bold text-[#2d3748] mb-3 sm:mb-4">
+            <h2 className="font-funnel text-xs sm:text-sm font-bold text-[#2d3748] mb-3 sm:mb-4">
               Order Summary
             </h2>
             <div className="space-y-2 sm:space-y-3">
-              <div className="flex justify-between font-poppins text-xs sm:text-sm text-[#718096]">
+              <div className="flex justify-between font-funnel text-xs sm:text-sm text-[#718096]">
                 <span>Vegetables Total</span>
                 <span className="font-medium text-[#2d3748]">
                   {formatCurrency(order.vegetablesTotal)}
@@ -571,7 +573,7 @@ const OrderHistory = () => {
               </div>
 
               {order.couponDiscount > 0 && (
-                <div className="flex justify-between font-poppins text-xs sm:text-sm text-[#f04700]">
+                <div className="flex justify-between font-funnel text-xs sm:text-sm text-[#f04700]">
                   <span>Discount</span>
                   <span className="font-bold">
                     -{formatCurrency(order.couponDiscount)}
@@ -579,7 +581,7 @@ const OrderHistory = () => {
                 </div>
               )}
 
-              <div className="flex justify-between font-poppins text-xs sm:text-sm text-[#718096]">
+              <div className="flex justify-between font-funnel text-xs sm:text-sm text-[#718096]">
                 <span>Delivery Charges</span>
                 <span className="font-medium text-[#2d3748]">
                   {order.deliveryCharges === 0
@@ -589,10 +591,10 @@ const OrderHistory = () => {
               </div>
 
               <div className="pt-2 sm:pt-3 mt-2 sm:mt-3 border-t border-gray-100 flex justify-between items-center">
-                <span className="font-poppins text-sm sm:text-base font-bold text-[#2d3748]">
+                <span className="font-funnel text-sm sm:text-base font-bold text-[#2d3748]">
                   Grand Total
                 </span>
-                <span className="font-poppins text-base sm:text-lg font-bold text-[#f04700]">
+                <span className="font-funnel text-base sm:text-lg font-bold text-[#f04700]">
                   {formatCurrency(order.totalAmount)}
                 </span>
               </div>

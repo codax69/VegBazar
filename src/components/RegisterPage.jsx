@@ -10,11 +10,12 @@ import {
   CheckCircle,
   UserPlus,
 } from "lucide-react";
-import { useAuth } from "../Context/AuthProvider";
-import { Navigate } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const { register } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
@@ -67,15 +68,13 @@ const RegisterPage = () => {
 
     if (formData.phone) {
       const phoneDigits = formData.phone.replace(/\D/g, "");
-      
+
       if (phoneDigits.length < 10) {
         newErrors.phone = "Phone number must be at least 10 digits";
       } else if (/^(\d)\1{9,}$/.test(phoneDigits)) {
         // Check for all same digits (e.g., 1111111111)
         newErrors.phone = "Invalid phone number (repeated digits)";
-      } else if (/^(?:0(?:1(?:2(?:3(?:4(?:5(?:6(?:7(?:89)?)?)?)?)?)?)?)?)?|1(?:2(?:3(?:4(?:5(?:6(?:7(?:89)?)?)?)?)?)?)?)?|123456789\d)$/.test(phoneDigits) || 
-                 /^[0-9]{1}\d*$/.test(phoneDigits) && /^(\d)(\d)/.test(phoneDigits) && 
-                 phoneDigits.split('').every((digit, i, arr) => i === 0 || Math.abs(parseInt(digit) - parseInt(arr[i-1])) <= 1)) {
+      } else {
         // Check for sequential digits (e.g., 1234567890, 9876543210)
         const isSequential = phoneDigits.split('').every((digit, i, arr) => {
           if (i === 0) return true;
@@ -83,7 +82,7 @@ const RegisterPage = () => {
           const prev = parseInt(arr[i - 1]);
           return (curr === prev + 1) || (curr === prev - 1);
         });
-        
+
         if (isSequential && phoneDigits.length >= 5) {
           newErrors.phone = "Invalid phone number (sequential digits)";
         }
@@ -112,8 +111,10 @@ const RegisterPage = () => {
         text: "Registration successful! Redirecting...",
       });
 
+      // Redirect using navigate instead of window.location
+      const redirectPath = result.redirectTo || "/";
       setTimeout(() => {
-        window.location.href = "/";
+        navigate(redirectPath, { replace: true });
       }, 1500);
     } else {
       setMessage({
@@ -127,11 +128,11 @@ const RegisterPage = () => {
 
   const handleLogin = () => {
     window.scrollTo(0, 0);
-    Navigate("/login");
+    navigate("/login");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 font-poppins">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 font-funnel">
       <div className="w-full max-w-sm">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
           {/* Header */}
@@ -147,11 +148,10 @@ const RegisterPage = () => {
             {/* Message Alert */}
             {message.text && (
               <div
-                className={`mb-4 p-3 rounded-lg flex items-start gap-2 text-sm ${
-                  message.type === "success"
-                    ? "bg-green-50 text-green-800 border border-green-200"
-                    : "bg-red-50 text-red-800 border border-red-200"
-                }`}
+                className={`mb-4 p-3 rounded-lg flex items-start gap-2 text-sm ${message.type === "success"
+                  ? "bg-green-50 text-green-800 border border-green-200"
+                  : "bg-red-50 text-red-800 border border-red-200"
+                  }`}
               >
                 {message.type === "success" ? (
                   <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -177,9 +177,8 @@ const RegisterPage = () => {
                     required
                     value={formData.username}
                     onChange={handleInputChange}
-                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm ${
-                      errors.username ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm ${errors.username ? "border-red-500" : "border-gray-300"
+                      }`}
                     placeholder="Mukesh Kumar"
                   />
                 </div>
@@ -203,9 +202,8 @@ const RegisterPage = () => {
                     required
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm ${
-                      errors.email ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm ${errors.email ? "border-red-500" : "border-gray-300"
+                      }`}
                     placeholder="mukesh123@gmail.com"
                   />
                 </div>
@@ -228,9 +226,8 @@ const RegisterPage = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm ${
-                      errors.phone ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm ${errors.phone ? "border-red-500" : "border-gray-300"
+                      }`}
                     placeholder="+91 1234567890"
                   />
                 </div>
@@ -254,9 +251,8 @@ const RegisterPage = () => {
                     required
                     value={formData.password}
                     onChange={handleInputChange}
-                    className={`w-full pl-10 pr-12 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-poppins text-sm ${
-                      errors.password ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`w-full pl-10 pr-12 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm ${errors.password ? "border-red-500" : "border-gray-300"
+                      }`}
                     placeholder="Min. 8 characters"
                   />
                   <button

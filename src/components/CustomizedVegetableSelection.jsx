@@ -128,15 +128,15 @@ const VegetableCard = memo(
         return weights.length > 0
           ? weights
           : [
-              {
-                id: 0,
-                label: "250g",
-                value: "250g",
-                price: veg.price || 0,
-                marketPrice: veg.price || 0,
-                inStock: hasEnoughStock(veg, "250g", false),
-              },
-            ];
+            {
+              id: 0,
+              label: "250g",
+              value: "250g",
+              price: veg.price || 0,
+              marketPrice: veg.price || 0,
+              inStock: hasEnoughStock(veg, "250g", false),
+            },
+          ];
       }
     }, [veg, isSetModel]);
 
@@ -160,20 +160,18 @@ const VegetableCard = memo(
 
     return (
       <div
-        className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${
-          isCompletelyOutOfStock
+        className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${isCompletelyOutOfStock
             ? "bg-gray-100 border-gray-300 opacity-75"
             : "bg-[#f0fcf6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
-        }`}
+          }`}
       >
         {/* Vegetable Image */}
         <div className="text-center">
           <div className="relative">
             {veg.image ? (
               <img
-                className={`w-28 h-28 sm:w-30 sm:h-30 md:w-32 md:h-32 object-cover mx-auto rounded-lg sm:rounded-xl mb-1.5 sm:mb-2 ${
-                  isCompletelyOutOfStock ? "grayscale" : ""
-                }`}
+                className={`w-28 h-28 sm:w-30 sm:h-30 md:w-32 md:h-32 object-cover mx-auto rounded-lg sm:rounded-xl mb-1.5 sm:mb-2 ${isCompletelyOutOfStock ? "grayscale" : ""
+                  }`}
                 src={veg.image}
                 alt={veg.name}
                 loading="lazy"
@@ -183,18 +181,16 @@ const VegetableCard = memo(
               />
             ) : (
               <div
-                className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br rounded-lg sm:rounded-xl mb-1.5 sm:mb-2 flex items-center justify-center mx-auto ${
-                  isCompletelyOutOfStock
+                className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br rounded-lg sm:rounded-xl mb-1.5 sm:mb-2 flex items-center justify-center mx-auto ${isCompletelyOutOfStock
                     ? "from-gray-200 to-gray-300"
                     : "from-gray-50 to-[#effdf5]"
-                }`}
+                  }`}
               >
                 <Leaf
-                  className={`w-8 h-8 sm:w-10 sm:h-10 ${
-                    isCompletelyOutOfStock
+                  className={`w-8 h-8 sm:w-10 sm:h-10 ${isCompletelyOutOfStock
                       ? "text-gray-400"
                       : "text-[#0e540b]/30"
-                  }`}
+                    }`}
                 />
               </div>
             )}
@@ -207,9 +203,8 @@ const VegetableCard = memo(
             )}
           </div>
           <p
-            className={`font-medium text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${
-              isCompletelyOutOfStock ? "text-gray-500" : "text-black"
-            }`}
+            className={`font-medium text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${isCompletelyOutOfStock ? "text-gray-500" : "text-black"
+              }`}
           >
             {veg.name}
             {isSetModel && (
@@ -232,13 +227,12 @@ const VegetableCard = memo(
                   }
                 }}
                 disabled={!option.inStock}
-                className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-all ${
-                  !option.inStock
+                className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-all ${!option.inStock
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed line-through"
                     : currentOption === option.value
                       ? "bg-[#0e540b] text-white"
                       : "bg-gray-100 text-black hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {option.label}
               </button>
@@ -739,12 +733,12 @@ const CustomizedVegetableSelection = () => {
   // Get cart items with vegetable details (instant from state)
   const cartItemsWithDetails = useMemo(() => {
     const items = [];
-    
+
     Object.entries(cartItems).forEach(([key, quantity]) => {
       if (quantity > 0) {
         const [vegId, weight] = key.split('-');
         const vegetable = vegetables.find(v => v._id === vegId);
-        
+
         if (vegetable) {
           items.push({
             id: vegetable._id,
@@ -757,7 +751,7 @@ const CustomizedVegetableSelection = () => {
         }
       }
     });
-    
+
     return items;
   }, [cartItems, vegetables]);
 
