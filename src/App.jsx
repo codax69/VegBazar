@@ -135,7 +135,7 @@ const AppWithOrderContext = () => {
 
       const response = await axios.get(`${API_URL}/api/baskets`);
       setOffers(response.data?.data.baskets);
-      console.log(offers)
+      // console.log(offers)
       sessionStorage.setItem(
         "baskets",
         JSON.stringify(response.data?.data.baskets)
@@ -159,7 +159,7 @@ const AppWithOrderContext = () => {
         name: v.name,
         image: v.image,
       }));
-      console.log(vegetables);
+      // console.log(vegetables);
       setAllVegetables(vegetables);
       sessionStorage.setItem("vegetables", JSON.stringify(vegetables));
     } catch (error) {
@@ -395,9 +395,9 @@ const VegetableSellingApp = () => {
   return (
     <Router>
       <ThemeProvider>
-          <WalletProvider>
-            <AppWithOrderContext />
-          </WalletProvider>
+        <WalletProvider>
+          <AppWithOrderContext />
+        </WalletProvider>
       </ThemeProvider>
     </Router>
   );

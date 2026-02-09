@@ -274,7 +274,7 @@ const RazorpayPayment = ({
       setCurrentOrderId(orderId);
       const orderData = buildOrderData(orderId);
 
-      console.log("📦 Order Data being sent:", orderData);
+      // console.log("📦 Order Data being sent:", orderData);
 
       // Create order in backend
       const result = await axios.post(
@@ -283,7 +283,7 @@ const RazorpayPayment = ({
         { timeout: 15000 }
       );
 
-      console.log("✅ Backend response:", result.data);
+      // console.log("✅ Backend response:", result.data);
 
       if (!result?.data?.data?.razorpayOrder?.id) {
         throw new Error("Failed to create order. Please try again.");
@@ -304,7 +304,7 @@ const RazorpayPayment = ({
       }
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_S9xkjZZlpd8fka",
+        key: import.meta.env.KEY_ID || "rzp_test_S9xkjZZlpd8fka",
         amount,
         currency,
         name: "VegBazar",
@@ -312,7 +312,7 @@ const RazorpayPayment = ({
         order_id: razorpayOrderId,
         handler: async function (response) {
           try {
-            console.log("💳 Payment response:", response);
+            // console.log("💳 Payment response:", response);
 
             // Now extractedCouponCode is available here
             const verifyData = {
@@ -342,7 +342,7 @@ const RazorpayPayment = ({
               verifyData.selectedVegetables = selectedVegetables;
             }
 
-            console.log("🔍 Verify Data being sent:", verifyData);
+            // console.log("🔍 Verify Data being sent:", verifyData);
 
             const verifyResult = await axios.post(
               `${import.meta.env.VITE_API_SERVER_URL}/api/orders/verify-payment`,
@@ -350,7 +350,7 @@ const RazorpayPayment = ({
               { timeout: 15000 }
             );
 
-            console.log("✅ Verification response:", verifyResult.data);
+            // console.log("✅ Verification response:", verifyResult.data);
 
             if (verifyResult.data.success) {
               // Clear pending order data

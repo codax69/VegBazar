@@ -28,7 +28,7 @@ const BillingSuccess = ({ onNewOrder }) => {
 
   // Get orderData from navigation state
   const orderData = location.state?.orderData;
-  console.log(orderData);
+  // console.log(orderData);
 
   // Redirect if no order data
   useEffect(() => {
@@ -144,7 +144,7 @@ const BillingSuccess = ({ onNewOrder }) => {
       price: selectedOffer?.price || 0,
     };
 
-    console.log("orderInfo object:", result);
+    // console.log("orderInfo object:", result);
 
     return result;
   }, [orderData]);

@@ -173,7 +173,7 @@ export const AuthProvider = ({ children }) => {
     const refreshTime = timeUntilExpiry - (5 * 60 * 1000);
     const timeToRefresh = refreshTime > 0 ? refreshTime : 0;
 
-    console.log(`Token will refresh in ${Math.floor(timeToRefresh / 1000 / 60)} minutes`);
+    // console.log(`Token will refresh in ${Math.floor(timeToRefresh / 1000 / 60)} minutes`);
 
     const timeoutId = setTimeout(async () => {
       const newToken = await refreshAccessToken();
@@ -202,7 +202,7 @@ export const AuthProvider = ({ children }) => {
 
       // Check if token is expired
       if (isTokenExpired(token)) {
-        console.log('Access token expired, attempting refresh...');
+        // console.log('Access token expired, attempting refresh...');
 
         // Try to refresh the token
         const newToken = await refreshAccessToken();

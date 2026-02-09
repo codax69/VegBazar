@@ -124,14 +124,14 @@ const BillingPage = () => {
 
       const userId = user?._id || user?.id;
       if (!userId) {
-        console.log("⚠️ No user ID found, skipping address fetch");
+        // console.log("⚠️ No user ID found, skipping address fetch");
         setIsLoadingAddress(false);
         return;
       }
 
       try {
         setIsLoadingAddress(true);
-        console.log("🔄 Fetching addresses for user:", userId);
+        // console.log("🔄 Fetching addresses for user:", userId);
 
         const { data } = await axios.get(
           `${API_URL}/api/addresses/active`,
@@ -142,27 +142,27 @@ const BillingPage = () => {
           }
         );
 
-        console.log("📦 API Response:", data);
-        console.log("📍 Default Address:", data?.data?.defaultAddress);
-        console.log("📍 All Addresses:", data?.data?.addresses);
-        console.log("📊 Total Addresses:", data?.data?.total);
+        // console.log("📦 API Response:", data);
+        // console.log("📍 Default Address:", data?.data?.defaultAddress);
+        // console.log("📍 All Addresses:", data?.data?.addresses);
+        // console.log("📊 Total Addresses:", data?.data?.total);
 
         if (isMounted) {
           // First try to use the default address
           if (data?.data?.defaultAddress) {
-            console.log("✅ Setting default address:", data.data.defaultAddress);
+            // console.log("✅ Setting default address:", data.data.defaultAddress);
             setDefaultAddress(data.data.defaultAddress);
             setSelectedAddress(data.data.defaultAddress);
           }
           // If no default but there are addresses, use the first one
           else if (data?.data?.addresses && data.data.addresses.length > 0) {
-            console.log("⚠️ No default address, using first address:", data.data.addresses[0]);
+            // console.log("⚠️ No default address, using first address:", data.data.addresses[0]);
             setDefaultAddress(data.data.addresses[0]);
             setSelectedAddress(data.data.addresses[0]);
           }
           // No addresses at all
           else {
-            console.log("❌ No addresses found for user");
+            // console.log("❌ No addresses found for user");
             setDefaultAddress(null);
             setSelectedAddress(null);
           }
@@ -194,7 +194,7 @@ const BillingPage = () => {
         // Refetch address when user returns to the page
         const refetchAddress = async () => {
           try {
-            console.log("🔄 Refetching addresses...");
+            // console.log("🔄 Refetching addresses...");
             const { data } = await axios.get(
               `${API_URL}/api/addresses/active`,
               {
@@ -204,17 +204,17 @@ const BillingPage = () => {
               }
             );
 
-            console.log("📦 Refetch API Response:", data.data);
+            // console.log("📦 Refetch API Response:", data.data);
 
             // First try to use the default address
             if (data?.data?.defaultAddress) {
-              console.log("✅ Refetch: Setting default address");
+              // console.log("✅ Refetch: Setting default address");
               setDefaultAddress(data.data.defaultAddress);
               setSelectedAddress(data.data.defaultAddress);
             }
             // If no default but there are addresses, use the first one
             else if (data?.data?.addresses && data.data.addresses.length > 0) {
-              console.log("⚠️ Refetch: No default, using first address");
+              // console.log("⚠️ Refetch: No default, using first address");
               setDefaultAddress(data.data.addresses[0]);
               setSelectedAddress(data.data.addresses[0]);
             }
@@ -278,13 +278,13 @@ const BillingPage = () => {
   const orderData = useMemo(() => {
     if (!orderCount) return null;
     if (!user) {
-      console.log("⚠️ User not loaded yet, orderData is null");
+      // console.log("⚠️ User not loaded yet, orderData is null");
       return null;
     }
 
     const userId = user._id || user.id;
     if (!userId) {
-      console.log("⚠️ No user ID found in user object");
+      // console.log("⚠️ No user ID found in user object");
       return null;
     }
 
@@ -415,7 +415,7 @@ const BillingPage = () => {
         }}
       />
     );
-  console.log(defaultAddress);
+  // console.log(defaultAddress);
   return (
     <div className="min-h-screen bg-[#ffffff] pt-8 md:pt-20 pb-20 lg:pb-0">
       <div className="max-w-6xl mx-auto px-4">

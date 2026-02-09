@@ -535,7 +535,7 @@ const VegetableCart = () => {
         orderStatus: "placed",
         orderDate: new Date().toISOString(),
       };
-      // console.log("Order Data:", orderData);
+      // // console.log("Order Data:", orderData);
       // Handle COD payment
       if (paymentMethod === "COD") {
         await axios.post(`${API_URL}/api/orders/create-order`, orderData);

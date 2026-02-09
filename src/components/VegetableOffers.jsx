@@ -14,7 +14,7 @@ const VegetableOffers = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_API_SERVER_URL}/api/baskets`
         );
-        console.log("API Response:", response.data);
+        // console.log("API Response:", response.data);
         // Access baskets from data.data.baskets based on API structure
         const basketsData = response.data.data?.baskets || response.data.baskets || [];
         setOffers(basketsData);
