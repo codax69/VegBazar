@@ -71,7 +71,7 @@ export default function VegBazarResponsiveBanner() {
             className="mb-2 sm:mb-3 h-7 sm:h-8 md:h-10 lg:h-11 animate-bounce"
           />
           <h1 className="mb-2 font-poppins font-bold sm:mb-3 text-2xl sm:text-2xl md:text-3xl lg:text-5xl font-black leading-tight">
-            <span className="text-[#0e540b]">Fresh</span>{" "}
+            <span className="text-[#0e540b]">Farm Fresh</span>
             <span className="text-[#e64200]">Vegetables</span>
           </h1>
           <p className="mb-3 sm:mb-4 max-w-md text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed font-funnel opacity-0 animate-[fadeInUp_0.6s_ease-out_0.2s_forwards]">
