@@ -1,6 +1,7 @@
-const APP_VERSION = "v1.0.4";
+const APP_VERSION = "v1.0.5";
 const CACHE_NAME = `vegbazar-${APP_VERSION}`;
 const RUNTIME_CACHE = `vegbazar-runtime-${APP_VERSION}`;
+const MAX_RUNTIME_CACHE_SIZE = 50; // Limit runtime cache size
 
 const STATIC_ASSETS = [
   "/public/",
@@ -19,7 +20,13 @@ self.addEventListener("install", (event) => {
         console.log("[Service Worker] Caching static assets");
         return cache.addAll(STATIC_ASSETS);
       })
-      .then(() => self.skipWaiting()),
+      .then(() => {
+        // Don't skip waiting - let user control updates
+        console.log("[Service Worker] Installed, waiting for activation");
+      })
+      .catch((error) => {
+        console.error("[Service Worker] Installation failed:", error);
+      })
   );
 });
 
@@ -41,36 +48,58 @@ self.addEventListener("activate", (event) => {
               console.log("[Service Worker] Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
-          }),
+          })
         );
       })
       .then(() => {
         return self.clients.matchAll().then((clients) => {
-          // Notify all clients to clear user data (one-time for v1.0.2)
+          // FIXED: Only clear user data for specific version migrations
+          const VERSIONS_REQUIRING_DATA_CLEAR = ["v1.0.2"];
+          
+          if (VERSIONS_REQUIRING_DATA_CLEAR.includes(APP_VERSION)) {
+            clients.forEach((client) => {
+              client.postMessage({
+                type: "CLEAR_USER_DATA",
+                version: APP_VERSION,
+                message: `Clearing user data for ${APP_VERSION} update`,
+              });
+            });
+          }
+
+          // Notify all clients that new version is ready
           clients.forEach((client) => {
             client.postMessage({
-              type: "CLEAR_USER_DATA",
+              type: "VERSION_UPDATED",
               version: APP_VERSION,
-              message: `Clearing user data for ${APP_VERSION} update`,
+              message: `Updated to ${APP_VERSION}`,
             });
           });
         });
       })
-      .then(() => self.clients.claim()),
+      .then(() => self.clients.claim())
+      .catch((error) => {
+        console.error("[Service Worker] Activation failed:", error);
+      })
   );
 });
+
+// Helper: Limit cache size
+async function limitCacheSize(cacheName, maxItems) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+  if (keys.length > maxItems) {
+    await cache.delete(keys[0]);
+    await limitCacheSize(cacheName, maxItems);
+  }
+}
 
 // Fetch Event - Serve from cache with network fallback
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip external origins and auth services
-  if (
-    url.origin !== location.origin ||
-    url.origin.includes("auth0.com") ||
-    url.origin.includes("google.com")
-  ) {
+  // FIXED: Simplified origin check
+  if (url.origin !== location.origin) {
     return;
   }
 
@@ -83,7 +112,9 @@ self.addEventListener("fetch", (event) => {
           if (response && response.status === 200 && request.method === "GET") {
             const responseClone = response.clone();
             caches.open(RUNTIME_CACHE).then((cache) => {
-              cache.put(request, responseClone);
+              cache.put(request, responseClone).then(() => {
+                limitCacheSize(RUNTIME_CACHE, MAX_RUNTIME_CACHE_SIZE);
+              });
             });
           }
           return response;
@@ -91,19 +122,28 @@ self.addEventListener("fetch", (event) => {
         .catch(() => {
           // Only try to serve from cache for GET requests
           if (request.method === "GET") {
-            return caches.match(request);
+            return caches.match(request).then((cachedResponse) => {
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+              // Return network error response
+              return new Response("Network error", {
+                status: 503,
+                statusText: "Service Unavailable",
+              });
+            });
           }
           // For non-GET requests, return a network error response
           return new Response("Network error", {
             status: 503,
             statusText: "Service Unavailable",
           });
-        }),
+        })
     );
     return;
   }
 
-  // Handle regular requests
+  // Handle regular requests - Cache First with Network Fallback
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -112,59 +152,32 @@ self.addEventListener("fetch", (event) => {
 
       return fetch(request)
         .then((response) => {
-          if (
-            !response ||
-            response.status !== 200 ||
-            response.type !== "basic"
-          ) {
+          // IMPROVED: More flexible response validation
+          if (!response || response.status !== 200) {
             return response;
           }
 
           const responseClone = response.clone();
           caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(request, responseClone);
+            cache.put(request, responseClone).then(() => {
+              limitCacheSize(RUNTIME_CACHE, MAX_RUNTIME_CACHE_SIZE);
+            });
           });
 
           return response;
         })
         .catch(() => {
+          // Serve offline page for document requests
           if (request.destination === "document") {
-            return caches
-              .match("/public/offline.html")
-              .then((offlineResponse) => {
-                return offlineResponse.text().then((html) => {
-                  const modifiedHtml = html.replace(
-                    "</body>",
-                    `
-                    <script>
-                      window.addEventListener('online', () => {
-                        console.log('Back online! Redirecting to home...');
-                        window.location.href = '/public/';
-                      });
-                      
-                      setInterval(() => {
-                        if (navigator.onLine) {
-                          fetch('/public/', { method: 'HEAD', cache: 'no-cache' })
-                            .then(() => {
-                              window.location.href = '/public/';
-                            })
-                            .catch(() => {
-                              console.log('Still offline');
-                            });
-                        }
-                      }, 3000);
-                    </script>
-                  </body>`,
-                  );
-
-                  return new Response(modifiedHtml, {
-                    headers: { "Content-Type": "text/html" },
-                  });
-                });
-              });
+            return caches.match("/public/offline.html");
           }
+          // For other resources, return a network error
+          return new Response("Network error", {
+            status: 503,
+            statusText: "Service Unavailable",
+          });
         });
-    }),
+    })
   );
 });
 
@@ -180,8 +193,10 @@ self.addEventListener("sync", (event) => {
 async function syncPendingOrders() {
   try {
     console.log("[Service Worker] Syncing pending orders...");
+    // Add your sync logic here
   } catch (error) {
     console.error("[Service Worker] Sync failed:", error);
+    throw error; // Re-throw to retry sync
   }
 }
 
@@ -255,7 +270,7 @@ self.addEventListener("notificationclick", (event) => {
         if (clients.openWindow) {
           return clients.openWindow(urlToOpen);
         }
-      }),
+      })
   );
 });
 
@@ -263,7 +278,7 @@ self.addEventListener("notificationclick", (event) => {
 self.addEventListener("message", (event) => {
   console.log("[Service Worker] Message received:", event.data);
 
-  // Skip waiting for immediate update
+  // Skip waiting for immediate update (user-triggered)
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
@@ -275,12 +290,20 @@ self.addEventListener("message", (event) => {
         .keys()
         .then((cacheNames) => {
           return Promise.all(
-            cacheNames.map((cacheName) => caches.delete(cacheName)),
+            cacheNames.map((cacheName) => caches.delete(cacheName))
           );
         })
         .then(() => {
-          event.ports[0].postMessage({ success: true });
-        }),
+          if (event.ports && event.ports[0]) {
+            event.ports[0].postMessage({ success: true });
+          }
+        })
+        .catch((error) => {
+          console.error("[Service Worker] Cache clear failed:", error);
+          if (event.ports && event.ports[0]) {
+            event.ports[0].postMessage({ success: false, error: error.message });
+          }
+        })
     );
   }
 
@@ -288,10 +311,14 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "CHECK_ONLINE") {
     fetch("/public/", { method: "HEAD", cache: "no-cache" })
       .then(() => {
-        event.ports[0].postMessage({ online: true });
+        if (event.ports && event.ports[0]) {
+          event.ports[0].postMessage({ online: true });
+        }
       })
       .catch(() => {
-        event.ports[0].postMessage({ online: false });
+        if (event.ports && event.ports[0]) {
+          event.ports[0].postMessage({ online: false });
+        }
       });
   }
 
@@ -305,7 +332,7 @@ self.addEventListener("message", (event) => {
         tag: "vegbazar-welcome",
         requireInteraction: false,
         vibrate: [200, 100, 200],
-      }),
+      })
     );
   }
 
@@ -323,9 +350,11 @@ self.addEventListener("message", (event) => {
 
   // Get current version
   if (event.data && event.data.type === "GET_VERSION") {
-    event.ports[0].postMessage({
-      version: APP_VERSION,
-      cacheName: CACHE_NAME,
-    });
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage({
+        version: APP_VERSION,
+        cacheName: CACHE_NAME,
+      });
+    }
   }
 });
