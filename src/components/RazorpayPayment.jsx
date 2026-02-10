@@ -22,14 +22,13 @@ const RazorpayPayment = ({
   } = useOrderContext();
 
   const { user } = useAuth();
-
   const customerInfo = useMemo(
     () => ({
       name: user?.username || "",
       mobile: user?.phone || "",
       email: user?.email || "",
     }),
-    [user]
+    [user],
   );
 
   const [orderCount, setOrderCount] = useState(1);
@@ -47,7 +46,8 @@ const RazorpayPayment = ({
   };
 
   const getOrderSummary = (order) => {
-    if (order && typeof order === "object" && order.summary) return order.summary;
+    if (order && typeof order === "object" && order.summary)
+      return order.summary;
     return null;
   };
 
@@ -73,7 +73,8 @@ const RazorpayPayment = ({
       }
 
       const subtotal = items.reduce((acc, item) => {
-        const price = parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
+        const price =
+          parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
         const qty = parseInt(item.quantity) || 0;
         return acc + price * qty;
       }, 0);
@@ -126,7 +127,7 @@ const RazorpayPayment = ({
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_API_SERVER_URL}/api/orders/today/total`,
-          { timeout: 10000 }
+          { timeout: 10000 },
         );
         setOrderCount(response.data?.data.count + 1);
       } catch (error) {
@@ -153,7 +154,9 @@ const RazorpayPayment = ({
       try {
         // Extract coupon code properly
         const extractedCouponCode =
-          typeof couponCode === "string" ? couponCode : couponCode?.code || null;
+          typeof couponCode === "string"
+            ? couponCode
+            : couponCode?.code || null;
 
         if (isCustomOrder && vegetableOrder) {
           const items = getOrderItems(vegetableOrder);
@@ -203,7 +206,8 @@ const RazorpayPayment = ({
             orderType: "basket",
             customerInfo: customerInfo || formData || {},
             deliveryAddressId: deliveryAddress?._id || null,
-            selectedBasket: selectedOffer?._id || selectedOffer?.id || selectedOffer,
+            selectedBasket:
+              selectedOffer?._id || selectedOffer?.id || selectedOffer,
             selectedVegetables: selectedVegetables || [],
             orderDate: new Date().toISOString(),
             totalAmount: totalAmount,
@@ -234,7 +238,7 @@ const RazorpayPayment = ({
       selectedVegetables,
       totalAmount,
       couponCode,
-    ]
+    ],
   );
 
   // Improved payment handler
@@ -261,11 +265,11 @@ const RazorpayPayment = ({
       // Ensure Razorpay script is loaded
       if (!scriptLoaded) {
         const res = await loadScript(
-          "https://checkout.razorpay.com/v1/checkout.js"
+          "https://checkout.razorpay.com/v1/checkout.js",
         );
         if (!res) {
           throw new Error(
-            "Razorpay SDK failed to load. Please check your internet connection."
+            "Razorpay SDK failed to load. Please check your internet connection.",
           );
         }
       }
@@ -280,7 +284,7 @@ const RazorpayPayment = ({
       const result = await axios.post(
         `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
         orderData,
-        { timeout: 15000 }
+        { timeout: 15000 },
       );
 
       // console.log("✅ Backend response:", result.data);
@@ -302,9 +306,8 @@ const RazorpayPayment = ({
       } else if (isBasketOrder && selectedOffer) {
         description = `${selectedOffer.title}`;
       }
-
       const options = {
-        key: import.meta.env.KEY_ID || "rzp_test_S9xkjZZlpd8fka",
+        key: import.meta.env.KEY_ID || "rzp_live_S9b62PxTC6AT2U",
         amount,
         currency,
         name: "VegBazar",
@@ -338,7 +341,8 @@ const RazorpayPayment = ({
                   parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
               }));
             } else if (isBasketOrder) {
-              verifyData.selectedBasket = selectedOffer?._id || selectedOffer?.id || selectedOffer;
+              verifyData.selectedBasket =
+                selectedOffer?._id || selectedOffer?.id || selectedOffer;
               verifyData.selectedVegetables = selectedVegetables;
             }
 
@@ -347,7 +351,7 @@ const RazorpayPayment = ({
             const verifyResult = await axios.post(
               `${import.meta.env.VITE_API_SERVER_URL}/api/orders/verify-payment`,
               verifyData,
-              { timeout: 15000 }
+              { timeout: 15000 },
             );
 
             // console.log("✅ Verification response:", verifyResult.data);
@@ -366,7 +370,7 @@ const RazorpayPayment = ({
                 // Navigate to new success page with cashback support
                 navigate("/order-success", {
                   state: {
-                    orderData: verifyResult.data.data || verifyResult.data
+                    orderData: verifyResult.data.data || verifyResult.data,
                   },
                 });
               }
@@ -377,7 +381,7 @@ const RazorpayPayment = ({
             console.error("❌ Payment verification error:", err);
             console.error("Error details:", err.response?.data);
             setError(
-              `Payment received but verification failed. Your payment ID: ${response.razorpay_payment_id}. Please contact support.`
+              `Payment received but verification failed. Your payment ID: ${response.razorpay_payment_id}. Please contact support.`,
             );
           } finally {
             setIsLoading(false);
@@ -468,10 +472,11 @@ const RazorpayPayment = ({
           <button
             onClick={createOrder}
             disabled={isCheckoutDisabled || isLoading}
-            className={`w-full font-funnel py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${isCheckoutDisabled || isLoading
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
-              }`}
+            className={`w-full font-funnel py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${
+              isCheckoutDisabled || isLoading
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
+            }`}
           >
             {isLoading ? (
               <>
@@ -529,7 +534,9 @@ const RazorpayPayment = ({
                 (typeof couponCode === "string" || couponCode.code) && (
                   <div className="text-green-600 font-semibold">
                     Coupon "
-                    {typeof couponCode === "string" ? couponCode : couponCode.code}
+                    {typeof couponCode === "string"
+                      ? couponCode
+                      : couponCode.code}
                     " applied ✓
                   </div>
                 )}
