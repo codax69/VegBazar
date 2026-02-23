@@ -2,7 +2,7 @@
 
 **VegBazar** is a modern online vegetable marketplace web application built with **React** and **Vite**. It provides users with a clean, fast, and responsive shopping experience to browse and purchase fresh vegetables and online.
 
-🌐 **Live Demo:** [View on Netlify](https://vegbazar.store) *(update link if different)*
+🌐 **Live at:** [Check Out Vegbazar](https://vegbazar.store)
 
 ---
 
