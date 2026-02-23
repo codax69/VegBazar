@@ -1,20 +1,52 @@
-# sever-main
+# VegBazar
 
-A JavaScript-based server application.
+**VegBazar** is a modern online vegetable marketplace web application built with **React** and **Vite**. It provides users with a clean, fast, and responsive shopping experience to browse and purchase fresh vegetables and online.
+
+🌐 **Live Demo:** [View on Netlify](https://vegbazar.store) *(update link if different)*
+
+---
+
+## ✨ Features
+
+- 🛒 Browse a wide variety of fresh vegetables items
+- 🔍 Search and filter products with ease
+- 🛍️ Add items to cart and manage quantities
+- 💳 Smooth checkout experience
+- 📱 Fully responsive design — works on mobile, tablet & desktop
+- ⚡ Blazing fast performance powered by Vite
+- 🎨 Clean and modern UI with custom fonts
+
+---
+
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| [React](https://react.dev/) | Frontend UI library |
+| [Vite](https://vitejs.dev/) | Build tool & dev server |
+| JavaScript (ES6+) | Core language |
+| HTML5 & CSS3 | Markup & styling |
+| [ESLint](https://eslint.org/) | Code linting |
+| [Netlify](https://www.netlify.com/) | Deployment & hosting |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-sever-main/
-├── config/          # Configuration files
-├── font/            # Font assets
-├── src/             # Source code
-├── app.js           # Application entry / core logic
-├── index.js         # Server bootstrap / main entry point
-├── const.js         # Constants and shared variables
-├── package.json     # Project metadata and dependencies
+VegBazar/
+├── Font/                # Custom font files
+├── public/              # Static public assets (images, icons, etc.)
+├── src/                 # Main source code
+│   ├── components/      # Reusable React components
+│   ├── pages/           # Page-level components
+│   ├── assets/          # Images and other media
+│   └── App.jsx          # Root app component
+├── index.html           # HTML entry point
+├── vite.config.js       # Vite configuration
+├── eslint.config.js     # ESLint configuration
+├── netlify.toml         # Netlify deployment settings
+├── package.json         # Project dependencies & scripts
 └── .gitignore
 ```
 
@@ -24,16 +56,18 @@ sever-main/
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v16 or higher recommended)
-- npm
+Make sure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- npm or yarn
 
 ### Installation
 
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/codax69/sever-main.git
-   cd sever-main
+   git clone https://github.com/codax69/VegBazar.git
+   cd VegBazar
    ```
 
 2. **Install dependencies:**
@@ -42,57 +76,61 @@ sever-main/
    npm install
    ```
 
-3. **Start the server:**
+3. **Start the development server:**
 
    ```bash
-   node index.js
+   npm run dev
    ```
 
-   Or if a start script is defined:
-
-   ```bash
-   npm start
-   ```
+   The app will be available at `http://localhost:5173`
 
 ---
 
-## ⚙️ Configuration
+## 📦 Available Scripts
 
-Configuration options can be found and modified in the `config/` directory. Make sure to review and update any environment-specific settings before running the application.
-
----
-
-## 🛠️ Scripts
-
-| Command       | Description              |
-|---------------|--------------------------|
-| `npm start`   | Start the server         |
-| `node index.js` | Run the entry point directly |
+| Command | Description |
+|---|---|
+| `npm run dev` | Start local development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Run ESLint to check code quality |
 
 ---
 
-## 📦 Dependencies
+## 🌐 Deployment
 
-Dependencies are listed in [`package.json`](./package.json). Run `npm install` to install them all.
+This project is configured for deployment on **Netlify** using `netlify.toml`.
+
+To deploy manually:
+
+1. Run `npm run build` to generate the `dist/` folder
+2. Upload the `dist/` folder to Netlify, **or** connect your GitHub repo to Netlify for automatic deployments on every push to `main`
 
 ---
 
 ## 🤝 Contributing
 
+Contributions are welcome! Here's how to get started:
+
 1. Fork the repository
-2. Create a new branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'Add your feature'`
-4. Push to the branch: `git push origin feature/your-feature`
+2. Create a new branch: `git checkout -b feature/your-feature-name`
+3. Make your changes and commit: `git commit -m 'Add your feature'`
+4. Push to your branch: `git push origin feature/your-feature-name`
 5. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-This project does not currently specify a license. Please contact the repository owner for usage terms.
+This project does not currently specify a license. Please contact the author for usage permissions.
 
 ---
 
 ## 👤 Author
 
-**codax69** — [GitHub Profile](https://github.com/codax69)
+**codax69**  
+🔗 [GitHub Profile](https://github.com/codax69)
+
+---
+
+> *Fresh picks, delivered fast — VegBazar brings the bazaar to your browser.* 🌿
