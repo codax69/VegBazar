@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
 
       proxy: {
         "/api": {
-          target: "https://vegbazar.cloud/api",
+          target: "https://vegbazar.cloud/",
           changeOrigin: true,
         },
       },
