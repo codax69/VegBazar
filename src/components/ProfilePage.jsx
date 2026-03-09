@@ -216,7 +216,7 @@ const ProfilePage = () => {
 
       // Initialize Razorpay
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_S9xkjZZlpd8fka",
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: orderData.data.amount,
         currency: "INR",
         name: "VegBazar",

@@ -323,8 +323,7 @@ const CustomizedVegetableSelection = () => {
     setSelectedVegetables,
   } = useOrderContext();
 
-  // API URL
-  const API_URL = "";
+
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -356,7 +355,7 @@ const CustomizedVegetableSelection = () => {
         }));
 
         const response = await axios.post(
-          `${API_URL}/api/orders/calculate-price`,
+          `/api/orders/calculate-price`,
           { items: normalizedItems },
         );
 
@@ -392,7 +391,7 @@ const CustomizedVegetableSelection = () => {
         return cartData;
       }
     },
-    [API_URL],
+    [],
   );
 
   // Get price for specific option
@@ -710,7 +709,7 @@ const CustomizedVegetableSelection = () => {
     const fetchVegetables = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/api/vegetables/random`);
+        const response = await axios.get(`/api/vegetables/random`);
         const veggiesData = response.data?.data || [];
         setVegetables(veggiesData);
       } catch (error) {
@@ -723,7 +722,7 @@ const CustomizedVegetableSelection = () => {
     };
 
     fetchVegetables();
-  }, [API_URL, setSelectedOffer, setSelectedVegetables]);
+  }, [setSelectedOffer, setSelectedVegetables]);
 
   // Memoize total items calculation
   const totalItems = useMemo(() => {

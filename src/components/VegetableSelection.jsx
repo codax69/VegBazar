@@ -151,8 +151,6 @@ const VegetableSelection = () => {
     useOrderContext();
   const [vegetables, setVegetables] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Memoize API URL
-  const API_URL = "";
 
   // Get effective vegetable limit (treat 0 as 1)
   const effectiveLimit = useMemo(() => {
@@ -246,7 +244,7 @@ const VegetableSelection = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${API_URL}/api/baskets/${selectedOffer._id}`
+          `/api/baskets/${selectedOffer._id}`
         );
         const data = response.data.data.vegetables || [];
         const offerWeight = selectedOffer?.weight || selectedOffer?.totalWeight || '500g';
@@ -270,7 +268,7 @@ const VegetableSelection = () => {
     };
 
     fetchOfferDetails();
-  }, [selectedOffer, getPriceForOfferWeight, API_URL]);
+  }, [selectedOffer, getPriceForOfferWeight]);
 
   // Memoized calculations
   const canProceed = useMemo(

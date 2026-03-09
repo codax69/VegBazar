@@ -307,7 +307,7 @@ const RazorpayPayment = ({
         description = `${selectedOffer.title}`;
       }
       const options = {
-        key: import.meta.env.KEY_ID || "rzp_live_S9b62PxTC6AT2U",
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount,
         currency,
         name: "VegBazar",
@@ -473,8 +473,8 @@ const RazorpayPayment = ({
             onClick={createOrder}
             disabled={isCheckoutDisabled || isLoading}
             className={`w-full font-funnel py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${isCheckoutDisabled || isLoading
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
               }`}
           >
             {isLoading ? (
