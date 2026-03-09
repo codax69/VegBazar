@@ -132,11 +132,11 @@ const AppWithOrderContext = () => {
       }
 
       const response = await axios.get(`/api/baskets`);
-      setOffers(response.data?.data.baskets);
+      setOffers(response.data?.data?.baskets || []);
       // console.log(offers)
       sessionStorage.setItem(
         "baskets",
-        JSON.stringify(response.data?.data.baskets)
+        JSON.stringify(response.data?.data?.baskets || [])
       );
     } catch (error) {
       console.error("Error fetching baskets:", error);
@@ -153,7 +153,7 @@ const AppWithOrderContext = () => {
       }
 
       const response = await axios.get(`/api/vegetables`);
-      const vegetables = response.data?.data.map((v) => ({
+      const vegetables = (response.data?.data || []).map((v) => ({
         name: v.name,
         image: v.image,
       }));
