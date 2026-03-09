@@ -152,7 +152,7 @@ const AppWithOrderContext = () => {
         return;
       }
 
-      const response = await axios.get(`${API_URL}/api/vegetables`);
+      const response = await axios.get(`/api/vegetables`);
       const vegetables = response.data?.data.map((v) => ({
         name: v.name,
         image: v.image,
