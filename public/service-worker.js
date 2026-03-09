@@ -1,4 +1,4 @@
-const APP_VERSION = "v1.1.1";
+const APP_VERSION = "v1.1.2";
 const CACHE_NAME = `vegbazar-${APP_VERSION}`;
 const RUNTIME_CACHE = `vegbazar-runtime-${APP_VERSION}`;
 const MAX_RUNTIME_CACHE_SIZE = 50; // Limit runtime cache size

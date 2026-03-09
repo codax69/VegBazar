@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
 
-// Create Auth Context
+
 const AuthContext = createContext(null);
 
-// Custom hook to use auth context
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -13,13 +13,13 @@ export const useAuth = () => {
   return context;
 };
 
-// Auth Provider Component
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Decode JWT token to check expiration
+
   const isTokenExpired = (token) => {
     if (!token) return true;
 
