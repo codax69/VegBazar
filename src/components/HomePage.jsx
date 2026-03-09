@@ -482,19 +482,17 @@ const Homepage = () => {
         const [veggiesRes, offersRes, testimonialsRes] = await Promise.all([
           axios
             .get(
-              `${import.meta.env.VITE_API_SERVER_URL}/api/vegetables/home/veg`
+              `/api/vegetables/home/veg`
             )
             .catch(() => ({ data: { data: [] } })),
           axios
             .get(
-              `${import.meta.env.VITE_API_SERVER_URL
-              }/api/baskets/top-baskets/suggestion`
+              `/api/baskets/top-baskets/suggestion`
             )
             .catch(() => ({ data: { data: [] } })),
           axios
             .get(
-              `${import.meta.env.VITE_API_SERVER_URL
-              }/api/testimonials/published`
+              `/api/testimonials/published`
             )
             .catch(() => ({ data: { data: { testimonials: [] } } })),
         ]);
@@ -601,7 +599,7 @@ const Homepage = () => {
 
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/orders/calculate-price`,
+        `/api/orders/calculate-price`,
         { items: normalizedItems }
       );
 
@@ -818,7 +816,7 @@ const Homepage = () => {
     try {
       // Increment click count on backend
       await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/baskets/click/${offer._id}`
+        `/api/baskets/click/${offer._id}`
       );
     } catch (error) {
       console.error("Error tracking offer click:", error);

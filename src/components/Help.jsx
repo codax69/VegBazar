@@ -62,7 +62,7 @@ const Help = () => {
 
     try {
       const submitTestimonial = await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/testimonials`,
+        `/api/testimonials`,
         feedback
       );
       const data = await submitTestimonial.data;

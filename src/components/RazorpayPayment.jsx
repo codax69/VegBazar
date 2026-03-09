@@ -126,7 +126,7 @@ const RazorpayPayment = ({
     const fetchOrderCount = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_SERVER_URL}/api/orders/today/total`,
+          `/api/orders/today/total`,
           { timeout: 10000 },
         );
         setOrderCount(response.data?.data.count + 1);
@@ -282,7 +282,7 @@ const RazorpayPayment = ({
 
       // Create order in backend
       const result = await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
+        `/api/orders/create-order`,
         orderData,
         { timeout: 15000 },
       );
@@ -349,7 +349,7 @@ const RazorpayPayment = ({
             // console.log("🔍 Verify Data being sent:", verifyData);
 
             const verifyResult = await axios.post(
-              `${import.meta.env.VITE_API_SERVER_URL}/api/orders/verify-payment`,
+              `/api/orders/verify-payment`,
               verifyData,
               { timeout: 15000 },
             );
@@ -472,11 +472,10 @@ const RazorpayPayment = ({
           <button
             onClick={createOrder}
             disabled={isCheckoutDisabled || isLoading}
-            className={`w-full font-funnel py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${
-              isCheckoutDisabled || isLoading
+            className={`w-full font-funnel py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${isCheckoutDisabled || isLoading
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
-            }`}
+              }`}
           >
             {isLoading ? (
               <>

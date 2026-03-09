@@ -33,7 +33,7 @@ const fetchOrderHistory = async (params, token) => {
   }
 
   const response = await fetch(
-    `${import.meta.env.VITE_API_SERVER_URL}/api/user/order-history?${queryParams.toString()}`,
+    `/api/user/order-history?${queryParams.toString()}`,
     {
       method: "GET",
       headers: {

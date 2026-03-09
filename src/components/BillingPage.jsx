@@ -22,8 +22,6 @@ import { BiLeaf } from "react-icons/bi";
 import OrderLoading from "./OrderLoading";
 import OrderFailed from "./OrderFailed";
 
-const API_URL = import.meta.env.VITE_API_SERVER_URL;
-
 // Memoized components for better performance
 const PaymentMethodButton = memo(({ method, isActive, onClick }) => {
   const isOnline = method === "ONLINE";
@@ -134,7 +132,7 @@ const BillingPage = () => {
         // console.log("🔄 Fetching addresses for user:", userId);
 
         const { data } = await axios.get(
-          `${API_URL}/api/addresses/active`,
+          `/api/addresses/active`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('accessToken')}`
@@ -196,7 +194,7 @@ const BillingPage = () => {
           try {
             // console.log("🔄 Refetching addresses...");
             const { data } = await axios.get(
-              `${API_URL}/api/addresses/active`,
+              `/api/addresses/active`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem('accessToken')}`
@@ -250,7 +248,7 @@ const BillingPage = () => {
     const fetchOrderCount = async () => {
       try {
         setIsLoadingOrderCount(true);
-        const res = await axios.get(`${API_URL}/api/orders/today/total`);
+        const res = await axios.get(`/api/orders/today/total`);
         setOrderCount(res.data?.data.count + 1);
       } catch (err) {
         console.error("Error fetching order count:", err);
@@ -345,7 +343,7 @@ const BillingPage = () => {
 
       try {
         const res = await axios.post(
-          `${API_URL}/api/orders/create-order`,
+          `/api/orders/create-order`,
           orderData
         );
 

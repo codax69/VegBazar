@@ -24,8 +24,6 @@ import PWAInstallBanner from "./components/PWAInstallBanner";
 import OrderSuccess from "./components/OrderSuccess";
 import Footer from "./components/Footer";
 
-const API_URL = import.meta.env.VITE_API_SERVER_URL;
-
 const HomePage = lazy(() => import("./components/HomePage"));
 const CustomerInfo = lazy(() => import("./components/CustomerInfo"));
 const VegetableOffers = lazy(() => import("./components/VegetableOffers"));
@@ -133,7 +131,7 @@ const AppWithOrderContext = () => {
         return;
       }
 
-      const response = await axios.get(`${API_URL}/api/baskets`);
+      const response = await axios.get(`/api/baskets`);
       setOffers(response.data?.data.baskets);
       // console.log(offers)
       sessionStorage.setItem(

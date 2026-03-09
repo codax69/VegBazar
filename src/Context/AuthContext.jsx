@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
 
-const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || 'http://localhost:4000/api';
-
 // Create Auth Context
 const AuthContext = createContext(null);
 
@@ -51,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   // Refresh access token using refresh token
   const refreshAccessToken = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/refresh-token`, {
+      const response = await fetch(`/api/auth/refresh-token`, {
         method: 'POST',
         credentials: 'include', // Send refresh token cookie
         headers: {

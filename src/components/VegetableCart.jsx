@@ -19,8 +19,6 @@ import RazorpayPayment from "./RazorpayPayment";
 import CouponCodeSection from "./CouponCodeSection";
 import AddressSection from "./AddressSection";
 import OrderLoading from "./OrderLoading";
-const API_URL = import.meta.env.VITE_API_SERVER_URL;
-
 const getOrderItems = (order) => {
   if (!order) return [];
   if (Array.isArray(order)) return order;
@@ -115,7 +113,7 @@ const VegetableCart = () => {
 
       try {
         const { data } = await axios.get(
-          `${API_URL}/api/addresses/active`,
+          `/api/addresses/active`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -145,7 +143,7 @@ const VegetableCart = () => {
 
     const fetchOrderCount = async () => {
       try {
-        const { data } = await axios.get(`${API_URL}/api/orders/today/total`);
+        const { data } = await axios.get(`/api/orders/today/total`);
         if (isMounted) {
           setOrderCount(data?.data.count + 1);
         }
@@ -273,7 +271,7 @@ const VegetableCart = () => {
     }
 
     const { data } = await axios.post(
-      `${API_URL}/api/orders/calculate-price`,
+      `/api/orders/calculate-price`,
       payload,
     );
     return data.data;
@@ -538,7 +536,7 @@ const VegetableCart = () => {
       // // console.log("Order Data:", orderData);
       // Handle COD payment
       if (paymentMethod === "COD") {
-        await axios.post(`${API_URL}/api/orders/create-order`, orderData);
+        await axios.post(`/api/orders/create-order`, orderData);
 
         sessionStorage.setItem("lastOrderData", JSON.stringify(orderData));
         sessionStorage.setItem("orderJustPlaced", "true");

@@ -80,7 +80,7 @@ const OtpVerification = ({ onSuccess }) => {
     setError("");
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/otp/verify`, {
+      const response = await axios.post(`/api/otp/verify`, {
         email: formData.email,
         otp: otpString,
       });
@@ -108,7 +108,7 @@ const OtpVerification = ({ onSuccess }) => {
     setError("");
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_SERVER_URL}/api/otp/resend`, {
+      const response = await axios.post(`/api/otp/resend`, {
         email: formData.email,
       });
 
@@ -172,10 +172,10 @@ const OtpVerification = ({ onSuccess }) => {
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
               className={`w-12 h-12 text-center text-xl font-semibold border-2 rounded-lg transition-all duration-200 ${digit
-                  ? "border-green-500 bg-green-50 text-green-700"
-                  : error
-                    ? "border-red-300 bg-red-50"
-                    : "border-gray-300 bg-white hover:border-gray-400 focus:border-green-500"
+                ? "border-green-500 bg-green-50 text-green-700"
+                : error
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-300 bg-white hover:border-gray-400 focus:border-green-500"
                 } focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-20`}
               autoComplete="off"
             />
@@ -194,8 +194,8 @@ const OtpVerification = ({ onSuccess }) => {
         onClick={handleVerifyOtp}
         disabled={loading || otp.join("").length !== 6}
         className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 ${loading || otp.join("").length !== 6
-            ? "bg-gray-300 cursor-not-allowed"
-            : "bg-green-600 hover:bg-green-700 transform hover:scale-[1.02] active:scale-[0.98]"
+          ? "bg-gray-300 cursor-not-allowed"
+          : "bg-green-600 hover:bg-green-700 transform hover:scale-[1.02] active:scale-[0.98]"
           }`}
       >
         {loading ? (

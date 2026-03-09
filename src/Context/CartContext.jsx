@@ -49,7 +49,7 @@ export const CartProvider = ({ children }) => {
       }));
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/orders/calculate-price`,
+        `/api/orders/calculate-price`,
         { items },
         { timeout: 10000 } // Add timeout
       );

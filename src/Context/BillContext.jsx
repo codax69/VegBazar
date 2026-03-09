@@ -2,8 +2,6 @@ import React, { createContext, useContext, useState, useMemo, useCallback, useEf
 import axios from 'axios';
 import { useOrderContext } from './OrderContext';
 
-const API_URL = import.meta.env.VITE_API_SERVER_URL;
-
 const BillContext = createContext();
 
 export const useBillContext = () => {
@@ -16,7 +14,7 @@ export const useBillContext = () => {
 
 export const BillProvider = ({ children }) => {
   const { selectedOffer, selectedVegetables, vegetableOrder, paymentMethod } = useOrderContext();
-  
+
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [deliveryCharge, setDeliveryCharge] = useState(20);
@@ -50,7 +48,7 @@ export const BillProvider = ({ children }) => {
   useEffect(() => {
     if (isCustomOrder && vegetableOrder) {
       const summary = getOrderSummary(vegetableOrder);
-      
+
       // Set coupon data from vegetableOrder
       if (vegetableOrder.coupon) {
         setAppliedCoupon(vegetableOrder.coupon);
@@ -59,7 +57,7 @@ export const BillProvider = ({ children }) => {
         setAppliedCoupon(null);
         setCouponDiscount(0);
       }
-      
+
       // Set delivery charge from summary
       if (summary?.deliveryCharges !== undefined) {
         setDeliveryCharge(summary.deliveryCharges);
@@ -71,7 +69,7 @@ export const BillProvider = ({ children }) => {
   useEffect(() => {
     const fetchOrderCount = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/orders/today/total`);
+        const res = await axios.get(`/api/orders/today/total`);
         setOrderCount(res.data.data.count + 1);
       } catch (err) {
         console.error('Error fetching order count:', err);
@@ -254,32 +252,32 @@ export const BillProvider = ({ children }) => {
     orderType,
     isCustomOrder,
     isBasketOrder,
-    
+
     // Coupon state
     appliedCoupon,
     couponDiscount,
     deliveryCharge,
-    
+
     // Calculations
     basketCalculations,
     customCalculations,
     totalAmount,
-    
+
     // Display data
     displayItems,
     packageName,
     orderCount,
-    
+
     // Payment method
     paymentMethod,
-    
+
     // Functions
     generateOrderId,
     handleApplyCoupon,
     handleRemoveCoupon,
     getOrderItems,
     getOrderSummary,
-    
+
     // State setters (for external updates)
     setAppliedCoupon,
     setCouponDiscount,

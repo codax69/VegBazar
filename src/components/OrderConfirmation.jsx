@@ -192,7 +192,7 @@ const OrderConfirmation = () => {
 
       try {
         const res = await axios.post(
-          `${import.meta.env.VITE_API_SERVER_URL}/api/orders/create-order`,
+          `/api/orders/create-order`,
           orderData
         );
 

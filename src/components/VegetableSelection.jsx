@@ -152,7 +152,7 @@ const VegetableSelection = () => {
   const [vegetables, setVegetables] = useState([]);
   const [loading, setLoading] = useState(true);
   // Memoize API URL
-  const API_URL = useMemo(() => import.meta.env.VITE_API_SERVER_URL, []);
+  const API_URL = "";
 
   // Get effective vegetable limit (treat 0 as 1)
   const effectiveLimit = useMemo(() => {

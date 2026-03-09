@@ -161,8 +161,8 @@ const VegetableCard = memo(
     return (
       <div
         className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${isCompletelyOutOfStock
-            ? "bg-gray-100 border-gray-300 opacity-75"
-            : "bg-[#f0fcf6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
+          ? "bg-gray-100 border-gray-300 opacity-75"
+          : "bg-[#f0fcf6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
           }`}
       >
         {/* Vegetable Image */}
@@ -182,14 +182,14 @@ const VegetableCard = memo(
             ) : (
               <div
                 className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br rounded-lg sm:rounded-xl mb-1.5 sm:mb-2 flex items-center justify-center mx-auto ${isCompletelyOutOfStock
-                    ? "from-gray-200 to-gray-300"
-                    : "from-gray-50 to-[#effdf5]"
+                  ? "from-gray-200 to-gray-300"
+                  : "from-gray-50 to-[#effdf5]"
                   }`}
               >
                 <Leaf
                   className={`w-8 h-8 sm:w-10 sm:h-10 ${isCompletelyOutOfStock
-                      ? "text-gray-400"
-                      : "text-[#0e540b]/30"
+                    ? "text-gray-400"
+                    : "text-[#0e540b]/30"
                     }`}
                 />
               </div>
@@ -228,10 +228,10 @@ const VegetableCard = memo(
                 }}
                 disabled={!option.inStock}
                 className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-all ${!option.inStock
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed line-through"
-                    : currentOption === option.value
-                      ? "bg-[#0e540b] text-white"
-                      : "bg-gray-100 text-black hover:bg-gray-200"
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed line-through"
+                  : currentOption === option.value
+                    ? "bg-[#0e540b] text-white"
+                    : "bg-gray-100 text-black hover:bg-gray-200"
                   }`}
               >
                 {option.label}
@@ -323,8 +323,8 @@ const CustomizedVegetableSelection = () => {
     setSelectedVegetables,
   } = useOrderContext();
 
-  // Memoize API URL
-  const API_URL = useMemo(() => import.meta.env.VITE_API_SERVER_URL, []);
+  // API URL
+  const API_URL = "";
 
   // Load cart from localStorage on mount
   useEffect(() => {

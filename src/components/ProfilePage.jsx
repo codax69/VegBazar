@@ -24,8 +24,6 @@ const ProfilePage = () => {
   // Call useWallet hook unconditionally at the top level
   const { balance = 0, hasWallet = false, loading: walletLoading = false, refreshBalance = () => { } } = useWallet();
 
-  const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL
-
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false); // Keep existing loading state
   const [editedData, setEditedData] = useState({ // Add editedData state
@@ -130,7 +128,7 @@ const ProfilePage = () => {
 
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await fetch(`${API_BASE_URL}/api/auth/update-details`, {
+      const response = await fetch(`/api/auth/update-details`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

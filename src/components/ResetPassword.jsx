@@ -53,7 +53,7 @@ const ResetPassword = () => {
             const token = window.location.pathname.split('/').pop();
 
             const response = await fetch(
-                `${import.meta.env.VITE_API_SERVER_URL}/api/auth/reset-password/${token}`,
+                `/api/auth/reset-password/${token}`,
                 {
                     method: "POST",
                     headers: {

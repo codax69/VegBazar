@@ -12,7 +12,7 @@ const VegetableOffers = () => {
     const fetchOffers = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_SERVER_URL}/api/baskets`
+          `/api/baskets`
         );
         // console.log("API Response:", response.data);
         // Access baskets from data.data.baskets based on API structure
@@ -30,7 +30,7 @@ const VegetableOffers = () => {
     try {
       // Increment click count on backend
       await axios.post(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/baskets/click/${offer._id}`
+        `/api/baskets/click/${offer._id}`
       );
     } catch (error) {
       console.error("Error tracking offer click:", error);

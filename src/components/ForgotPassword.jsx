@@ -22,7 +22,7 @@ const ForgotPassword = () => {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/auth/forgot-password`,
+        `/api/auth/forgot-password`,
         {
           method: "POST",
           headers: {

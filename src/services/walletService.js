@@ -1,7 +1,5 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_SERVER_URL;
-
 /**
  * Wallet API Service
  * Handles all wallet-related API calls
@@ -13,7 +11,7 @@ const API_URL = import.meta.env.VITE_API_SERVER_URL;
  */
 export const getWallet = async () => {
   try {
-    const response = await axios.get(`${API_URL}/api/wallet`);
+    const response = await axios.get(`/api/wallet`);
     return response.data;
   } catch (error) {
     if (error.response?.status === 404) {

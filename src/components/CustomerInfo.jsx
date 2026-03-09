@@ -194,7 +194,7 @@ const CustomerInfo = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/addresses/`,
+        `/api/addresses/`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -225,7 +225,7 @@ const CustomerInfo = () => {
   const fetchCities = useCallback(async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/cities`
+        `/api/cities`
       );
       setCities(response.data);
     } catch (error) {
@@ -274,7 +274,7 @@ const CustomerInfo = () => {
 
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/addresses/${addressId}`,
+        `/api/addresses/${addressId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -305,7 +305,7 @@ const CustomerInfo = () => {
 
     try {
       const response = await axios.put(
-        `${import.meta.env.VITE_API_SERVER_URL}/api/addresses/${addressId}/default`,
+        `/api/addresses/${addressId}/default`,
         {},
         {
           headers: {
@@ -329,7 +329,7 @@ const CustomerInfo = () => {
 
       if (editingAddress) {
         const response = await axios.put(
-          `${import.meta.env.VITE_API_SERVER_URL}/api/addresses/${editingAddress._id}`,
+          `/api/addresses/${editingAddress._id}`,
           data,
           {
             headers: {
@@ -339,7 +339,7 @@ const CustomerInfo = () => {
         );
       } else {
         const response = await axios.post(
-          `${import.meta.env.VITE_API_SERVER_URL}/api/addresses/add`,
+          `/api/addresses/add`,
           data,
           {
             headers: {
