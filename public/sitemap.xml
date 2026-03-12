@@ -5,120 +5,121 @@
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
   <url>
-    <loc>https://vegbazar.com/</loc>
+    <loc>https://vegbazar.store/</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/about</loc>
+    <loc>https://vegbazar.store/about</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/contact</loc>
+    <loc>https://vegbazar.store/contact</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/products</loc>
+    <loc>https://vegbazar.store/products</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/categories</loc>
+    <loc>https://vegbazar.store/categories</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/categories/vegetables</loc>
+    <loc>https://vegbazar.store/categories/vegetables</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/categories/fruits</loc>
+    <loc>https://vegbazar.store/categories/fruits</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/categories/leafy-greens</loc>
+    <loc>https://vegbazar.store/categories/leafy-greens</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/categories/herbs</loc>
-    <lastmod>2026-01-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <url>
-    <loc>https://vegbazar.com/categories/exotic</loc>
+    <loc>https://vegbazar.store/categories/herbs</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/deals</loc>
+    <loc>https://vegbazar.store/categories/exotic</loc>
+    <lastmod>2026-01-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://vegbazar.store/deals</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/seasonal</loc>
+    <loc>https://vegbazar.store/seasonal</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/blog</loc>
+    <loc>https://vegbazar.store/blog</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/privacy-policy</loc>
+    <loc>https://vegbazar.store/privacy-policy</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/terms-of-service</loc>
+    <loc>https://vegbazar.store/terms-of-service</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/faq</loc>
+    <loc>https://vegbazar.store/faq</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://vegbazar.com/delivery-info</loc>
+    <loc>https://vegbazar.store/delivery-info</loc>
     <lastmod>2026-01-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+</urlset>

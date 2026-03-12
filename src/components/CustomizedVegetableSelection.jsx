@@ -162,7 +162,7 @@ const VegetableCard = memo(
       <div
         className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${isCompletelyOutOfStock
           ? "bg-gray-100 border-gray-300 opacity-75"
-          : "bg-[#f0fcf6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
+          : "bg-[#ffffff] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
           }`}
       >
         {/* Vegetable Image */}

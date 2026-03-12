@@ -28,7 +28,7 @@ export const getWallet = async () => {
  */
 export const createWallet = async () => {
   try {
-    const response = await axios.post(`${API_URL}/api/wallet`);
+    const response = await axios.post(`/api/wallet`);
     return response.data;
   } catch (error) {
     throw error;
@@ -41,7 +41,7 @@ export const createWallet = async () => {
  */
 export const getBalance = async () => {
   try {
-    const response = await axios.get(`${API_URL}/api/wallet/balance`);
+    const response = await axios.get(`/api/wallet/balance`);
     return response.data;
   } catch (error) {
     throw error;
@@ -70,7 +70,7 @@ export const getTransactions = async ({
     if (source) params.append("source", source);
 
     const response = await axios.get(
-      `${API_URL}/api/wallet/transactions?${params.toString()}`,
+      `/api/wallet/transactions?${params.toString()}`,
     );
     return response.data;
   } catch (error) {
@@ -99,7 +99,7 @@ export const hasSufficientBalance = async (amount) => {
  */
 export const initiateAddMoney = async (amount) => {
   try {
-    const response = await axios.post(`${API_URL}/api/wallet/add-money`, {
+    const response = await axios.post(`/api/wallet/add-money`, {
       amount,
     });
     return response.data;
@@ -116,7 +116,7 @@ export const initiateAddMoney = async (amount) => {
 export const verifyAddMoney = async (paymentData) => {
   try {
     const response = await axios.post(
-      `${API_URL}/api/wallet/verify-payment`,
+      `/api/wallet/verify-payment`,
       paymentData,
     );
     return response.data;

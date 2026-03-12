@@ -6,7 +6,7 @@ const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="bg-gradient-to-r from-[#f0fdf4] to-[#f0fdf4] pt-12 pb-6 border-t border-[#0e540b]/10 mt-auto font-sans">
+        <footer className="bg-[#ffffff] pt-12 pb-6 border-t border-[#0e540b]/10 mt-auto font-sans">
             <div className="container mx-auto px-4 max-w-7xl">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
 
@@ -100,13 +100,13 @@ const Footer = () => {
 
                         <h4 className="text-sm font-semibold text-gray-700 mb-3">Follow Us</h4>
                         <div className="flex gap-4">
-                            <a href="#" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all border border-blue-100">
+                            <a href="https://www.facebook.com/vegbazar" target="_blank" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all border border-blue-100">
                                 <Facebook className="w-5 h-5" />
                             </a>
-                            <a href="#" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-pink-600 shadow-sm hover:shadow-md hover:bg-pink-50 transition-all border border-pink-100">
+                            <a href="https://www.instagram.com/vegbazar.store" target="_blank" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-pink-600 shadow-sm hover:shadow-md hover:bg-pink-50 transition-all border border-pink-100">
                                 <Instagram className="w-5 h-5" />
                             </a>
-                            <a href="#" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-sky-500 shadow-sm hover:shadow-md hover:bg-sky-50 transition-all border border-sky-100">
+                            <a href="https://www.twitter.com/vegbazar.store" target="_blank" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-sky-500 shadow-sm hover:shadow-md hover:bg-sky-50 transition-all border border-sky-100">
                                 <Twitter className="w-5 h-5" />
                             </a>
                         </div>
