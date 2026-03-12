@@ -619,7 +619,7 @@ const VegetableCart = () => {
               </h2>
             </div>
           </div>
-          <div className="bg-[#f0fcf6] p-8 md:p-6 rounded-lg shadow-md text-center">
+          <div className="bg-[#ffffff] p-8 md:p-6 rounded-lg shadow-md text-center">
             <ShoppingBag size={48} className="mx-auto text-gray-300 mb-2" />
             <h3 className="font-funnel text-lg md:text-base font-semibold text-gray-600 mb-1">
               Your cart is empty
@@ -670,7 +670,7 @@ const VegetableCart = () => {
               />
             </div>
 
-            <div className="lg:hidden bg-[#f0fcf6] p-4 rounded-lg shadow-md">
+            <div className="lg:hidden bg-[#ffffff] p-4 rounded-lg shadow-md">
               <h3 className="font-funnel text-base font-bold text-gray-800 mb-3 border-b pb-2">
                 Bill Summary
               </h3>
@@ -782,7 +782,7 @@ const VegetableCart = () => {
 };
 
 const CartItems = React.memo(({ items, updateQuantity, removeItem }) => (
-  <div className="bg-[#f0fcf6] p-3 md:p-2.5 rounded-lg shadow-md">
+  <div className="bg-[#ffffff] p-3 md:p-2.5 rounded-lg shadow-md">
     <h3 className="font-funnel text-base md:text-sm font-bold text-gray-800 mb-2 md:mb-1.5 border-b pb-1.5 md:pb-1">
       Order Items ({items.length} items,{" "}
       {items.reduce((sum, item) => sum + item.quantity, 0)} total quantity)
@@ -883,7 +883,7 @@ const CartItem = React.memo(({ item, index, updateQuantity, removeItem }) => {
 
 const PaymentMethodSection = React.memo(
   ({ paymentMethod, setPaymentMethod }) => (
-    <div className="bg-[#f0fcf6] p-4 md:p-3 rounded-lg shadow-md">
+    <div className="bg-[#ffffff] p-4 md:p-3 rounded-lg shadow-md">
       <h3 className="font-funnel text-base md:text-sm font-bold text-gray-800 mb-3 md:mb-2 flex items-center gap-2">
         <CreditCard size={18} className="text-[#0e540b] md:w-4 md:h-4" />
         Select Payment Method
@@ -965,7 +965,7 @@ const PriceSummary = React.memo(
     selectedAddress,
   }) => (
     <div className="lg:w-1/3 hidden lg:block">
-      <div className="bg-[#f0fcf6] p-3 rounded-lg shadow-md lg:sticky lg:top-4 space-y-3">
+      <div className="bg-[#ffffff] p-3 rounded-lg shadow-md lg:sticky lg:top-4 space-y-3">
         <CouponCodeSection
           onApplyCoupon={onApplyCoupon}
           appliedCoupon={appliedCoupon}
@@ -1071,7 +1071,7 @@ const MobileCheckoutButton = React.memo(
     customerInfo,
     selectedAddress,
   }) => (
-    <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[#f0fcf6] border-t border-gray-200 shadow-2xl z-50">
+    <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[#ffffff] border-t border-gray-200 shadow-2xl z-50">
       <div className="px-4 py-3">
         {paymentMethod === "ONLINE" ? (
           <div className="w-full">

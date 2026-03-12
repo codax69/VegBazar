@@ -35,7 +35,7 @@ const CashbackModal = ({ isOpen, cashbackAmount, newBalance, onClose }) => {
             onClick={handleClose}
         >
             <div
-                className={`bg-gradient-to-br from-white to-[#f0fcf6] rounded-3xl p-8 max-w-[450px] w-full relative shadow-[0_20px_60px_rgba(14,84,11,0.3)] overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${animate ? 'scale-100 translate-y-0 opacity-100' : 'scale-80 translate-y-5 opacity-0'}`}
+                className={`bg-gradient-to-br from-white to-[#ffffff] rounded-3xl p-8 max-w-[450px] w-full relative shadow-[0_20px_60px_rgba(14,84,11,0.3)] overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${animate ? 'scale-100 translate-y-0 opacity-100' : 'scale-80 translate-y-5 opacity-0'}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Close Button */}

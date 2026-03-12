@@ -857,7 +857,7 @@ const CustomizedVegetableSelection = () => {
                         {totalItems}
                       </p>
                     </div>
-                    <div className="w-full sm:flex-1 overflow-x-auto px-2 sm:px-3 py-1.5 sm:py-2 bg-gradient-to-r from-[#f0fcf6] to-[#e8f9ed] rounded-lg md:mx-2">
+                    <div className="w-full sm:flex-1 overflow-x-auto px-2 sm:px-3 py-1.5 sm:py-2 bg-gradient-to-r from-[#ffffff] to-[#e8f9ed] rounded-lg md:mx-2">
                       <div className="flex gap-1.5 sm:gap-2 min-w-max">
                         {cartItemsWithDetails
                           .slice(0, 10)

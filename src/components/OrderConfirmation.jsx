@@ -261,7 +261,7 @@ const OrderConfirmation = () => {
           <span className="font-medium font-funnel text-sm">Back</span>
         </button>
 
-        <div className="bg-[#f0fcf6] rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-[#ffffff] rounded-xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-[#0e540b] to-green-700 p-4">
             <div className="flex items-center justify-center gap-2 mb-1">
               <Package className="w-6 h-6 text-white" />

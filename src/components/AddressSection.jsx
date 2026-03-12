@@ -3,7 +3,7 @@ import { MapPin, Plus, Edit, CheckCircle } from "lucide-react";
 
 const AddressSection = React.memo(
   ({ defaultAddress, onChangeAddress, user, isLoading = false }) => (
-    <div className="bg-[#f0fcf6] p-4 md:p-3 rounded-lg shadow-md">
+    <div className="bg-[#ffffff] p-4 md:p-3 rounded-lg shadow-md">
       <h3 className="font-funnel text-base md:text-sm font-bold text-gray-800 mb-3 md:mb-2 flex items-center gap-2">
         <MapPin size={18} className="text-[#0e540b] md:w-4 md:h-4" />
         Delivery Address

@@ -43,7 +43,7 @@ const OrderFailed = lazy(() => import("./components/OrderFailed"));
 const ProfilePage = lazy(() => import("./components/ProfilePage"));
 const Wallet = lazy(() => import("./components/Wallet"));
 const WalletTransactions = lazy(() => import("./components/WalletTransactions"));
-
+const VideoPlayer = lazy(() => import("./components/VideoPlayer"));
 // Loading component
 const LoadingSpinner = () => (
   <div
@@ -247,7 +247,8 @@ const AppWithOrderContext = () => {
     "/order-failed",
     "/profile",
     "/wallet",
-    "/wallet/transactions"
+    "/wallet/transactions",
+    "/video"
   ];
 
   return (
@@ -377,6 +378,7 @@ const AppWithOrderContext = () => {
                       </AuthProtectedRoute>
                     }
                   />
+                  <Route path="/video" element={<VideoPlayer />} />
                 </Routes>
               </Suspense>
             </div>

@@ -100,7 +100,7 @@ const Help = () => {
           </p>
         </div>
 
-        <div className="bg-[#f0fcf6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
+        <div className="bg-[#ffffff] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl md:text-2xl font-funnel font-semibold mb-3 flex items-center gap-2 text-[#0e540b]">
             <MessageSquare className="w-5 h-5" /> Get in Touch
           </h2>

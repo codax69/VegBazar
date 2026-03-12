@@ -541,7 +541,7 @@ const BillingPage = () => {
           {/* Left Section */}
           <div className="lg:col-span-2 space-y-3">
             {/* Selected Plan */}
-            <div className="bg-[#f0fcf6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+            <div className="bg-[#ffffff] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-base font-funnel font-bold text-gray-800 flex items-center gap-1.5">
                   <FiPackage className="size-4 text-[#0e540b]" />
