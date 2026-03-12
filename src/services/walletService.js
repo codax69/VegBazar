@@ -15,7 +15,6 @@ export const getWallet = async () => {
     return response.data;
   } catch (error) {
     if (error.response?.status === 404) {
-      // Wallet doesn't exist
       return null;
     }
     throw error;
