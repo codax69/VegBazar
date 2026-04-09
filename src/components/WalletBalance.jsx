@@ -6,7 +6,6 @@ import { Wallet as WalletIcon, TrendingUp, TrendingDown } from 'lucide-react';
 const WalletBalance = ({ showActions = true }) => {
     const navigate = useNavigate();
     const { wallet, balance, loading, hasWallet } = useWallet();
-
     if (loading) {
         return (
             <div className="bg-gray-100 rounded-2xl p-6 text-white shadow-[0_10px_40px_rgba(14,84,11,0.2)] relative overflow-hidden transition-all duration-200 min-h-[180px]">
@@ -22,7 +21,7 @@ const WalletBalance = ({ showActions = true }) => {
     const isActive = wallet?.status === 'active';
 
     return (
-        <div className={`rounded-2xl p-6 text-whitev pt-10 shadow-[0_10px_40px_rgba(14,84,11,0.2)] relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_48px_rgba(14,84,11,0.3)] ${!isActive ? 'bg-gradient-to-br from-gray-500 to-gray-600 opacity-70' : 'bg-gradient-to-br from-[#0e540b] to-[#165a13]'}`}>
+        <div className={`rounded-2xl p-6 text-white pt-10 shadow-[0_10px_40px_rgba(14,84,11,0.2)] relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_48px_rgba(14,84,11,0.3)] ${!isActive ? 'bg-gradient-to-br from-gray-500 to-gray-600 opacity-70' : 'bg-gradient-to-br from-[#0e540b] to-[#165a13]'}`}>
             <div className="flex justify-between items-center mb-5">
                 <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-[10px]">
                     <WalletIcon size={24} />

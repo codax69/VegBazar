@@ -256,7 +256,7 @@ const AppWithOrderContext = () => {
       <CartProvider>
         <BillProvider>
           <BackButtonHandler />
-          <div className="min-h-screen bg-[#ffffff] flex flex-col">
+          <div className="min-h-screen bg-[#f5f1e8] flex flex-col">
             <PWAInstallBanner />
             <Navbar />
             <div className="pt-10 flex-1 container max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-2">
@@ -335,7 +335,7 @@ const AppWithOrderContext = () => {
                     path="/order-success"
                     element={
                       <AuthProtectedRoute redirectTo="/login">
-                        <BillingSuccess />
+                        <OrderSuccess />
                       </AuthProtectedRoute>
                     }
                   />

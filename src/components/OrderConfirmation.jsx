@@ -52,23 +52,20 @@ const OrderConfirmation = () => {
   const [submitError, setSubmitError] = useState(null);
   const [savedOrderData, setSavedOrderData] = useState(null);
 
-  // ✅ Check for saved order on mount
+  // ✅ Fix 12: Standardize session storage loading
   useEffect(() => {
     const orderDataFromStorage = sessionStorage.getItem("lastOrderData");
 
     if (orderDataFromStorage) {
       try {
         const parsedData = JSON.parse(orderDataFromStorage);
-        // Handle both direct data and nested response structure
-        const actualData =
-          parsedData?.data?.data || parsedData?.data || parsedData;
+        // Consistently unwrap the API response structure
+        const actualData = parsedData?.data || parsedData;
         setSavedOrderData(actualData);
         setIsOrderPlaced(true);
       } catch (error) {
         console.error("❌ Error parsing order data:", error);
       }
-    } else {
-      // console.log("ℹ️ No saved order data found");
     }
   }, [setIsOrderPlaced]);
 
@@ -103,7 +100,8 @@ const OrderConfirmation = () => {
       return savedOrderData;
     }
 
-    const orderId = generateOrderId(orderCount);
+    // ✅ Fix 8: Don't show a fake client-side ID before placement
+    const orderId = savedOrderData ? savedOrderData.orderId : "Will be assigned on confirmation";
 
     // Custom order preparation
     if (isCustomOrder && customCalculations) {
@@ -197,9 +195,10 @@ const OrderConfirmation = () => {
         );
 
         if (res.status >= 200 && res.status < 300) {
-          // ✅ Store the order data from the response (actual created order)
-          const createdOrder = res.data?.data || orderData;
+          // ✅ Fix 12: Consistently store response.data (ApiResponse.data)
+          const createdOrder = res.data?.data || res.data;
           sessionStorage.setItem("lastOrderData", JSON.stringify(createdOrder));
+          setSavedOrderData(createdOrder);
           setIsOrderPlaced(true);
         } else {
           setSubmitError("Order save failed. Try again.");
@@ -221,9 +220,8 @@ const OrderConfirmation = () => {
 
   // ✅ Show success if order is placed
   if (isOrderPlaced && orderData) {
-    // Extract order data - handle both direct orderData and nested response.data.data
-    const actualOrderData =
-      orderData?.data?.data || orderData?.data || orderData;
+    // ✅ Logic moved to useEffect for consistency
+    const actualOrderData = orderData;
 
     return (
       <OrderSuccess orderData={actualOrderData} onNewOrder={handleNewOrder} />

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { useOrderContext } from './OrderContext';
+import { useLocation } from 'react-router-dom';
 
 const BillContext = createContext();
 
@@ -64,9 +65,16 @@ export const BillProvider = ({ children }) => {
       }
     }
   }, [isCustomOrder, vegetableOrder]);
-
+  
+  const location = useLocation()
   // Fetch daily order count
   useEffect(() => {
+    const isBillingOrCart =
+      location.pathname.includes('/billing') ||
+      location.pathname.includes('/cart');
+
+    if (!isBillingOrCart) return; // ✅ Early return if not on target page
+
     const fetchOrderCount = async () => {
       try {
         const res = await axios.get(`/api/orders/today/total`);
@@ -75,8 +83,9 @@ export const BillProvider = ({ children }) => {
         console.error('Error fetching order count:', err);
       }
     };
+
     fetchOrderCount();
-  }, []);
+  }, [location.pathname]);
 
   // Calculate custom order total
   const calculateCustomTotal = useCallback(() => {
@@ -195,7 +204,7 @@ export const BillProvider = ({ children }) => {
     try {
       if (isBasketOrder) {
         // Basket order coupon validation
-        const { data } = await axios.post(`${API_URL}/api/orders/validate-coupon-basket`, {
+        const { data } = await axios.post(`/api/orders/validate-coupon-basket`, {
           offerId: selectedOffer._id || selectedOffer.id,
           offerPrice: selectedOffer.price,
           couponCode: couponCode,
@@ -217,7 +226,7 @@ export const BillProvider = ({ children }) => {
           quantity: item.quantity,
         }));
 
-        const { data } = await axios.post(`${API_URL}/api/orders/calculate-price`, {
+        const { data } = await axios.post(`/api/orders/calculate-price`, {
           items: normalizedItems,
           couponCode: couponCode,
         });

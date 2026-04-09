@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 const OrderLoading = ({ loadingText, loadingMsg = "Please wait" }) => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-[#ffffff] p-8 rounded-2xl shadow-lg text-center">
+      <div className="max-w-md w-full bg-[#f3efe6] p-8 rounded-2xl shadow-lg text-center">
         <div className="flex justify-center mb-6">
           <Loader2 className="h-16 w-16 text-[#0e540b] animate-spin" />
         </div>

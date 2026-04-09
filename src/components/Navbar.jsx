@@ -168,13 +168,13 @@ const Navbar = () => {
   return (
     <>
       {/* Top Navbar - Desktop & Mobile */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-lg border-b border-white/20 shadow-sm transition-all duration-300">
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-[#f3efe6]/70 backdrop-blur-lg border-b border-white/20 shadow-sm transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <button
               onClick={() => handleNavigate("/")}
-              className="flex flex-col items-center justify-center text-2xl cursor-pointer select-none transition-transform hover:scale-105"
+              className="flex flex-col items-center justify-center text-2xl cursor-pointer select-none transition-transform hover:scale-105 shrink-0"
               style={{ fontFamily: "Trirong, serif" }}
               aria-label="VegBazar Home"
             >
@@ -184,13 +184,13 @@ const Navbar = () => {
                 className="w-6 sm:w-7 md:w-8 lg:w-9"
                 loading="lazy"
               />
-              <span className="text-[#0e540b] bg-white/40 backdrop-blur-sm px-1.5 sm:px-2 rounded-md text-xs sm:text-sm md:text-md font-extrabold tracking-wide border border-white/50">
+              <span className="text-[#0e540b] px-0.5 text-[10px] sm:text-xs md:text-sm font-extrabold tracking-wide">
                 VegBazar
               </span>
             </button>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1 lg:gap-2">
+            <div className="hidden md:flex items-center gap-0 lg:gap-2">
               {desktopNavItems.map(({ path, icon: Icon, label }) => {
                 const isActive = currentPath === path;
                 return (
@@ -201,8 +201,8 @@ const Navbar = () => {
                       flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
                       transition-all duration-200 ease-out
                       ${isActive
-                        ? "bg-green-100/80 text-black shadow-sm border border-green-200/50 backdrop-blur-sm"
-                        : "text-black hover:bg-white/50 hover:backdrop-blur-sm"
+                        ? "bg-[#f3efe6]/80 text-black shadow-sm border border-gray-200/50 backdrop-blur-sm"
+                        : "text-black hover:bg-[#f3efe6]/50 hover:backdrop-blur-sm"
                       }
                     `}
                     aria-label={label}
@@ -252,12 +252,12 @@ const Navbar = () => {
                   onClick={handleAuthClick}
                   disabled={isLoading}
                   className={`
-                    flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200
+                    flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-full transition-all duration-200
                     backdrop-blur-sm border
                     ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
                     ${isAuthenticated
-                      ? 'bg-green-100/50 hover:bg-green-200/50 border-green-200/50'
-                      : 'bg-white/50 hover:bg-white/80 border-gray-200/50'
+                      ? 'bg-[#f3efe6]/50 hover:bg-[#f3efe6]/80 border-gray-200/50'
+                      : 'bg-[#f3efe6]/50 hover:bg-[#f3efe6]/80 border-gray-200/50'
                     }
                   `}
                   aria-label={isLoading ? 'Loading...' : (isAuthenticated ? 'User menu' : 'Sign in')}
@@ -278,7 +278,7 @@ const Navbar = () => {
                     <FiUser className="w-5 h-5 text-gray-700" />
                   )}
                   {isAuthenticated && !isLoading && (
-                    <span className="hidden md:block text-sm font-medium text-gray-800 max-w-[100px] truncate">
+                    <span className="text-[13px] sm:text-sm font-medium text-gray-800 max-w-[60px] sm:max-w-[100px] truncate">
                       {getUserDisplayName()}
                     </span>
                   )}
@@ -286,7 +286,7 @@ const Navbar = () => {
 
                 {/* Dropdown Menu - Glassmorphism */}
                 {showUserMenu && isAuthenticated && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute right-0 mt-2 w-56 bg-[#f3efe6]/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-gray-200/50">
                       <p className="text-sm font-semibold text-gray-900 truncate">
@@ -303,7 +303,7 @@ const Navbar = () => {
                         handleNavigate('/profile');
                         setShowUserMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-white/60 flex items-center gap-2 transition-colors border-b border-gray-100"
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#f3efe6]/60 flex items-center gap-2 transition-colors border-b border-gray-100"
                     >
                       <FiUser className="w-4 h-4" />
                       My Profile
@@ -314,12 +314,12 @@ const Navbar = () => {
                         handleNavigate('/wallet');
                         setShowUserMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-white/60 flex items-center gap-2 transition-colors"
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#f3efe6]/60 flex items-center gap-2 transition-colors"
                     >
                       <Wallet className="w-4 h-4" />
                       <span>My Wallet</span>
                       {hasWallet && (
-                        <span className="ml-auto text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                        <span className="ml-auto text-xs font-semibold text-green-700 bg-[#f3efe6] px-2 py-0.5 rounded-full">
                           ₹{balance?.toFixed(2) || '0.00'}
                         </span>
                       )}
@@ -330,7 +330,7 @@ const Navbar = () => {
                         handleNavigate('/orders');
                         setShowUserMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-white/60 flex items-center gap-2 transition-colors"
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#f3efe6]/60 flex items-center gap-2 transition-colors"
                     >
                       <PiPackageBold className="w-4 h-4" />
                       My Orders
@@ -341,7 +341,7 @@ const Navbar = () => {
                         handleNavigate('/address');
                         setShowUserMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-white/60 flex items-center gap-2 transition-colors"
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#f3efe6]/60 flex items-center gap-2 transition-colors"
                     >
                       <FiMapPin className="w-4 h-4" />
                       Address
@@ -366,7 +366,7 @@ const Navbar = () => {
       <nav
         className={`
           fixed bottom-0 left-0 right-0 z-50 md:hidden
-          bg-white/95 backdrop-blur-lg border-t border-white/50
+          bg-[#f3efe6]/95 backdrop-blur-lg border-t border-white/50
           shadow-[0_-8px_32px_0_rgba(31,38,135,0.1)]
           transition-transform duration-300 ease-out
           ${isBottomNavVisible ? "translate-y-0" : "translate-y-full"}
@@ -374,7 +374,7 @@ const Navbar = () => {
         role="navigation"
         aria-label="Mobile navigation"
       >
-        <div className="flex items-center justify-around px-2 py-1 safe-area-inset-bottom">
+        <div className="flex items-center justify-between px-1 sm:px-2 py-1 safe-area-inset-bottom w-full max-w-md mx-auto">
           {navItems.map(({ path, icon: Icon, label }) => {
             const isActive = currentPath === path;
             return (
@@ -384,7 +384,7 @@ const Navbar = () => {
                 // Removed focus:ring properties to prevent border lines on click
                 className={`
                   relative flex flex-col items-center justify-center gap-0.5
-                  px-3 py-1.5 rounded-xl min-w-[60px]
+                  px-0.5 sm:px-2 py-1.5 rounded-xl flex-1 min-w-0
                   transition-all duration-200 ease-out
                   focus:outline-none
                   ${isActive ? "transform scale-105" : "active:scale-95"}
@@ -396,7 +396,7 @@ const Navbar = () => {
                 <div
                   className={`
                     relative p-1.5 rounded-lg transition-all duration-200
-                    ${isActive ? "bg-green-100/60 backdrop-blur-sm" : ""}
+                    ${isActive ? "bg-[#f3efe6]/60 backdrop-blur-sm" : ""}
                   `}
                 >
                   {path === "/vegetables" ? (
@@ -428,7 +428,7 @@ const Navbar = () => {
                 {/* Label */}
                 <span
                   className={`
-                    text-[10px] font-medium transition-all duration-200
+                    text-[9px] sm:text-[10px] w-full text-center truncate px-0.5 font-medium transition-all duration-200
                     ${isActive ? "text-green-800 font-semibold" : "text-black/70"}
                   `}
                 >

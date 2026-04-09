@@ -12,6 +12,7 @@ import {
   Copy,
   Check,
   AlertCircle,
+  Wallet,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import { useAuth } from "../Context/AuthContext.jsx";
@@ -26,30 +27,23 @@ const BillingSuccess = ({ onNewOrder }) => {
   const [copied, setCopied] = useState(false);
   const [showCashbackModal, setShowCashbackModal] = useState(false);
 
-  // Get orderData from navigation state
   const orderData = location.state?.orderData;
-  // console.log(orderData);
 
-  // Redirect if no order data
   useEffect(() => {
     if (!orderData) {
       navigate("/offers");
     }
   }, [orderData, navigate]);
 
-  // Show cashback modal if cashback exists
   useEffect(() => {
-    if (orderData?.cashback && orderData.cashback > 0) {
-      // Refresh wallet balance to get updated amount
+    if (orderData?.cashbackAmount && orderData.cashbackAmount > 0) {
       refreshBalance();
-      // Show modal after a short delay
       setTimeout(() => {
         setShowCashbackModal(true);
       }, 500);
     }
   }, [orderData, refreshBalance]);
 
-  // Extract customer info with user data fallback
   const customerInfo = useMemo(() => {
     if (user) {
       return {
@@ -64,29 +58,19 @@ const BillingSuccess = ({ onNewOrder }) => {
     return orderData?.customerInfo || {};
   }, [user, orderData]);
 
-  // Helper function to get vegetable name
   const getVegetableName = (veg) => {
     if (!veg) return "Unknown";
-
     if (veg.name) return veg.name;
-
     if (veg.vegetable && veg.vegetable.name) return veg.vegetable.name;
-
     if (typeof veg === "string") return veg;
-
     return "Unknown Vegetable";
   };
 
-  // Format vegetables for display
   const displayVegetables = useMemo(() => {
     const vegsToDisplay = orderData?.selectedVegetables || [];
-
     if (!vegsToDisplay || vegsToDisplay.length === 0) return [];
-
     return vegsToDisplay.map((veg, index) => {
-      // Handle nested vegetable object structure from API
       const vegData = veg.vegetable || veg;
-
       return {
         key: `veg-${index}`,
         name: getVegetableName(veg),
@@ -98,7 +82,6 @@ const BillingSuccess = ({ onNewOrder }) => {
     });
   }, [orderData?.selectedVegetables]);
 
-  // Calculate order summary from orderData
   const orderInfo = useMemo(() => {
     if (!orderData) {
       return {
@@ -110,6 +93,9 @@ const BillingSuccess = ({ onNewOrder }) => {
         delivery: 0,
         totalAmount: 0,
         selectedVegetables: [],
+        walletUsed: 0,
+        remainingAmount: 0,
+        price: 0,
       };
     }
 
@@ -122,9 +108,13 @@ const BillingSuccess = ({ onNewOrder }) => {
       totalAmount = 0,
       selectedVegetables = [],
       selectedOffer = {},
+      // ✅ Wallet fields
+      walletUsed = 0,
+      walletDeduction = 0,
+      remainingAmount = 0,
+      useWallet = false,
     } = orderData;
 
-    // Determine package title
     const packageTitle =
       orderType === "custom"
         ? "Custom Selection"
@@ -132,7 +122,7 @@ const BillingSuccess = ({ onNewOrder }) => {
           ? selectedOffer?.title || "Basket Package"
           : "N/A";
 
-    const result = {
+    return {
       orderId,
       orderType,
       packageTitle,
@@ -142,11 +132,11 @@ const BillingSuccess = ({ onNewOrder }) => {
       totalAmount,
       selectedVegetables,
       price: selectedOffer?.price || 0,
+      // ✅ Wallet breakdown
+      walletUsed: walletUsed || walletDeduction || 0,
+      remainingAmount,
+      useWallet,
     };
-
-    // console.log("orderInfo object:", result);
-
-    return result;
   }, [orderData]);
 
   const handleCopyOrderId = async () => {
@@ -159,22 +149,17 @@ const BillingSuccess = ({ onNewOrder }) => {
     }
   };
 
-  // Handle new order
   const handleNewOrder = () => {
-    if (onNewOrder) {
-      onNewOrder();
-    }
+    if (onNewOrder) onNewOrder();
     navigate("/");
     window.scrollTo(0, 0);
   };
 
-  if (!orderData) {
-    return null;
-  }
+  if (!orderData) return null;
 
   return (
-    <div className="min-h-screen bg-[#ffffff] flex items-center justify-center py-6 px-3 sm:px-4 pt-20">
-      <div className="max-w-2xl w-full bg-[#ffffff] p-4 sm:p-6 md:p-8 rounded-2xl shadow-xl">
+    <div className="min-h-screen bg-[#f3efe6] flex items-center justify-center py-6 px-3 sm:px-4 pt-20">
+      <div className="max-w-2xl w-full bg-[#f3efe6] p-4 sm:p-6 md:p-8 rounded-2xl shadow-xl">
         {/* Success Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-4">
@@ -195,19 +180,14 @@ const BillingSuccess = ({ onNewOrder }) => {
             Order Summary
           </h3>
 
-          {/* Customer & Order Info Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
-            {/* Order ID with Copy Button */}
+            {/* Order ID */}
             <div className="flex items-start gap-2 sm:col-span-2">
               <Package className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-funnel text-gray-500">
-                  Order ID
-                </p>
+                <p className="text-xs sm:text-sm font-funnel text-gray-500">Order ID</p>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-800 font-funnel break-all">
-                    {orderInfo.orderId}
-                  </span>
+                  <span className="font-semibold text-gray-800 font-funnel break-all">{orderInfo.orderId}</span>
                   {orderInfo.orderId && orderInfo.orderId !== "N/A" && (
                     <button
                       onClick={handleCopyOrderId}
@@ -215,18 +195,13 @@ const BillingSuccess = ({ onNewOrder }) => {
                       title="Copy Order ID"
                       aria-label="Copy Order ID"
                     >
-                      {copied ? (
-                        <Check className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <Copy className="w-4 h-4 text-gray-600" />
-                      )}
+                      {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-gray-600" />}
                     </button>
                   )}
                 </div>
                 {copied && (
                   <p className="text-xs text-green-600 font-funnel mt-1 flex items-center gap-1">
-                    <Check className="w-3 h-3" />
-                    Order ID copied!
+                    <Check className="w-3 h-3" /> Order ID copied!
                   </p>
                 )}
               </div>
@@ -236,12 +211,8 @@ const BillingSuccess = ({ onNewOrder }) => {
             <div className="flex items-start gap-2">
               <User className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-funnel text-gray-500">
-                  Customer Name
-                </p>
-                <p className="font-semibold text-gray-800 font-funnel break-words">
-                  {customerInfo?.name || "N/A"}
-                </p>
+                <p className="text-xs sm:text-sm font-funnel text-gray-500">Customer Name</p>
+                <p className="font-semibold text-gray-800 font-funnel break-words">{customerInfo?.name || "N/A"}</p>
               </div>
             </div>
 
@@ -249,12 +220,8 @@ const BillingSuccess = ({ onNewOrder }) => {
             <div className="flex items-start gap-2">
               <Phone className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-funnel text-gray-500">
-                  Mobile
-                </p>
-                <p className="font-semibold text-gray-800 font-funnel">
-                  {customerInfo?.mobile || "N/A"}
-                </p>
+                <p className="text-xs sm:text-sm font-funnel text-gray-500">Mobile</p>
+                <p className="font-semibold text-gray-800 font-funnel">{customerInfo?.mobile || "N/A"}</p>
               </div>
             </div>
 
@@ -263,12 +230,8 @@ const BillingSuccess = ({ onNewOrder }) => {
               <div className="flex items-start gap-2">
                 <Mail className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-funnel text-gray-500">
-                    Email
-                  </p>
-                  <p className="font-semibold text-gray-800 font-funnel truncate">
-                    {customerInfo.email}
-                  </p>
+                  <p className="text-xs sm:text-sm font-funnel text-gray-500">Email</p>
+                  <p className="font-semibold text-gray-800 font-funnel truncate">{customerInfo.email}</p>
                 </div>
               </div>
             )}
@@ -280,9 +243,7 @@ const BillingSuccess = ({ onNewOrder }) => {
                 <p className="text-xs sm:text-sm font-funnel text-gray-500">
                   {orderInfo.orderType === "custom" ? "Order Type" : "Package"}
                 </p>
-                <p className="font-semibold text-gray-800 font-funnel break-words">
-                  {orderInfo.packageTitle}
-                </p>
+                <p className="font-semibold text-gray-800 font-funnel break-words">{orderInfo.packageTitle}</p>
               </div>
             </div>
 
@@ -290,77 +251,107 @@ const BillingSuccess = ({ onNewOrder }) => {
             <div className="flex items-start gap-2">
               <CreditCard className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-funnel text-gray-500">
-                  Total Amount
-                </p>
+                <p className="text-xs sm:text-sm font-funnel text-gray-500">Total Amount</p>
                 <p className="font-bold text-[#0e540b] text-lg sm:text-xl">
-                  ₹{orderInfo.totalAmount.toFixed(2)}
+                  ₹{orderInfo.finalPayableAmount}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Important Notice */}
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
+          {/* <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
             <p className="text-xs sm:text-sm font-assistant text-yellow-700">
               <strong>Important:</strong> Please save your Order ID for tracking.
               We send order confirmations via email.
             </p>
-          </div>
+          </div> */}
 
           {/* Price Breakdown */}
           <div className="mt-4 pt-4 border-t border-green-200">
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center">
                 <span className="font-assistant text-gray-600">Plan Price</span>
-                <span className="font-assistant font-semibold text-gray-800">
-                  ₹{orderInfo.price.toFixed(2)}
-                </span>
+                <span className="font-assistant font-semibold text-gray-800">₹{orderInfo.price.toFixed(2)}</span>
               </div>
 
               {orderInfo.discount > 0 && (
                 <div className="flex justify-between items-center text-green-600">
                   <span className="font-assistant">Coupon Discount</span>
-                  <span className="font-assistant font-semibold">
-                    -₹{orderInfo.discount.toFixed(2)}
-                  </span>
+                  <span className="font-assistant font-semibold">-₹{orderInfo.discount.toFixed(2)}</span>
                 </div>
               )}
 
               <div className="flex justify-between items-center">
-                <span className="font-assistant text-gray-600">
-                  Delivery Charge
-                </span>
+                <span className="font-assistant text-gray-600">Delivery Charge</span>
                 <span className="font-assistant font-semibold text-gray-800">
-                  {orderInfo.delivery === 0
-                    ? "FREE"
-                    : `₹${orderInfo.delivery.toFixed(2)}`}
+                  {orderInfo.delivery === 0 ? "FREE" : `₹${orderInfo.delivery.toFixed(2)}`}
                 </span>
               </div>
+
+              {/* ✅ Wallet deduction in billing confirmation */}
+              {orderInfo.walletUsed > 0 && (
+                <>
+                  <div className="border-t border-dashed border-green-200 pt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-assistant text-gray-600">Bill Total</span>
+                      <span className="font-assistant font-semibold text-gray-800">
+                        ₹{orderInfo.totalAmount.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-assistant text-[#0e540b] flex items-center gap-1">
+                      <Wallet size={13} /> Wallet Deduction
+                    </span>
+                    <span className="font-assistant font-semibold text-[#0e540b]">
+                      -₹{orderInfo.walletUsed.toFixed(2)}
+                    </span>
+                  </div>
+                </>
+              )}
 
               <div className="border-t border-green-200 pt-2 mt-2">
                 <div className="flex justify-between items-center">
                   <span className="font-funnel font-bold text-gray-800">
-                    Total
+                    {orderInfo.walletUsed > 0 ? "Amount Paid" : "Total"}
                   </span>
                   <span className="font-amiko font-bold text-[#0e540b] text-lg">
-                    ₹{orderInfo.totalAmount.toFixed(2)}
+                    ₹{orderInfo.walletUsed > 0
+                      ? Math.max(0, orderInfo.totalAmount - orderInfo.walletUsed).toFixed(2)
+                      : orderInfo.totalAmount.toFixed(2)}
                   </span>
                 </div>
+                {orderInfo.walletUsed > 0 && (
+                  <p className="font-funnel text-[10px] text-gray-400 text-right mt-0.5">
+                    ₹{orderInfo.walletUsed.toFixed(2)} paid via wallet
+  	            </p>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Delivery Address - if available */}
+          {/* ✅ Wallet Payment Summary Banner */}
+          {orderInfo.walletUsed > 0 && (
+            <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg flex items-start gap-2">
+              <Wallet className="w-4 h-4 text-[#0e540b] flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-funnel font-bold text-[#0e540b]">Wallet Used</p>
+                <p className="text-xs font-funnel text-gray-700 mt-0.5">
+                  ₹{orderInfo.walletUsed.toFixed(2)} was deducted from your wallet balance for this order.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Delivery Address */}
           {customerInfo?.address && (
             <div className="mt-4 pt-4 border-t border-green-200">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-funnel text-gray-500 mb-1">
-                    Delivery Address
-                  </p>
+                  <p className="text-xs sm:text-sm font-funnel text-gray-500 mb-1">Delivery Address</p>
                   <p className="text-sm font-assistant text-gray-700 break-words">
                     {customerInfo.address}
                     {customerInfo.area && `, ${customerInfo.area}`}
@@ -371,30 +362,24 @@ const BillingSuccess = ({ onNewOrder }) => {
             </div>
           )}
 
-          {/* Selected Vegetables Section */}
+          {/* Selected Vegetables */}
           {displayVegetables.length > 0 && (
             <div className="mt-4 pt-4 border-t border-green-200">
               <p className="font-semibold font-funnel text-gray-700 mb-3 flex items-center gap-2 text-sm sm:text-base">
                 <ShoppingBag className="w-4 h-4 text-[#0e540b] flex-shrink-0" />
                 Selected Vegetables ({displayVegetables.length})
               </p>
-
-              {/* Custom Orders - Detailed list */}
               {orderInfo.orderType === "custom" ? (
                 <div className="space-y-2">
                   {displayVegetables.map((veg) => (
                     <div
                       key={veg.key}
-                      className="bg-[#ffffff] p-2 sm:p-3 rounded-lg border border-green-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1"
+                      className="bg-[#f3efe6] p-2 sm:p-3 rounded-lg border border-green-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1"
                     >
                       <div className="flex-1 min-w-0">
-                        <span className="font-medium text-gray-800 font-assistant text-sm break-words">
-                          {veg.name}
-                        </span>
+                        <span className="font-medium text-gray-800 font-assistant text-sm break-words">{veg.name}</span>
                         {veg.weight && veg.weight !== "N/A" && (
-                          <span className="text-xs text-gray-600 font-assistant ml-2">
-                            ({veg.weight})
-                          </span>
+                          <span className="text-xs text-gray-600 font-assistant ml-2">({veg.weight})</span>
                         )}
                       </div>
                       {veg.quantity && veg.price > 0 && (
@@ -411,15 +396,13 @@ const BillingSuccess = ({ onNewOrder }) => {
                   ))}
                 </div>
               ) : (
-                /* Basket Orders - Simple tags */
                 <div className="flex flex-wrap gap-2">
                   {displayVegetables.map((veg) => (
                     <span
                       key={veg.key}
                       className="bg-green-100 font-assistant text-green-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-funnel font-medium border border-green-200"
                     >
-                      {veg.name}
-                      {veg.weight && veg.weight !== "N/A" && ` (${veg.weight})`}
+                      {veg.name}{veg.weight && veg.weight !== "N/A" && ` (${veg.weight})`}
                     </span>
                   ))}
                 </div>
@@ -448,7 +431,13 @@ const BillingSuccess = ({ onNewOrder }) => {
                         ? "Cash on Delivery"
                         : orderData.paymentMethod === "ONLINE"
                           ? "Online Payment"
-                          : orderData.paymentMethod}
+                          : orderData.paymentMethod === "WALLET"
+                            ? "Wallet"
+                            : orderData.paymentMethod === "WALLET_COD"
+                              ? "Wallet + Cash on Delivery"
+                              : orderData.paymentMethod === "WALLET_ONLINE"
+                                ? "Wallet + Online"
+                                : orderData.paymentMethod}
                     </span>
                   </p>
                 )}
@@ -462,26 +451,6 @@ const BillingSuccess = ({ onNewOrder }) => {
           </div>
         )}
 
-        {/* Next Steps Card */}
-        {/* <div className="bg-yellow-50 p-4 rounded-xl mb-6 border border-yellow-200">
-          <div className="flex gap-3">
-            <Phone className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-gray-800 font-assistant mb-1 text-sm sm:text-base">
-                Next Steps
-              </p>
-              <p className="text-gray-700 text-xs sm:text-sm font-assistant">
-                Your order has been received and will be processed shortly. You
-                will receive a confirmation call on{" "}
-                <strong className="text-gray-900">
-                  {customerInfo?.mobile || "your registered number"}
-                </strong>{" "}
-                within 30 minutes.
-              </p>
-            </div>
-          </div>
-        </div> */}
-
         {/* Place Another Order Button */}
         <button
           onClick={handleNewOrder}
@@ -492,10 +461,9 @@ const BillingSuccess = ({ onNewOrder }) => {
         </button>
       </div>
 
-      {/* Cashback Modal */}
       <CashbackModal
         isOpen={showCashbackModal}
-        cashbackAmount={orderData?.cashback || 0}
+        cashbackAmount={orderData?.cashbackAmount || 0}
         newBalance={balance}
         onClose={() => setShowCashbackModal(false)}
       />

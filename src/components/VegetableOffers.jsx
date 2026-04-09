@@ -53,7 +53,7 @@ const VegetableOffers = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#ffffff] pt-14 px-3 sm:pt-28 sm:px-4 md:pt-28 lg:pt-30">
+    <div className="min-h-screen bg-[#f3efe6] pt-14 px-3 sm:pt-28 sm:px-4 md:pt-28 lg:pt-30">
       <div className="w-full max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="mb-4 sm:mb-6">
@@ -82,14 +82,14 @@ const VegetableOffers = () => {
               {offers.map((offer) => (
                 <div
                   key={offer._id}
-                  className="group relative bg-[#ffffff] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] active:scale-95 sm:hover:-translate-y-1 sm:hover:scale-[1.02] overflow-hidden flex flex-col"
+                  className="group relative bg-[#f3efe6] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] active:scale-95 sm:hover:-translate-y-1 sm:hover:scale-[1.02] overflow-hidden flex flex-col"
                   onClick={() => handleOfferSelect(offer)}
                 >
                   {/* Header with Icon */}
                   <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-3 sm:p-4 text-center relative overflow-hidden flex-shrink-0">
                     <div className="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 bg-[#0e540b] opacity-10 rounded-bl-full"></div>
                     <div className="relative z-10">
-                      <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#ffffff] rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
+                      <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#f3efe6] rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
                         <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-[#0e540b]" />
                       </div>
                       <h3 className="text-base font-funnel sm:text-lg font-bold text-gray-800 mb-1">
@@ -184,7 +184,7 @@ const VegetableOffers = () => {
 
             {/* Help Section */}
             <div className="mt-4 sm:mt-6 text-center px-2">
-              <div className="bg-[#ffffff] rounded-xl shadow-md p-3 sm:p-4 max-w-2xl mx-auto border border-green-100">
+              <div className="bg-[#f3efe6] rounded-xl shadow-md p-3 sm:p-4 max-w-2xl mx-auto border border-green-100">
                 <div className="flex items-center justify-center gap-1.5 mb-2">
                   <Leaf className="w-4 h-4 text-[#0e540b]" />
                   <h3 className="text-sm sm:text-base font-semibold text-gray-800">

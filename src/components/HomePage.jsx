@@ -201,7 +201,7 @@ const VegetableCard = memo(
       <div
         className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${isCompletelyOutOfStock
           ? "bg-gray-100 border-gray-300 opacity-75"
-          : "bg-[#ffffff] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
+          : "bg-[#f3efe6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
           }`}
       >
         {/* Vegetable Image */}
@@ -220,9 +220,9 @@ const VegetableCard = memo(
               />
             ) : (
               <div
-                className={`w-full h-full bg-gradient-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${isCompletelyOutOfStock
+                className={`w-full h-full bg-linear-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${isCompletelyOutOfStock
                   ? "from-gray-200 to-gray-300"
-                  : "from-gray-50 to-[#ffffff]"
+                  : "from-gray-50 to-[#f3efe6]"
                   }`}
               >
                 <Leaf
@@ -287,7 +287,7 @@ const VegetableCard = memo(
                       ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 line-through"
                       : isActive
                         ? "bg-[#0e540b] text-white shadow-md scale-[1.02]"
-                        : "bg-[#ffffff] text-black hover:bg-[#e8f2e8] hover:text-[#0e540b] shadow-sm"
+                        : "bg-[#f3efe6] text-black hover:bg-[#e8f2e8] hover:text-[#0e540b] shadow-sm"
                     }`}
                 >
                   {option.label}
@@ -338,7 +338,7 @@ const VegetableCard = memo(
         ) : quantity === 0 ? (
           <button
             onClick={() => onAddToCart(veg)}
-            className="w-full bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+            className="w-full bg-linear-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 text-xs sm:text-sm"
             aria-label={`Add ${veg.name} to cart`}
           >
             <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -348,7 +348,7 @@ const VegetableCard = memo(
           <div className="flex items-center justify-between bg-[#0e540b] rounded-lg px-2 py-1.5">
             <button
               onClick={() => onRemoveFromCart(veg)}
-              className="w-7 h-7 flex items-center justify-center bg-[#ffffff] rounded-md hover:bg-gray-100 transition"
+              className="w-7 h-7 flex items-center justify-center bg-[#f3efe6] rounded-md hover:bg-gray-100 transition"
               aria-label="Decrease quantity"
             >
               <Minus size={14} className="text-[#0e540b]" />
@@ -358,7 +358,7 @@ const VegetableCard = memo(
             </span>
             <button
               onClick={() => onAddToCart(veg)}
-              className="w-7 h-7 flex items-center justify-center bg-[#ffffff] rounded-md hover:bg-gray-100 transition"
+              className="w-7 h-7 flex items-center justify-center bg-[#f3efe6] rounded-md hover:bg-gray-100 transition"
               aria-label="Increase quantity"
             >
               <Plus size={14} className="text-[#0e540b]" />
@@ -378,12 +378,12 @@ const OfferCard = memo(({ offer, onNavigate }) => {
   return (
     <div
       onClick={onNavigate}
-      className="group relative bg-[#ffffff] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] active:scale-95 sm:hover:-translate-y-1 sm:hover:scale-[1.02] overflow-hidden flex flex-col"
+      className="group relative bg-[#f3efe6] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] active:scale-95 sm:hover:-translate-y-1 sm:hover:scale-[1.02] overflow-hidden flex flex-col"
     >
-      <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-3 sm:p-4 text-center relative overflow-hidden flex-shrink-0">
+      <div className="bg-linear-to-br from-green-100 to-emerald-100 p-3 sm:p-4 text-center relative overflow-hidden shrink-0">
         <div className="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 bg-[#0e540b] opacity-10 rounded-bl-full"></div>
         <div className="relative z-10">
-          <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#ffffff] rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
+          <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#f3efe6] rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
             <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-[#0e540b]" />
           </div>
           <h3 className="text-base font-funnel sm:text-lg font-bold text-gray-800 mb-1">
@@ -397,7 +397,7 @@ const OfferCard = memo(({ offer, onNavigate }) => {
       </div>
 
       <div className="p-3 sm:p-4 flex-1 flex flex-col">
-        <div className="text-center mb-3 flex-shrink-0">
+        <div className="text-center mb-3 shrink-0">
           <div className="flex items-center justify-center gap-1.5 mb-1">
             <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0e540b]" />
             <span className="text-xs font-medium font-funnel text-gray-600">
@@ -410,13 +410,13 @@ const OfferCard = memo(({ offer, onNavigate }) => {
         </div>
 
         {offer.description && (
-          <p className="text-gray-900 font-funnel text-sm font-bold text-center mb-3 leading-relaxed flex-shrink-0 px-2">
+          <p className="text-gray-900 font-funnel text-sm font-bold text-center mb-3 leading-relaxed shrink-0 px-2">
             {offer.description}
           </p>
         )}
 
         {offer.vegetables && offer.vegetables.length > 0 && (
-          <div className="bg-green-50 rounded-lg p-2.5 sm:p-3 mb-3 border border-green-100 flex-shrink-0">
+          <div className="bg-green-50 rounded-lg p-2.5 sm:p-3 mb-3 border border-green-100 shrink-0">
             <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
               <Check className="w-3.5 h-3.5 font-funnel text-[#0e540b]" />
               What's Included:
@@ -427,13 +427,13 @@ const OfferCard = memo(({ offer, onNavigate }) => {
                   key={veg._id || index}
                   className="text-xs text-gray-700 flex items-center gap-1.5"
                 >
-                  <div className="w-1 h-1 rounded-full bg-[#0e540b] flex-shrink-0"></div>
+                  <div className="w-1 h-1 rounded-full bg-[#0e540b] shrink-0"></div>
                   <span className="truncate font-funnel">{veg.vegetable?.name || veg.name || 'Vegetable'}</span>
                 </li>
               ))}
               {offer.vegetables.length > 3 && (
                 <li className="text-xs text-[#0e540b] font-medium flex items-center gap-1.5">
-                  <div className="w-1 h-1 rounded-full font-funnel bg-[#0e540b] flex-shrink-0"></div>
+                  <div className="w-1 h-1 rounded-full font-funnel bg-[#0e540b] shrink-0"></div>
                   +{offer.vegetables.length - 3} more vegetables
                 </li>
               )}
@@ -443,7 +443,7 @@ const OfferCard = memo(({ offer, onNavigate }) => {
 
         <button
           aria-label={`Select ${offer.title} package`}
-          className="w-full font-funnel bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2.5 sm:py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 group-hover:scale-105 text-xs sm:text-sm mt-auto"
+          className="w-full font-funnel bg-linear-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2.5 sm:py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 group-hover:scale-105 text-xs sm:text-sm mt-auto"
         >
           <ShoppingCart className="w-4 h-4" />
           Select
@@ -462,7 +462,6 @@ const OfferCard = memo(({ offer, onNavigate }) => {
 OfferCard.displayName = "OfferCard";
 
 const Homepage = () => {
-  const [vegetables, setVegetables] = useState([]);
   const [topOffers, setTopOffers] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -497,8 +496,15 @@ const Homepage = () => {
             .catch(() => ({ data: { data: { testimonials: [] } } })),
         ]);
 
-        const allVegetables = veggiesRes.data?.data || [];
-        setVegetables(allVegetables);
+        const sortByStock = (a, b) => {
+          const aOut = a.outOfStock || (a.stockKg === 0 && (a.stockPieces === 0 || a.stockPieces == null));
+          const bOut = b.outOfStock || (b.stockKg === 0 && (b.stockPieces === 0 || b.stockPieces == null));
+          if (aOut && !bOut) return 1;
+          if (!aOut && bOut) return -1;
+          return 0;
+        };
+
+        const allVegetables = (veggiesRes.data?.data || []).sort(sortByStock);
         setTopSellingVegetables(allVegetables.slice(0, 10));
         setSuggestedVegetables(allVegetables.slice(10, 16));
         setTopOffers(offersRes.data?.data || []);
@@ -861,7 +867,7 @@ const Homepage = () => {
   }, [navigate, setSelectedOffer, setSelectedVegetables, setVegetableOrder, handleOfferClick]);
 
   return (
-    <div className="min-h-screen bg-[#ffffff] md:pt-10">
+    <div className="min-h-screen bg-[#f3efe6] md:pt-10">
       {/* Floating Cart Button */}
       {totalCartItems > 0 && (
         <button
@@ -880,7 +886,7 @@ const Homepage = () => {
       {/* Main Content */}
       <div className="w-full sm:w-full md:max-w-7xl lg:max-w-7xl h-full mx-auto px-1 md:py-5">
         {/* Top 10 Selling Vegetables Section */}
-        <div className="w-full bg-[#ffffff] shadow-lg rounded-xl mt-8 pb-6">
+        <div className="w-full bg-[#f3efe6] shadow-lg rounded-xl mt-8 pb-6">
           <div className="md:p-6 lg:p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Top 10 Selling Vegetables
@@ -914,7 +920,7 @@ const Homepage = () => {
         </div>
 
         {/* Top 6 Suggest Vegetables for this Session */}
-        <div className="w-full bg-[#ffffff] shadow-lg rounded-xl mt-8 pb-6">
+        <div className="w-full bg-[#f3efe6] shadow-lg rounded-xl mt-8 pb-6">
           <div className="md:p-6 lg:p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Top 6 Suggested Vegetables for this Session
@@ -950,7 +956,7 @@ const Homepage = () => {
         </div>
 
         {/* Offers Section */}
-        <div className="w-full bg-[#ffffff] shadow-lg rounded-xl mt-8 pb-6">
+        <div className="w-full bg-[#f3efe6] shadow-lg rounded-xl mt-8 pb-6">
           <div className="md:p-6 lg:p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Top Offers</h3>
@@ -984,7 +990,7 @@ const Homepage = () => {
         <TestimonialsCarousel testimonials={testimonials} />
 
         {/* Features / Why choose us */}
-        <div className="w-full bg-[#ffffff] shadow-lg rounded-xl mt-8 pb-6">
+        <div className="w-full bg-[#f3efe6] shadow-lg rounded-xl mt-8 pb-6">
           <div className="md:p-6 lg:p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Why VegBazar
@@ -993,7 +999,7 @@ const Homepage = () => {
               {features.map((f, idx) => (
                 <div
                   key={idx}
-                  className="bg-white rounded-lg p-4 flex flex-col items-center text-center shadow-sm"
+                  className="bg-[#f3efe6] rounded-lg p-4 flex flex-col items-center text-center shadow-sm"
                 >
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#0e540b]/10 mb-3">
                     <f.icon className="w-5 h-5 text-[#0e540b]" />
@@ -1008,7 +1014,7 @@ const Homepage = () => {
 
         {/* Footer CTA */}
         <div className="w-full mt-8 pb-12">
-          <div className="max-w-4xl mx-auto bg-gradient-to-r from-[#0e540b] to-[#063a06] text-white rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="max-w-4xl mx-auto bg-linear-to-r from-[#0e540b] to-[#063a06] text-white rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold">
                 Ready to order fresh vegetables?
@@ -1020,13 +1026,13 @@ const Homepage = () => {
             <div className="flex gap-3">
               <button
                 onClick={handleNavigateToVegBag}
-                className="px-4 py-2 bg-white text-[#0e540b] rounded-md font-semibold hover:brightness-95 transition"
+                className="px-4 py-2 bg-[#f3efe6] text-[#0e540b] rounded-md font-semibold hover:brightness-95 transition"
               >
                 View Cart
               </button>
               <button
                 onClick={() => navigate("/vegetables")}
-                className="px-4 py-2 border border-white rounded-md hover:bg-white/10 transition"
+                className="px-4 py-2 border border-white rounded-md hover:bg-[#f3efe6]/10 transition"
               >
                 Browse Vegetables
               </button>

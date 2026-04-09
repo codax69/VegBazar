@@ -249,6 +249,14 @@ const VegetableSelection = () => {
         const data = response.data.data.vegetables || [];
         const offerWeight = selectedOffer?.weight || selectedOffer?.totalWeight || '500g';
 
+        const sortByStock = (a, b) => {
+          const aOut = a.outOfStock || (a.stockKg === 0 && (a.stockPieces === 0 || a.stockPieces == null));
+          const bOut = b.outOfStock || (b.stockKg === 0 && (b.stockPieces === 0 || b.stockPieces == null));
+          if (aOut && !bOut) return 1;
+          if (!aOut && bOut) return -1;
+          return 0;
+        };
+
         const processedVegetables = data
           .map(item => {
             // Extract the actual vegetable data from the nested structure
@@ -258,7 +266,8 @@ const VegetableSelection = () => {
             const priceForOffer = getPriceForOfferWeight(veg.prices, veg.marketPrices, offerWeight);
             return priceForOffer ? { ...veg, priceForOffer } : null;
           })
-          .filter(Boolean);
+          .filter(Boolean)
+          .sort(sortByStock);
         setVegetables(processedVegetables);
       } catch (error) {
         console.error("Error fetching offer details:", error.message);

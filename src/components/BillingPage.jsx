@@ -85,7 +85,6 @@ const BillingPage = () => {
   const {
     selectedOffer,
     selectedVegetables,
-    formData,
     navigate,
     paymentMethod,
     setPaymentMethod,
@@ -233,15 +232,7 @@ const BillingPage = () => {
 
   const handleChangeAddress = useCallback(() => navigate("/address"), [navigate]);
 
-  // Generate Order ID function
-  const generateOrderId = useCallback((count) => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const orderNum = String(count).padStart(3, "0");
-    return `ORD${year}${month}${day}${orderNum}`;
-  }, []);
+
 
   // Fetch order count on mount
   useEffect(() => {
@@ -276,19 +267,16 @@ const BillingPage = () => {
   const orderData = useMemo(() => {
     if (!orderCount) return null;
     if (!user) {
-      // console.log("⚠️ User not loaded yet, orderData is null");
       return null;
     }
 
     const userId = user._id || user.id;
     if (!userId) {
-      // console.log("⚠️ No user ID found in user object");
       return null;
     }
 
-    const orderId = generateOrderId(orderCount);
+    // ✅ BUG-3 Fix: Don't generate a client-side orderId — backend creates the real unique ID
     return {
-      orderId,
       customerInfo: userId,
       selectedBasket: selectedOffer || {},
       orderType: "basket",
@@ -300,14 +288,12 @@ const BillingPage = () => {
       deliveryCharges: deliveryCharge,
       paymentMethod,
       paymentStatus: paymentMethod === "COD" ? "pending" : "awaiting_payment",
-
       orderStatus: "placed",
       deliveryAddressId: selectedAddress?._id || null,
     };
   }, [
     orderCount,
     user,
-    formData,
     selectedOffer,
     selectedVegetables,
     totalAmount,
@@ -315,8 +301,6 @@ const BillingPage = () => {
     couponDiscount,
     deliveryCharge,
     paymentMethod,
-
-    generateOrderId,
     selectedAddress,
   ]);
 
@@ -415,7 +399,7 @@ const BillingPage = () => {
     );
   // console.log(defaultAddress);
   return (
-    <div className="min-h-screen bg-[#ffffff] pt-8 md:pt-20 pb-20 lg:pb-0">
+    <div className="min-h-screen bg-[#f3efe6] pt-8 md:pt-20 pb-20 lg:pb-0">
       <div className="max-w-6xl mx-auto px-4">
         {/* Back Button */}
         <button
@@ -541,7 +525,7 @@ const BillingPage = () => {
           {/* Left Section */}
           <div className="lg:col-span-2 space-y-3">
             {/* Selected Plan */}
-            <div className="bg-[#ffffff] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+            <div className="bg-[#f3efe6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-base font-funnel font-bold text-gray-800 flex items-center gap-1.5">
                   <FiPackage className="size-4 text-[#0e540b]" />
@@ -592,7 +576,7 @@ const BillingPage = () => {
             />
 
             {/* Payment Method */}
-            <div className="bg-[#ffffff] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+            <div className="bg-[#f3efe6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
               <h2 className="text-base font-funnel font-bold text-gray-800 mb-2 flex items-center gap-1.5">
                 <FiCreditCard className="size-4 text-[#0e540b]" />
                 Payment Method
@@ -624,7 +608,7 @@ const BillingPage = () => {
 
           {/* Right Section - Desktop Sidebar */}
           <div className="lg:col-span-1 hidden lg:block">
-            <div className="bg-[#ffffff] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100 lg:sticky lg:top-4 space-y-3">
+            <div className="bg-[#f3efe6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100 lg:sticky lg:top-4 space-y-3">
               {/* Coupon Section - Desktop (Top of sidebar) */}
               <CouponCodeSection
                 onApplyCoupon={handleApplyCoupon}
@@ -723,7 +707,7 @@ const BillingPage = () => {
         </div>
 
         {/* Trust Badges */}
-        <div className="mt-4 bg-[#ffffff] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+        <div className="mt-4 bg-[#f3efe6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
           <div className="grid grid-cols-3 gap-3 text-center">
             {trustBadges.map((badge, i) => (
               <TrustBadge
@@ -738,7 +722,7 @@ const BillingPage = () => {
       </div>
 
       {/* Mobile Sticky Payment Button */}
-      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[#ffffff] border-t border-gray-200 shadow-2xl z-50">
+      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[#f3efe6] border-t border-gray-200 shadow-2xl z-50">
         <div className="px-4 py-3">
           {/* Bill Summary - Compact */}
           <div className="space-y-1 mb-2">
@@ -759,7 +743,9 @@ const BillingPage = () => {
             )}
           </div>
 
-          {/* Payment Button */}
+          {/* ✅ BUG-3 Fix: Removed duplicate RazorpayPayment — desktop version above is the single source of truth.
+               The mobile button intentionally does not render a second <RazorpayPayment> to avoid
+               two parallel create-order API calls firing simultaneously. */}
           {paymentMethod === "ONLINE" && orderData && (
             <div className="w-full">
               <RazorpayPayment

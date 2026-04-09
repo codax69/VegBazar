@@ -3,6 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { getTransactions } from '../services/walletService';
 import { ArrowUpRight, ArrowDownLeft, ChevronLeft, Filter } from 'lucide-react';
 
+const SOURCE_LABELS = {
+    order_payment: 'Order Payment',
+    refund: 'Refund',
+    cashback: 'Cashback',
+    reversal: 'Reversal',
+    adjustment: 'Adjustment',
+    payment: 'Payment'
+};
+
 const WalletTransactions = () => {
     const navigate = useNavigate();
     const [transactions, setTransactions] = useState([]);
@@ -12,11 +21,7 @@ const WalletTransactions = () => {
     const [filter, setFilter] = useState({ type: null, source: null });
     const [showFilters, setShowFilters] = useState(false);
 
-    useEffect(() => {
-        fetchTransactions();
-    }, [page, filter]);
-
-    const fetchTransactions = async () => {
+    const fetchTransactions = React.useCallback(async () => {
         setLoading(true);
         try {
             const response = await getTransactions({
@@ -25,14 +30,22 @@ const WalletTransactions = () => {
                 type: filter.type,
                 source: filter.source,
             });
-            setTransactions(response.data.transactions || []);
-            setTotalPages(response.data.pagination?.totalPages || 1);
+            // ✅ BUG-W1 Fix: Backend returns ApiResponse { data: { transactions, pagination } }
+            // Since service returns response.data (the json), we access .data.transactions
+            if (response && response.data) {
+                setTransactions(response.data.transactions || []);
+                setTotalPages(response.data.pagination?.totalPages || 1);
+            }
         } catch (error) {
             console.error('Error fetching transactions:', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, filter]);
+
+    useEffect(() => {
+        fetchTransactions();
+    }, [fetchTransactions]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -105,10 +118,12 @@ const WalletTransactions = () => {
                                 onChange={(e) => handleFilterChange('source', e.target.value)}
                             >
                                 <option value="all">All</option>
-                                <option value="order">Order</option>
+                                {/* ✅ BUG-W3 Fix: Values must match DB enum: order_payment, refund, cashback, reversal, adjustment */}
+                                <option value="order_payment">Order Payment</option>
                                 <option value="refund">Refund</option>
                                 <option value="cashback">Cashback</option>
-                                <option value="payment">Payment</option>
+                                <option value="reversal">Reversal</option>
+                                <option value="adjustment">Adjustment</option>
                             </select>
                         </div>
                         <button
@@ -134,8 +149,9 @@ const WalletTransactions = () => {
                     <>
                         <div className="bg-white rounded-2xl p-4 shadow-sm flex flex-col gap-3">
                             {transactions.map((transaction) => (
-                                <div key={transaction._id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100">
-                                    <div className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0">
+                                // ✅ BUG-W4 Fix: formatTransaction returns `id` not `_id`
+                                <div key={transaction.id || transaction._id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100">
+                                    <div className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0">
                                         {transaction.type === 'credit' ? (
                                             <ArrowDownLeft className="text-green-500 bg-[rgba(34,197,94,0.1)] p-2.5 rounded-[10px]" size={20} />
                                         ) : (
@@ -143,7 +159,10 @@ const WalletTransactions = () => {
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-[15px] font-semibold text-gray-900 capitalize font-funnel mb-1">{transaction.source}</div>
+                                        {/* ✅ BUG-W5 Fix: Show human-readable source label instead of raw enum */}
+                                        <div className="text-[15px] font-semibold text-gray-900 capitalize font-funnel mb-1">
+                                            {SOURCE_LABELS[transaction.source] || transaction.source}
+                                        </div>
                                         <div className="text-[13px] text-gray-500 font-funnel">
                                             {formatDate(transaction.createdAt)} • {formatTime(transaction.createdAt)}
                                         </div>
@@ -151,8 +170,9 @@ const WalletTransactions = () => {
                                             <div className="text-[13px] text-gray-400 mt-1 font-funnel">{transaction.description}</div>
                                         )}
                                     </div>
+                                    {/* ✅ BUG-W2 Fix: Backend formatTransaction returns `amount` (rupees), NOT `amountInRupees` */}
                                     <div className={`text-base font-bold font-funnel flex-shrink-0 ${transaction.type === 'credit' ? 'text-green-500' : 'text-red-500'}`}>
-                                        {transaction.type === 'credit' ? '+' : '-'}₹{transaction.amountInRupees?.toFixed(2)}
+                                        {transaction.type === 'credit' ? '+' : '-'}₹{(transaction.amount ?? 0).toFixed(2)}
                                     </div>
                                 </div>
                             ))}

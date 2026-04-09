@@ -132,7 +132,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 font-funnel">
+    <div className="min-h-screen bg-[#f3efe6]  flex items-center justify-center p-3 font-funnel">
       <div className="w-full max-w-sm">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
           {/* Header */}

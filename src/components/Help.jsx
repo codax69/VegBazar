@@ -89,7 +89,7 @@ const Help = () => {
   };
 
   return (
-    <div className="min-h-screen pt-6 md:pt-24 pb-10 px-3 bg-[#ffffff]">
+    <div className="min-h-screen pt-6 md:pt-24 pb-10 px-3 bg-[#f3efe6]">
       <div className="max-w-2xl mx-auto space-y-6 md:space-y-8">
         <div className="text-center mb-4">
           <h1 className="text-2xl md:text-3xl font-funnel font-semibold text-[#0e540b] mb-1">
@@ -100,7 +100,7 @@ const Help = () => {
           </p>
         </div>
 
-        <div className="bg-[#ffffff] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
+        <div className="bg-[#f3efe6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl md:text-2xl font-funnel font-semibold mb-3 flex items-center gap-2 text-[#0e540b]">
             <MessageSquare className="w-5 h-5" /> Get in Touch
           </h2>
@@ -149,7 +149,7 @@ const Help = () => {
           </div>
         </div>
 
-        <div className="bg-[#ffffff] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
+        <div className="bg-[#f3efe6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl font-funnel font-semibold mb-3 text-[#0e540b]">
             Quick Feedback
           </h2>
@@ -276,7 +276,7 @@ const Help = () => {
           )}
         </div>
 
-        <div className="bg-[#ffffff] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
+        <div className="bg-[#f3efe6] rounded-lg shadow-sm p-4 md:p-5 border border-gray-100">
           <h2 className="text-xl font-funnel font-semibold mb-3 text-[#0e540b]">
             FAQs
           </h2>

@@ -49,7 +49,7 @@ const CouponCodeSection = ({
   }, [handleApplyCoupon]);
 
   return (
-    <div className={`bg-[#ffffff] rounded-xl shadow-md border-2 border-dashed border-green-300 ${isMobile ? 'p-3' : 'p-4'}`}>
+    <div className={`bg-[#f3efe6] rounded-xl shadow-md border-2 border-dashed border-green-300 ${isMobile ? 'p-3' : 'p-4'}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -97,7 +97,7 @@ const CouponCodeSection = ({
           </div>
 
           {/* Discount Amount */}
-          <div className="bg-[#ffffff] text-white rounded-lg p-2 flex justify-between items-center">
+          <div className="bg-[#f3efe6] text-white rounded-lg p-2 flex justify-between items-center">
             <span className={`font-semibold font-funnel ${isMobile ? 'text-xs' : 'text-sm'}`}>
               You save
             </span>

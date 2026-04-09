@@ -162,7 +162,7 @@ const VegetableCard = memo(
       <div
         className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${isCompletelyOutOfStock
           ? "bg-gray-100 border-gray-300 opacity-75"
-          : "bg-[#ffffff] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
+          : "bg-[#f3efe6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
           }`}
       >
         {/* Vegetable Image */}
@@ -286,7 +286,7 @@ const VegetableCard = memo(
           <div className="flex items-center justify-between bg-[#0e540b] rounded-lg px-2 py-1.5">
             <button
               onClick={() => onRemoveFromCart(veg)}
-              className="w-7 h-7 flex items-center justify-center bg-[#ffffff] rounded-md hover:bg-gray-100 transition"
+              className="w-7 h-7 flex items-center justify-center bg-[#f3efe6] rounded-md hover:bg-gray-100 transition"
             >
               <Minus size={14} className="text-[#0e540b]" />
             </button>
@@ -295,7 +295,7 @@ const VegetableCard = memo(
             </span>
             <button
               onClick={() => onAddToCart(veg)}
-              className="w-7 h-7 flex items-center justify-center bg-[#ffffff] rounded-md hover:bg-gray-100 transition"
+              className="w-7 h-7 flex items-center justify-center bg-[#f3efe6] rounded-md hover:bg-gray-100 transition"
             >
               <Plus size={14} className="text-[#0e540b]" />
             </button>
@@ -709,8 +709,16 @@ const CustomizedVegetableSelection = () => {
     const fetchVegetables = async () => {
       try {
         setLoading(true);
+        const sortByStock = (a, b) => {
+          const aOut = a.outOfStock || (a.stockKg === 0 && (a.stockPieces === 0 || a.stockPieces == null));
+          const bOut = b.outOfStock || (b.stockKg === 0 && (b.stockPieces === 0 || b.stockPieces == null));
+          if (aOut && !bOut) return 1;
+          if (!aOut && bOut) return -1;
+          return 0;
+        };
+
         const response = await axios.get(`/api/vegetables/random`);
-        const veggiesData = response.data?.data || [];
+        const veggiesData = (response.data?.data || []).sort(sortByStock);
         setVegetables(veggiesData);
       } catch (error) {
         console.error("Error fetching vegetables:", error);
@@ -762,8 +770,8 @@ const CustomizedVegetableSelection = () => {
   }, [vegetables, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#ffffff] pb-36 lg:py-4 md:pb-10 md:py-4">
-      <div className="w-full max-w-7xl mx-auto mt-5 bg-[#ffffff] p-4 sm:p-1 md:p-8">
+    <div className="min-h-screen bg-[#f3efe6] pb-36 lg:py-4 md:pb-10 md:py-4">
+      <div className="w-full max-w-7xl mx-auto mt-5 bg-[#f3efe6] p-4 sm:p-1 md:p-8">
         {/* Header */}
         <div className="flex items-center md:justify-between gap-10 mb-8 pb-4 border-b-2 border-gray-100">
           <button
@@ -847,7 +855,7 @@ const CustomizedVegetableSelection = () => {
 
             {/* Footer with Cart Preview */}
             {totalItems > 0 && (
-              <div className="fixed bottom-0 left-0 right-0 bg-[#ffffff] border-t-2 border-gray-200 shadow-2xl z-50">
+              <div className="fixed bottom-0 left-0 right-0 bg-[#f3efe6] border-t-2 border-gray-200 shadow-2xl z-50">
                 {/* Checkout Bar */}
                 <div className="px-2 sm:px-3 py-1.5 sm:py-2 overflow-x-auto">
                   <div className="max-w-7xl mx-auto flex flex-col gap-2 sm:gap-3 md:flex-row md:items-center md:justify-between min-w-min">
@@ -857,7 +865,7 @@ const CustomizedVegetableSelection = () => {
                         {totalItems}
                       </p>
                     </div>
-                    <div className="w-full sm:flex-1 overflow-x-auto px-2 sm:px-3 py-1.5 sm:py-2 bg-gradient-to-r from-[#ffffff] to-[#e8f9ed] rounded-lg md:mx-2">
+                    <div className="w-full sm:flex-1 overflow-x-auto px-2 sm:px-3 py-1.5 sm:py-2 bg-gradient-to-r from-[#f3efe6] to-[#e8f9ed] rounded-lg md:mx-2">
                       <div className="flex gap-1.5 sm:gap-2 min-w-max">
                         {cartItemsWithDetails
                           .slice(0, 10)
@@ -913,7 +921,7 @@ const CustomizedVegetableSelection = () => {
                     </div>
                     <button
                       onClick={handleCheckout}
-                      className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base text-white bg-gradient-to-r from-[#0e540b] to-[#063a06] hover:from-[#063a06] hover:to-[#051f04] hover:shadow-2xl active:scale-95 transition-all shadow-xl flex items-center justify-center gap-1.5 sm:gap-2 border-2 border-transparent hover:border-[#ffffff]/30 flex-shrink-0"
+                      className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base text-white bg-gradient-to-r from-[#0e540b] to-[#063a06] hover:from-[#063a06] hover:to-[#051f04] hover:shadow-2xl active:scale-95 transition-all shadow-xl flex items-center justify-center gap-1.5 sm:gap-2 border-2 border-transparent hover:border-[#f3efe6]/30 flex-shrink-0"
                     >
                       <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span className="hidden sm:inline">Checkout</span>

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getWallet, createWallet as createWalletAPI, getBalance } from '../services/walletService';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { useAuth } from './AuthContext.jsx';
 
 const WalletContext = createContext();
@@ -20,7 +20,7 @@ export const WalletProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     // Fetch wallet data
-    const fetchWallet = async () => {
+    const fetchWallet = useCallback(async () => {
         if (!isAuthenticated) {
             setWallet(null);
             setBalance(0);
@@ -31,23 +31,10 @@ export const WalletProvider = ({ children }) => {
         setError(null);
 
         try {
-            const walletData = await getWallet();
-
-            if (walletData) {
-                setWallet(walletData.data.wallet);
-                setBalance(walletData.data.wallet.balance);
-            } else {
-                // Wallet doesn't exist - automatically create one for the user
-                try {
-                    const newWalletResponse = await createWalletAPI();
-                    setWallet(newWalletResponse.data.wallet);
-                    setBalance(0);
-                } catch (createErr) {
-                    console.error('Error auto-creating wallet:', createErr);
-                    // If wallet creation fails, set to null
-                    setWallet(null);
-                    setBalance(0);
-                }
+            const response = await axios.get('/api/wallet');
+            if (response.data) {
+                setWallet(response.data.data.wallet);
+                setBalance(response.data.data.wallet.balance);
             }
         } catch (err) {
             console.error('Error fetching wallet:', err);
@@ -55,8 +42,8 @@ export const WalletProvider = ({ children }) => {
             // If error is 404 (wallet not found), try to create one
             if (err.response?.status === 404) {
                 try {
-                    const newWalletResponse = await createWalletAPI();
-                    setWallet(newWalletResponse.data.wallet);
+                    const newWalletResponse = await axios.post('/api/wallet');
+                    setWallet(newWalletResponse.data.data.wallet);
                     setBalance(0);
                 } catch (createErr) {
                     console.error('Error auto-creating wallet:', createErr);
@@ -72,16 +59,16 @@ export const WalletProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isAuthenticated]);
 
     // Create wallet
-    const createWallet = async () => {
+    const createWallet = useCallback(async () => {
         setLoading(true);
         setError(null);
 
         try {
-            const response = await createWalletAPI();
-            setWallet(response.data.wallet);
+            const response = await axios.post('/api/wallet');
+            setWallet(response.data.data.wallet);
             setBalance(0);
             return response;
         } catch (err) {
@@ -91,19 +78,22 @@ export const WalletProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     // Refresh balance
-    const refreshBalance = async () => {
+    const refreshBalance = useCallback(async () => {
         if (!isAuthenticated || !wallet) return;
 
         try {
-            const balanceData = await getBalance();
-            setBalance(balanceData.data.balance);
+            const response = await axios.get('/api/wallet/balance');
+            setBalance(response.data.data.balance);
+            if (response.data.data.wallet) {
+                 setWallet(response.data.data.wallet); // also update wallet status
+            }
         } catch (err) {
             console.error('Error refreshing balance:', err);
         }
-    };
+    }, [isAuthenticated, wallet]);
 
     // Fetch wallet on mount and when user changes
     useEffect(() => {
@@ -113,7 +103,24 @@ export const WalletProvider = ({ children }) => {
             setWallet(null);
             setBalance(0);
         }
-    }, [isAuthenticated, user]);
+    }, [isAuthenticated, user, fetchWallet]);
+
+    // Periodically refresh the wallet when it is active
+    useEffect(() => {
+        let intervalId;
+        if (isAuthenticated && wallet && wallet.status === 'active') {
+             // Poll for latest balance and wallet data every 15 seconds
+             intervalId = setInterval(() => {
+                 refreshBalance();
+             }, 15000); 
+        }
+
+        return () => {
+             if (intervalId) {
+                  clearInterval(intervalId);
+             }
+        };
+    }, [isAuthenticated, wallet, refreshBalance]);
 
     const value = {
         wallet,

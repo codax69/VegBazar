@@ -3,6 +3,12 @@ import axios from "axios";
 import { useOrderContext } from "../Context/OrderContext";
 import { CreditCard, Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "../Context/AuthContext.jsx";
+import { useWallet } from "../Context/WalletContext.jsx";
+
+// ─── Auth header helper ───────────────────────────────────────────────────────
+const authHeader = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+});
 
 const RazorpayPayment = ({
   orderType,
@@ -11,6 +17,8 @@ const RazorpayPayment = ({
   couponCode,
   deliveryAddress,
   isCheckoutDisabled,
+  walletCreditUsed = 0,
+  amountAfterWallet = null,
 }) => {
   const {
     selectedOffer,
@@ -18,10 +26,13 @@ const RazorpayPayment = ({
     formData,
     navigate,
     setIsOrderPlaced,
+    setVegetableOrder,
     paymentMethod,
   } = useOrderContext();
 
   const { user } = useAuth();
+  const { refreshBalance } = useWallet();
+
   const customerInfo = useMemo(
     () => ({
       name: user?.username || "",
@@ -31,13 +42,11 @@ const RazorpayPayment = ({
     [user],
   );
 
-  const [orderCount, setOrderCount] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [currentOrderId, setCurrentOrderId] = useState(null);
 
-  // Helper functions
+  // ─── helpers ──────────────────────────────────────────────────────────────
   const getOrderItems = (order) => {
     if (!order) return [];
     if (Array.isArray(order)) return order;
@@ -46,10 +55,27 @@ const RazorpayPayment = ({
   };
 
   const getOrderSummary = (order) => {
-    if (order && typeof order === "object" && order.summary)
-      return order.summary;
+    if (order && typeof order === "object" && order.summary) return order.summary;
     return null;
   };
+
+  // ─── clear all cart state after order ────────────────────────────────────
+  const clearCartAfterOrder = useCallback(async () => {
+    // 1. Backend cart clear
+    try {
+      await axios.delete("/api/cart/clear", { headers: authHeader() });
+    } catch (_) {
+      // non-critical
+    }
+
+    // 2. React state reset
+    if (setVegetableOrder) setVegetableOrder([]);
+
+    // 3. localStorage / sessionStorage cleanup
+    localStorage.removeItem("orderSummary");
+    localStorage.removeItem("vegbazar_cart");
+    sessionStorage.removeItem("pendingOrderData");
+  }, [setVegetableOrder]);
 
   const isCustomOrder = useMemo(() => {
     return orderType === "custom" || getOrderItems(vegetableOrder).length > 0;
@@ -62,7 +88,7 @@ const RazorpayPayment = ({
     );
   }, [orderType, selectedOffer, selectedVegetables]);
 
-  // Calculate total amount with proper coupon handling
+  // ─── total amount ─────────────────────────────────────────────────────────
   const totalAmount = useMemo(() => {
     if (isCustomOrder && vegetableOrder) {
       const items = getOrderItems(vegetableOrder);
@@ -73,26 +99,38 @@ const RazorpayPayment = ({
       }
 
       const subtotal = items.reduce((acc, item) => {
-        const price =
-          parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
+        const price = parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
         const qty = parseInt(item.quantity) || 0;
         return acc + price * qty;
       }, 0);
 
-      const delivery = summary?.deliveryCharges ?? 20;
+      const delivery = summary?.deliveryCharges ?? 30;
       return subtotal > 0 ? subtotal + delivery : 0;
     }
 
     if (isBasketOrder && selectedOffer) {
       const offerPrice = selectedOffer.price || 0;
       const discount = couponCode?.discount || 0;
-      const deliveryCharge = 20;
+      const deliveryCharge = selectedOffer.deliveryCharges ?? 30;
       return Math.max(0, offerPrice - discount) + deliveryCharge;
     }
 
     return 0;
   }, [isCustomOrder, isBasketOrder, vegetableOrder, selectedOffer, couponCode]);
 
+  // ─── actual charge amount after wallet deduction ──────────────────────────
+  // Always use amountAfterWallet when provided (passed from VegetableCart).
+  // Razorpay must only charge the remaining amount, not the full total.
+  const chargeAmount = useMemo(() => {
+    if (amountAfterWallet !== null && amountAfterWallet !== undefined) {
+      return Math.max(0, amountAfterWallet);
+    }
+    return totalAmount;
+  }, [amountAfterWallet, totalAmount]);
+
+  const displayAmount = chargeAmount;
+
+  // ─── load Razorpay script ─────────────────────────────────────────────────
   const loadScript = useCallback((src) => {
     return new Promise((resolve) => {
       if (window.Razorpay) {
@@ -122,60 +160,29 @@ const RazorpayPayment = ({
     }
   }, [paymentMethod, loadScript]);
 
-  useEffect(() => {
-    const fetchOrderCount = async () => {
-      try {
-        const response = await axios.get(
-          `/api/orders/today/total`,
-          { timeout: 10000 },
-        );
-        setOrderCount(response.data?.data.count + 1);
-      } catch (error) {
-        console.error("Error fetching order count:", error);
-        setOrderCount(1);
-      }
-    };
-
-    fetchOrderCount();
-  }, []);
-
-  const generateOrderId = useCallback((count = 1) => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const orderNum = String(count).padStart(3, "0");
-    return `ORD${year}${month}${day}${orderNum}`;
-  }, []);
-
-  // Build order data that matches backend expectations
+  // ─── build order data ─────────────────────────────────────────────────────
   const buildOrderData = useCallback(
     (orderId) => {
       try {
-        // Extract coupon code properly
         const extractedCouponCode =
-          typeof couponCode === "string"
-            ? couponCode
-            : couponCode?.code || null;
+          typeof couponCode === "string" ? couponCode : couponCode?.code || null;
 
         if (isCustomOrder && vegetableOrder) {
           const items = getOrderItems(vegetableOrder);
           const summary = getOrderSummary(vegetableOrder);
 
-          // Map items to match backend's expected structure
           const selectedVegetablesData = (items || []).map((item) => ({
             vegetable: item.id || item.vegetableId,
             weight: item.weight,
             quantity: item.quantity,
-            pricePerUnit:
-              parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
+            pricePerUnit: parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
             subtotal:
               (parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0) *
               (item.quantity || 0),
             isFromBasket: false,
           }));
 
-          const orderData = {
+          return {
             orderId,
             orderType: "custom",
             customerInfo: customerInfo || formData || {},
@@ -184,41 +191,37 @@ const RazorpayPayment = ({
             vegetablesTotal:
               summary?.subtotal ||
               items.reduce((total, item) => {
-                const price =
-                  parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
+                const price = parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0;
                 return total + price * (item.quantity || 0);
               }, 0),
-            totalAmount: totalAmount,
-            paymentMethod: "ONLINE",
-            paymentStatus: "awaiting_payment",
+            totalAmount,
+            paymentMethod: walletCreditUsed > 0 ? "WALLET_ONLINE" : "ONLINE",
+            walletCreditUsed,
+            finalPayableAmount: amountAfterWallet ?? totalAmount,
             orderStatus: "placed",
             orderDate: new Date().toISOString(),
             couponCode: extractedCouponCode,
             couponDiscount: couponCode?.discount || 0,
           };
-
-          return orderData;
         }
 
         if (isBasketOrder) {
-          const orderData = {
+          return {
             orderId,
             orderType: "basket",
             customerInfo: customerInfo || formData || {},
             deliveryAddressId: deliveryAddress?._id || null,
-            selectedBasket:
-              selectedOffer?._id || selectedOffer?.id || selectedOffer,
+            selectedBasket: selectedOffer?._id || selectedOffer?.id || selectedOffer,
             selectedVegetables: selectedVegetables || [],
             orderDate: new Date().toISOString(),
-            totalAmount: totalAmount,
-            paymentMethod: "ONLINE",
-            paymentStatus: "awaiting_payment",
+            totalAmount,
+            paymentMethod: walletCreditUsed > 0 ? "WALLET_ONLINE" : "ONLINE",
+            walletCreditUsed,
+            finalPayableAmount: amountAfterWallet ?? totalAmount,
             orderStatus: "placed",
             couponCode: extractedCouponCode,
             couponDiscount: couponCode?.discount || 0,
           };
-
-          return orderData;
         }
 
         throw new Error("Invalid order type");
@@ -228,86 +231,67 @@ const RazorpayPayment = ({
       }
     },
     [
-      isCustomOrder,
-      isBasketOrder,
-      vegetableOrder,
-      formData,
-      customerInfo,
-      deliveryAddress,
-      selectedOffer,
-      selectedVegetables,
-      totalAmount,
-      couponCode,
+      isCustomOrder, isBasketOrder, vegetableOrder, formData, customerInfo,
+      deliveryAddress, selectedOffer, selectedVegetables, totalAmount,
+      couponCode, walletCreditUsed, amountAfterWallet,
     ],
   );
 
-  // Improved payment handler
+  // ─── create & open Razorpay ───────────────────────────────────────────────
   const createOrder = async () => {
     if (isLoading) return;
 
+    let isMounted = true;
     setIsLoading(true);
     setError(null);
 
     try {
-      // Validate data
       if (!customerInfo?.name || !customerInfo?.mobile) {
         throw new Error("Customer information is incomplete");
       }
 
+      // Validate full order total (not chargeAmount — wallet may cover everything)
       if (totalAmount <= 0) {
         throw new Error("Invalid order amount");
       }
 
-      // Extract coupon code once at the beginning
       const extractedCouponCode =
         typeof couponCode === "string" ? couponCode : couponCode?.code || null;
 
-      // Ensure Razorpay script is loaded
       if (!scriptLoaded) {
-        const res = await loadScript(
-          "https://checkout.razorpay.com/v1/checkout.js",
-        );
+        const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
         if (!res) {
-          throw new Error(
-            "Razorpay SDK failed to load. Please check your internet connection.",
-          );
+          throw new Error("Razorpay SDK failed to load. Please check your internet connection.");
         }
       }
 
-      const orderId = generateOrderId(orderCount);
-      setCurrentOrderId(orderId);
-      const orderData = buildOrderData(orderId);
+      const orderData = buildOrderData(null);
 
-      // console.log("📦 Order Data being sent:", orderData);
-
-      // Create order in backend
-      const result = await axios.post(
-        `/api/orders/create-order`,
-        orderData,
-        { timeout: 15000 },
-      );
-
-      // console.log("✅ Backend response:", result.data);
+      const result = await axios.post(`/api/orders/create-order`, orderData, {
+        timeout: 15000,
+      });
 
       if (!result?.data?.data?.razorpayOrder?.id) {
         throw new Error("Failed to create order. Please try again.");
       }
 
       const razorpayOrderId = result.data.data.razorpayOrder.id;
-      const amount = Math.round(totalAmount * 100);
+      const actualOrderId = result.data.data.orderData.orderId;
+      const actualChargeAmount = result.data.data.razorpayOrder.amount;
+      // Use backend's Razorpay amount (already wallet-adjusted).
+      // Fall back to chargeAmount (amountAfterWallet) — never full totalAmount.
+      const amount = actualChargeAmount || Math.round(chargeAmount * 100);
       const currency = "INR";
 
-      // Store order data in sessionStorage for recovery
+      orderData.orderId = actualOrderId;
       sessionStorage.setItem("pendingOrderData", JSON.stringify(orderData));
 
-      let description = "";
-      if (isCustomOrder) {
-        description = "Custom Vegetable Order";
-      } else if (isBasketOrder && selectedOffer) {
-        description = `${selectedOffer.title}`;
-      }
+      const description = isCustomOrder
+        ? "Custom Vegetable Order"
+        : selectedOffer?.title || "Basket Order";
+
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_SZLIBsr5d3H2uH",
         amount,
         currency,
         name: "VegBazar",
@@ -315,30 +299,27 @@ const RazorpayPayment = ({
         order_id: razorpayOrderId,
         handler: async function (response) {
           try {
-            // console.log("💳 Payment response:", response);
-
-            // Now extractedCouponCode is available here
             const verifyData = {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
-              orderId: orderId,
+              orderId: actualOrderId,
               orderType: isCustomOrder ? "custom" : "basket",
-              customerInfo: customerInfo,
+              customerInfo,
               deliveryAddressId: deliveryAddress?._id || null,
               couponCode: extractedCouponCode,
-              totalAmount: totalAmount,
+              totalAmount,           // full order total (for records)
+              walletCreditUsed,      // wallet portion
+              finalPayableAmount: chargeAmount, // actual Razorpay charged amount
             };
 
-            // Add order-specific data
             if (isCustomOrder && vegetableOrder) {
               const items = getOrderItems(vegetableOrder);
               verifyData.selectedVegetables = items.map((item) => ({
                 vegetable: item.id || item.vegetableId,
                 weight: item.weight,
                 quantity: item.quantity,
-                pricePerUnit:
-                  parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
+                pricePerUnit: parseFloat(item.pricePerUnit) || parseFloat(item.price) || 0,
               }));
             } else if (isBasketOrder) {
               verifyData.selectedBasket =
@@ -346,32 +327,26 @@ const RazorpayPayment = ({
               verifyData.selectedVegetables = selectedVegetables;
             }
 
-            // console.log("🔍 Verify Data being sent:", verifyData);
-
             const verifyResult = await axios.post(
               `/api/orders/verify-payment`,
               verifyData,
               { timeout: 15000 },
             );
 
-            // console.log("✅ Verification response:", verifyResult.data);
-
             if (verifyResult.data.success) {
-              // Clear pending order data
-              sessionStorage.removeItem("pendingOrderData");
-              // Clear cart from localStorage
-              localStorage.removeItem("orderSummary");
-              localStorage.removeItem("vegbazar_cart");
+              // ── FIX: clear cart fully after successful online payment ──────
+              await clearCartAfterOrder();
+
+              // refresh wallet balance if wallet was used
+              if (walletCreditUsed > 0) await refreshBalance();
+
               setIsOrderPlaced(true);
 
               if (onSuccess) {
                 onSuccess();
               } else {
-                // Navigate to new success page with cashback support
                 navigate("/order-success", {
-                  state: {
-                    orderData: verifyResult.data.data || verifyResult.data,
-                  },
+                  state: { orderData: verifyResult.data.data || verifyResult.data },
                 });
               }
             } else {
@@ -379,12 +354,13 @@ const RazorpayPayment = ({
             }
           } catch (err) {
             console.error("❌ Payment verification error:", err);
-            console.error("Error details:", err.response?.data);
-            setError(
-              `Payment received but verification failed. Your payment ID: ${response.razorpay_payment_id}. Please contact support.`,
-            );
+            if (isMounted) {
+              setError(
+                `Payment received but verification failed. Your payment ID: ${response.razorpay_payment_id}. Please contact support.`,
+              );
+            }
           } finally {
-            setIsLoading(false);
+            if (isMounted) setIsLoading(false);
           }
         },
         prefill: {
@@ -396,7 +372,7 @@ const RazorpayPayment = ({
           address: deliveryAddress?.street || "",
           area: deliveryAddress?.area || "",
           city: deliveryAddress?.city || "",
-          orderId: orderId,
+          orderId: actualOrderId,
         },
         theme: { color: "#0e540b" },
         modal: {
@@ -412,13 +388,11 @@ const RazorpayPayment = ({
       paymentObject.open();
     } catch (error) {
       console.error("❌ Payment creation error:", error);
-      console.error("Error details:", error.response?.data);
 
       let errorMessage = "Unable to initiate payment. Please try again.";
 
       if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
-        errorMessage =
-          "Request timed out. Please check your connection and try again.";
+        errorMessage = "Request timed out. Please check your connection and try again.";
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
@@ -426,11 +400,11 @@ const RazorpayPayment = ({
       }
 
       setError(errorMessage);
-      setIsLoading(false);
+      if (isMounted) setIsLoading(false);
     }
   };
 
-  // UI code remains the same...
+  // ─── UI ───────────────────────────────────────────────────────────────────
   if (error) {
     return (
       <div className="w-full max-w-md mx-auto p-4 sm:p-6">
@@ -446,10 +420,7 @@ const RazorpayPayment = ({
           </div>
         </div>
         <button
-          onClick={() => {
-            setError(null);
-            createOrder();
-          }}
+          onClick={() => { setError(null); createOrder(); }}
           className="w-full font-funnel py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base flex items-center justify-center gap-2"
         >
           <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -467,15 +438,16 @@ const RazorpayPayment = ({
         </div>
       )}
 
-      {totalAmount > 0 ? (
+      {totalAmount > 0 ? (  // use totalAmount — chargeAmount can be 0 when wallet covers all
         <>
           <button
             onClick={createOrder}
             disabled={isCheckoutDisabled || isLoading}
-            className={`w-full font-funnel py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${isCheckoutDisabled || isLoading
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
-              }`}
+            className={`w-full font-funnel py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${
+              isCheckoutDisabled || isLoading
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
+            }`}
           >
             {isLoading ? (
               <>
@@ -490,7 +462,7 @@ const RazorpayPayment = ({
             ) : (
               <>
                 <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
-                Pay Now ₹{totalAmount.toFixed(2)}
+                Pay Now ₹{displayAmount.toFixed(2)}
               </>
             )}
           </button>
@@ -508,11 +480,10 @@ const RazorpayPayment = ({
                 Package: ₹{selectedOffer.price}
                 {couponCode && couponCode.discount > 0 && (
                   <span className="text-green-600 font-semibold">
-                    {" "}
-                    - ₹{couponCode.discount} (Coupon)
+                    {" "}- ₹{couponCode.discount} (Coupon)
                   </span>
                 )}
-                {" + ₹20 delivery"}
+                {` + ₹${selectedOffer.deliveryCharges ?? 30} delivery`}
               </div>
               {couponCode && couponCode.code && (
                 <div className="text-green-600 font-semibold">
@@ -526,19 +497,19 @@ const RazorpayPayment = ({
             <div className="mt-3 text-xs sm:text-sm text-gray-600 text-center space-y-1">
               <div>
                 {vegetableOrder?.summary?.deliveryCharges === 0
-                  ? "Free Delivery (Order above ₹250)"
-                  : "Includes ₹20 delivery charge"}
+                  ? "Free Delivery (Order above ₹269)"
+                  : `Includes ₹${vegetableOrder?.summary?.deliveryCharges ?? 30} delivery charge`}
               </div>
-              {couponCode &&
-                (typeof couponCode === "string" || couponCode.code) && (
-                  <div className="text-green-600 font-semibold">
-                    Coupon "
-                    {typeof couponCode === "string"
-                      ? couponCode
-                      : couponCode.code}
-                    " applied ✓
-                  </div>
-                )}
+              {couponCode && (typeof couponCode === "string" || couponCode.code) && (
+                <div className="text-green-600 font-semibold">
+                  Coupon "{typeof couponCode === "string" ? couponCode : couponCode.code}" applied ✓
+                </div>
+              )}
+              {walletCreditUsed > 0 && (
+                <div className="text-[#0e540b] font-semibold">
+                  ₹{walletCreditUsed.toFixed(2)} paid via wallet
+                </div>
+              )}
             </div>
           )}
         </>

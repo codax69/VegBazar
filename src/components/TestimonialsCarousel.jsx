@@ -63,7 +63,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
   const active = safeTestimonials[currentTestimonial];
 
   return (
-    <div className="w-full bg-white shadow-lg rounded-xl mt-8 pb-6">
+    <div className="w-full bg-[#f3efe6] shadow-lg rounded-xl mt-8 pb-6">
       <div className="md:p-6 lg:p-6 p-4">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-bold text-gray-900">
@@ -72,13 +72,13 @@ const TestimonialsCarousel = ({ testimonials }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrev}
-              className="p-2 rounded-md bg-white shadow-sm hover:bg-gray-50 transition-all hover:scale-110 active:scale-95"
+              className="p-2 rounded-md bg-[#f3efe6] shadow-sm hover:bg-gray-50 transition-all hover:scale-110 active:scale-95"
             >
               ‹
             </button>
             <button
               onClick={handleNext}
-              className="p-2 rounded-md bg-white shadow-sm hover:bg-gray-50 transition-all hover:scale-110 active:scale-95"
+              className="p-2 rounded-md bg-[#f3efe6] shadow-sm hover:bg-gray-50 transition-all hover:scale-110 active:scale-95"
             >
               ›
             </button>
@@ -100,7 +100,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
               {/* Main Testimonial */}
               <div className="md:col-span-2">
                 <div
-                  className={`bg-white rounded-lg p-6 shadow-sm h-full flex flex-col justify-between transition-all duration-300 ${isTransitioning
+                  className={`bg-[#f3efe6] rounded-lg p-6 shadow-sm h-full flex flex-col justify-between transition-all duration-300 ${isTransitioning
                       ? "opacity-0 scale-95"
                       : "opacity-100 scale-100"
                     }`}
@@ -131,7 +131,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
               {/* Side Card */}
               <div className="hidden md:block">
                 <div
-                  className={`bg-white rounded-lg p-6 shadow-sm h-full flex flex-col justify-center items-center transition-all duration-300 ${isTransitioning
+                  className={`bg-[#f3efe6] rounded-lg p-6 shadow-sm h-full flex flex-col justify-center items-center transition-all duration-300 ${isTransitioning
                       ? "opacity-0 scale-95"
                       : "opacity-100 scale-100"
                     }`}
