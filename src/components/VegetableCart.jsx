@@ -923,7 +923,7 @@ const BillRows = React.memo(
       <div className="flex justify-between items-center">
         <span className="font-funnel text-gray-600">Delivery Charge</span>
         <span className="font-funnel font-semibold text-gray-800">
-          {deliveryCharge === 0 ? "FREE" : `₹${deliveryCharge.toFixed(2)}`}
+          {subtotal > 269  ? "FREE" : `₹${deliveryCharge.toFixed(2)}`}
         </span>
       </div>
       {deliveryCharge > 0 && subtotal < 269 && (
