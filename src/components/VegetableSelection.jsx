@@ -233,7 +233,7 @@ const VegetableSelection = () => {
 
   const handleAllVegetables = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    navigate("/all-vegetables");
+    navigate("/vegetables");
   }, [navigate]);
 
   // Fetch vegetables with loading state

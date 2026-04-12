@@ -216,7 +216,7 @@ const OrderHistory = () => {
   };
 
   const formatCurrency = (amount) => {
-    return `₹${amount.toLocaleString("en-IN")}`;
+    return `₹${amount}`;
   };
 
   const viewOrderDetails = (orderId) => {

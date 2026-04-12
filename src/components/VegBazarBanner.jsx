@@ -34,7 +34,7 @@ function VegCard({ emoji, image, name, price }) {
 // ─── Slide Label ──────────────────────────────────────────────────────────────
 function SlideLabel({ children, color }) {
   return (
-    <div 
+    <div
       className="text-[9px] font-bold uppercase tracking-[0.1em] flex items-center gap-[5px] mb-2"
       style={{ color }}
     >
@@ -53,36 +53,7 @@ const icons = {
   Refresh: ({ color }) => <svg className="flex-shrink-0" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-4.26" /></svg>,
   Tag: ({ color }) => <svg className="flex-shrink-0" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>,
   Activity: ({ color }) => <svg className="flex-shrink-0" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>,
-};
-
-// ─── Typewriter Text Component ────────────────────────────────────────────────
-const TypewriterText = ({ text, isActive }) => {
-  const [displayed, setDisplayed] = useState("");
-
-  useEffect(() => {
-    if (!isActive) {
-      setDisplayed("");
-      return;
-    }
-    let i = 0;
-    const interval = setInterval(() => {
-      setDisplayed(text.substring(0, i + 1));
-      i++;
-      if (i >= text.length) clearInterval(interval);
-    }, 45);
-    return () => clearInterval(interval);
-  }, [text, isActive]);
-
-  return (
-    <p className="text-[13px] text-gray-500 mt-2 leading-relaxed min-h-[40px]">
-      {displayed}
-      <motion.span
-        animate={{ opacity: [0, 1, 0] }}
-        transition={{ repeat: Infinity, duration: 0.8 }}
-        className="inline-block w-1 h-[14px] bg-[#0e540b] ml-0.5 align-middle"
-      />
-    </p>
-  );
+  Trophy: ({ color }) => <svg className="flex-shrink-0" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg>,
 };
 
 // ─── Main Banner ──────────────────────────────────────────────────────────────
@@ -112,7 +83,6 @@ export default function VegBazarBanner({
   const [randomVegs, setRandomVegs] = useState(vegetables);
 
   useEffect(() => {
-    // Fetch random vegs for Today's Picks
     axios.get("/api/vegetables/random")
       .then(res => {
         const data = res.data?.data || res.data;
@@ -124,7 +94,6 @@ export default function VegBazarBanner({
             if (!aOut && bOut) return -1;
             return 0;
           };
-
           const sorted = data.sort(sortByStock);
           const formatted = sorted.slice(0, 4).map(v => ({
             image: v.image || null,
@@ -151,8 +120,6 @@ export default function VegBazarBanner({
     const offset = info.offset.x;
     const velocity = info.velocity.x;
     const threshold = 40;
-
-    // determine direction based on offset and velocity
     if (offset < -threshold || velocity < -200) {
       setCurrent((prev) => (prev + 1) % TOTAL);
     } else if (offset > threshold || velocity > 200) {
@@ -160,8 +127,8 @@ export default function VegBazarBanner({
     }
   };
 
-  const btnClasses = (green = false) => 
-    `inline-block px-[18px] py-[7px] rounded-full text-white text-[11px] font-bold mt-3 border-none cursor-pointer font-body transition-all ` + 
+  const btnClasses = (green = false) =>
+    `inline-block px-[18px] py-[7px] rounded-full text-white text-[11px] font-bold mt-3 border-none cursor-pointer font-body transition-all ` +
     (green ? "bg-[#063a06]" : "bg-gradient-to-br from-[#0e540b] to-[#063a06]");
 
   return (
@@ -171,7 +138,7 @@ export default function VegBazarBanner({
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}
         onTouchEnd={() => setIsPaused(false)}
-        className="font-body bg-gradient-to-br from-[#f9fdf8] to-[#f3efe6] rounded-[20px] overflow-hidden relative min-h-[264px] select-none mt-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+        className="font-body bg-white rounded-[20px] overflow-hidden relative select-none mt-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
       >
         <motion.div
           drag="x"
@@ -183,14 +150,128 @@ export default function VegBazarBanner({
           className="flex h-full cursor-grab touch-pan-y"
           whileTap={{ cursor: "grabbing" }}
         >
-          {/* ── SLIDE 0 — Coming Soon ── */}
-          <div className="min-w-full flex flex-col items-center justify-center py-5 px-6 gap-2 box-border text-center">
-            <div className="text-[36px] mb-0.5">🎁✨</div>
-            <h1 className="font-heading text-2xl font-extrabold leading-tight text-[#1a1a1a] m-0">
-              <span className="text-[#063a06]">New Offers & Rewards</span><br />
-              <span className="text-[#0e540b]">Coming Soon!</span>
-            </h1>
-            <TypewriterText text="Get ready for exclusive gifts, massive discounts, and more surprises directly from VegBazar." isActive={current === 0} />
+
+          {/* ── SLIDE 0 — Fresh Challenge ── */}
+          <div
+            className="min-w-full bg-white h-full flex flex-row items-center justify-between py-5 px-6 gap-4 box-border relative overflow-hidden"
+          >
+            {/* Paisley watermark */}
+            <svg
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              style={{ opacity: 0.045 }}
+              viewBox="0 0 400 264"
+              preserveAspectRatio="xMidYMid slice"
+            >
+              <circle cx="70" cy="55" r="42" stroke="#2d6010" strokeWidth="2" fill="none" />
+              <circle cx="70" cy="55" r="28" stroke="#2d6010" strokeWidth="1.5" fill="none" />
+              <circle cx="330" cy="205" r="42" stroke="#2d6010" strokeWidth="2" fill="none" />
+              <circle cx="330" cy="205" r="28" stroke="#2d6010" strokeWidth="1.5" fill="none" />
+              <ellipse cx="145" cy="215" rx="28" ry="46" stroke="#2d6010" strokeWidth="1.5" fill="none" transform="rotate(-30 145 215)" />
+              <ellipse cx="285" cy="48" rx="28" ry="46" stroke="#2d6010" strokeWidth="1.5" fill="none" transform="rotate(20 285 48)" />
+              <circle cx="200" cy="132" r="58" stroke="#2d6010" strokeWidth="0.8" fill="none" />
+            </svg>
+
+            {/* Hatch — top-left */}
+            <svg className="absolute top-0 left-0 w-20 opacity-30 pointer-events-none" viewBox="0 0 80 80">
+              <defs>
+                <pattern id="hatch-tl" patternUnits="userSpaceOnUse" width="9" height="9" patternTransform="rotate(45)">
+                  <line x1="0" y1="0" x2="0" y2="9" stroke="#b8a07a" strokeWidth="3.5" />
+                </pattern>
+              </defs>
+              <rect width="80" height="80" fill="url(#hatch-tl)" />
+            </svg>
+
+            {/* Hatch — bottom-right */}
+            <svg className="absolute bottom-0 right-0 w-20 h-20 opacity-30 pointer-events-none" viewBox="0 0 80 80">
+              <defs>
+                <pattern id="hatch-br" patternUnits="userSpaceOnUse" width="9" height="9" patternTransform="rotate(45)">
+                  <line x1="0" y1="0" x2="0" y2="9" stroke="#b8a07a" strokeWidth="3.5" />
+                </pattern>
+              </defs>
+              <rect width="80" height="80" fill="url(#hatch-br)" />
+            </svg>
+
+            {/* Left: Text */}
+            <div className="flex-[1_1_200px] relative z-10">
+
+              {/* Label */}
+              <div
+                className="text-[10px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1.5"
+                style={{
+                  fontFamily: "'Poppins', 'Funnel Sans', sans-serif",
+                  color: "#4a7c1f",
+                }}
+              >
+                <icons.Trophy color="#4a7c1f" />
+                Limited Time Challenge
+              </div>
+
+              {/* Heading */}
+              <h1
+                className="m-0 leading-[1.08] text-[#1a4a08]"
+                style={{
+                  fontFamily: "'Funnel Display', sans-serif",
+                  fontSize: "26px",
+                  fontWeight: 800,
+                }}
+              >
+                VegBazar Fresh<br />
+                <span style={{ color: "#0e540b" }}>Challenge</span>
+              </h1>
+
+              {/* Order pills */}
+              <div className="flex items-center gap-1.5 my-2">
+                <span
+                  className="bg-[#0e540b] text-white text-[10px] font-bold px-2.5 py-[3px] rounded-full"
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                >
+                  5 orders
+                </span>
+                <span
+                  className="text-[11px] text-[#7a8a6a] font-medium"
+                  style={{ fontFamily: "'Funnel Sans', sans-serif" }}
+                >
+                  in
+                </span>
+                <span
+                  className="bg-[#063a06] text-white text-[10px] font-bold px-2.5 py-[3px] rounded-full"
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                >
+                  20 days
+                </span>
+              </div>
+
+              {/* Prize badge */}
+              <div className="inline-flex items-center gap-1.5 border-2 border-purple-600 rounded-[7px] px-3 py-[5px] mb-2.5 bg-purple-50">
+                <icons.Trophy color="#7c3aed" />
+                <span
+                  className="text-[10px] font-bold text-purple-700"
+                  style={{
+                    fontFamily: "'Poppins', sans-serif",
+                    letterSpacing: "0.03em",
+                  }}
+                >
+                  WIN FROM ₹5000 PRIZE POOL
+                </span>
+              </div>
+
+              {/* CTA text */}
+              <div
+                className="text-[10px] font-bold uppercase tracking-wider text-orange-500"
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+              >
+                Start your fresh journey today →
+              </div>
+            </div>
+
+            {/* Right: Challenge image */}
+            <div className="flex-[1_1_140px] flex items-center justify-center relative z-10">
+              <img
+                src="https://res.cloudinary.com/dltmiswel/image/upload/v1775998292/reward_dhzmno.webp"
+                alt="VegBazar Fresh Challenge Prizes"
+                className="w-full max-w-[220px] object-contain"
+              />
+            </div>
           </div>
 
           {/* ── SLIDE 1 — Features ── */}
