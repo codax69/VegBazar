@@ -216,7 +216,8 @@ const OrderHistory = () => {
   };
 
   const formatCurrency = (amount) => {
-    return `₹${amount}`;
+    console.log(amount)
+    return `₹${amount.toString()}`;
   };
 
   const viewOrderDetails = (orderId) => {
@@ -439,7 +440,7 @@ const OrderHistory = () => {
                     <div className="flex flex-col items-end">
                       <span className="font-funnel text-[10px] text-[#a0aec0] uppercase font-bold tracking-widest mb-1">Total Amount</span>
                       <span className="font-funnel text-2xl font-bold text-[#0e540b] leading-none">
-                        {formatCurrency(order.finalPayableAmount)}
+                        {formatCurrency(order.finalPayableAmount || order.totalAmount)}
                       </span>
                     </div>
                   </div>
@@ -650,7 +651,7 @@ const OrderHistory = () => {
                   Grand Total
                 </p>
                 <p className="font-funnel text-3xl font-bold text-center tracking-tight text-white drop-shadow-md">
-                  {formatCurrency(order.finalPayableAmount)}
+                  {formatCurrency(order.finalPayableAmount || order.totalAmount)}
                 </p>
               </div>
             </div>
