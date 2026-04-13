@@ -30,6 +30,7 @@ const VegetableOffers = lazy(() => import("./components/VegetableOffers"));
 const VegetableSelection = lazy(() =>
   import("./components/VegetableSelection")
 );
+const ChallengePage = lazy(() => import("./components/ChallengePage"));
 const OrderConfirmation = lazy(() => import("./components/OrderConfirmation"));
 const Help = lazy(() => import("./components/Help"));
 const BillingPage = lazy(() => import("./components/BillingPage"));
@@ -248,7 +249,8 @@ const AppWithOrderContext = () => {
     "/profile",
     "/wallet",
     "/wallet/transactions",
-    "/video"
+    "/video",
+    "/challenge"
   ];
 
   return (
@@ -290,6 +292,14 @@ const AppWithOrderContext = () => {
                   <Route
                     path="/vegetables"
                     element={<CustomizedVegetableSelection />}
+                  />
+                  <Route
+                    path="/challenge"
+                    element={
+                      <AuthProtectedRoute redirectTo="/login">
+                        <ChallengePage />
+                      </AuthProtectedRoute>
+                    }
                   />
                   <Route path="/support" element={<Help />} />
                   <Route
