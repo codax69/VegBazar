@@ -226,6 +226,36 @@ export default function VegBazarBanner({
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
+          <motion.div
+            style={{ ...slideStyle }}
+            animate={{ x: cur === 0 ? "100%" : cur === 1 ? "-100%" : cur === 2 ? "100%" : cur === 3 ? "0%" : "100%" }}
+            transition={{ type: "spring", stiffness: 320, damping: 34 }}
+          >
+            <LP bg="#7f1d1d">
+              <div style={{ position: "absolute", top: -24, right: -24, width: 80, height: 80, borderRadius: "50%", background: "#dc2626", opacity: 0.3, filter: "blur(24px)", pointerEvents: "none" }} />
+              <Label icon={IC.Shield} text="Important Notice" color="#fca5a5" />
+              <H>Service<br /><span style={{ color: "#fca5a5" }}>Temporarily Closed</span></H>
+              <p style={{ margin: "clamp(8px,2vw,14px) 0 0", fontSize: "clamp(9px,2.2vw,11px)", color: "#fecaca", lineHeight: 1.6, maxWidth: 250 }}>
+                We are currently closed for maintenance and improvements. Thank you for your patience. We'll be back soon with better service!
+              </p>
+              <div style={{ marginTop: "clamp(8px,2vw,12px)", display: "inline-flex", alignItems: "center", gap: 7, padding: "6px 10px", borderRadius: 10, border: "1.5px solid rgba(252,165,165,0.4)", background: "rgba(153,27,27,0.3)" }}>
+                <IC.Shield c="#fca5a5" s={10} />
+                <span style={{ color: "#fca5a5", fontSize: "clamp(8px,2vw,10px)", fontWeight: 700, fontFamily: "'Poppins', sans-serif" }}>WE'LL BE BACK SOON</span>
+              </div>
+            </LP>
+
+            <RP bg="#fee2e2">
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                <div style={{ width: "130%", aspectRatio: "1", borderRadius: "50%", border: "40px solid rgba(127,29,29,0.05)" }} />
+              </div>
+              <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+                <div style={{ fontSize: "clamp(60px,15vw,100px)", marginBottom: 16 }}>🔧</div>
+                <p style={{ fontSize: "clamp(12px,3vw,14px)", color: "#7f1d1d", fontWeight: 700, fontFamily: "'Poppins', sans-serif" }}>
+                  Under Maintenance
+                </p>
+              </div>
+            </RP>
+          </motion.div>
           {/* SLIDE 0 — Challenge */}
           <motion.div
             style={{ ...slideStyle }}
@@ -312,36 +342,7 @@ export default function VegBazarBanner({
           </motion.div>
 
           {/* SLIDE 3 — Service Close */}
-          <motion.div
-            style={{ ...slideStyle }}
-            animate={{ x: cur === 0 ? "100%" : cur === 1 ? "-100%" : cur === 2 ? "100%" : cur === 3 ? "0%" : "100%" }}
-            transition={{ type: "spring", stiffness: 320, damping: 34 }}
-          >
-            <LP bg="#7f1d1d">
-              <div style={{ position: "absolute", top: -24, right: -24, width: 80, height: 80, borderRadius: "50%", background: "#dc2626", opacity: 0.3, filter: "blur(24px)", pointerEvents: "none" }} />
-              <Label icon={IC.Shield} text="Important Notice" color="#fca5a5" />
-              <H>Service<br /><span style={{ color: "#fca5a5" }}>Temporarily Closed</span></H>
-              <p style={{ margin: "clamp(8px,2vw,14px) 0 0", fontSize: "clamp(9px,2.2vw,11px)", color: "#fecaca", lineHeight: 1.6, maxWidth: 250 }}>
-                We are currently closed for maintenance and improvements. Thank you for your patience. We'll be back soon with better service!
-              </p>
-              <div style={{ marginTop: "clamp(8px,2vw,12px)", display: "inline-flex", alignItems: "center", gap: 7, padding: "6px 10px", borderRadius: 10, border: "1.5px solid rgba(252,165,165,0.4)", background: "rgba(153,27,27,0.3)" }}>
-                <IC.Shield c="#fca5a5" s={10} />
-                <span style={{ color: "#fca5a5", fontSize: "clamp(8px,2vw,10px)", fontWeight: 700, fontFamily: "'Poppins', sans-serif" }}>WE'LL BE BACK SOON</span>
-              </div>
-            </LP>
-
-            <RP bg="#fee2e2">
-              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                <div style={{ width: "130%", aspectRatio: "1", borderRadius: "50%", border: "40px solid rgba(127,29,29,0.05)" }} />
-              </div>
-              <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
-                <div style={{ fontSize: "clamp(60px,15vw,100px)", marginBottom: 16 }}>🔧</div>
-                <p style={{ fontSize: "clamp(12px,3vw,14px)", color: "#7f1d1d", fontWeight: 700, fontFamily: "'Poppins', sans-serif" }}>
-                  Under Maintenance
-                </p>
-              </div>
-            </RP>
-          </motion.div>
+          
         </div>
 
         {/* ── bottom bar ── */}
