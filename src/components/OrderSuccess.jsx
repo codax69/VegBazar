@@ -217,6 +217,10 @@ const OrderSuccess = ({ orderData: propOrderData, onNewOrder }) => {
           <p className="text-sm sm:text-base font-funnel text-gray-600">
             Thank you for your order
           </p>
+          <div className="mt-4 rounded-2xl border border-yellow-200 bg-yellow-50 p-3 text-left text-sm text-yellow-900">
+            <p className="font-semibold">Important notice:</p>
+            <p>This is a dummy/demo order only. No home delivery will happen because the site services are currently closed.</p>
+          </div>
         </div>
 
         {/* ── Order Summary Card ── */}
