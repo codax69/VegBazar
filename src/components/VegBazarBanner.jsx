@@ -226,9 +226,10 @@ export default function VegBazarBanner({
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
+          {/* SLIDE 0 — Service Close */}
           <motion.div
             style={{ ...slideStyle }}
-            animate={{ x: cur === 0 ? "100%" : cur === 1 ? "-100%" : cur === 2 ? "100%" : cur === 3 ? "0%" : "100%" }}
+            animate={{ x: cur === 0 ? "0%" : cur === 1 ? "-100%" : cur === 2 ? "-200%" : cur === 3 ? "-300%" : "0%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
           >
             <LP bg="#7f1d1d">
@@ -256,10 +257,10 @@ export default function VegBazarBanner({
               </div>
             </RP>
           </motion.div>
-          {/* SLIDE 0 — Challenge */}
+          {/* SLIDE 1 — Challenge */}
           <motion.div
             style={{ ...slideStyle }}
-            animate={{ x: cur === 0 ? "0%" : cur === 1 ? "-100%" : cur === 2 ? "-200%" : cur === 3 ? "-300%" : "0%" }}
+            animate={{ x: cur === 0 ? "100%" : cur === 1 ? "0%" : cur === 2 ? "-100%" : cur === 3 ? "-200%" : "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
           >
             <LP bg="#063a06">
@@ -290,10 +291,10 @@ export default function VegBazarBanner({
             </RP>
           </motion.div>
 
-          {/* SLIDE 1 — Features */}
+          {/* SLIDE 2 — Features */}
           <motion.div
             style={{ ...slideStyle }}
-            animate={{ x: cur === 0 ? "100%" : cur === 1 ? "0%" : cur === 2 ? "-100%" : cur === 3 ? "-200%" : "100%" }}
+            animate={{ x: cur === 0 ? "200%" : cur === 1 ? "100%" : cur === 2 ? "0%" : cur === 3 ? "-100%" : "200%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
           >
             <LP bg="#fff">
@@ -316,10 +317,10 @@ export default function VegBazarBanner({
             </RP>
           </motion.div>
 
-          {/* SLIDE 2 — Veggies */}
+          {/* SLIDE 3 — Veggies */}
           <motion.div
             style={{ ...slideStyle }}
-            animate={{ x: cur === 0 ? "-100%" : cur === 1 ? "100%" : cur === 2 ? "0%" : cur === 3 ? "-100%" : "-100%" }}
+            animate={{ x: cur === 0 ? "300%" : cur === 1 ? "200%" : cur === 2 ? "100%" : cur === 3 ? "0%" : "300%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
           >
             <LP bg="#063a06">
@@ -340,9 +341,6 @@ export default function VegBazarBanner({
               </div>
             </RP>
           </motion.div>
-
-          {/* SLIDE 3 — Service Close */}
-          
         </div>
 
         {/* ── bottom bar ── */}
