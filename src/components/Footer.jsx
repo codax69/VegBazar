@@ -1,3 +1,4 @@
+// src/components/Footer.jsx — Rebuilt with v2 1px hairline cards, Fraunces titles, and Inter typography
 import React from 'react';
 import { MapPin, Phone, Mail, Globe, Clock, Truck, Facebook, Instagram, Twitter } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -6,51 +7,52 @@ const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="bg-[#f3efe6] pt-12 pb-6 border-t border-[#0e540b]/10 mt-auto font-sans">
+        <footer className="bg-[var(--color-bg-surface)] pt-12 pb-24 md:pb-8 border-t border-[var(--color-border)] mt-auto font-body transition-colors duration-150">
             <div className="container mx-auto px-4 max-w-7xl">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
 
                     {/* Brand & Contact Column */}
                     <div className="space-y-4">
-                        <h2 className="text-2xl font-bold text-[#0e540b] flex items-center gap-2">
-                            <img src="/vegbazar.svg" alt="VegBazar Logo" className="h-10 w-auto" />
+                        <h2 className="text-xl font-display font-semibold text-[var(--color-text-primary)] flex items-center gap-2">
+                            <img src="/vegbazar.svg" alt="VegBazar Logo" className="h-8 w-auto" />
+                            <span>VegBazar</span>
                         </h2>
-                        <p className="text-gray-600 text-sm mb-4 font-funnel">
+                        <p className="text-[var(--color-text-secondary)] text-xs leading-relaxed font-body mb-4">
                             Fresh vegetables delivered directly to your doorstep in Valsad. Quality and freshness guaranteed.
                         </p>
 
-                        <div className="space-y-3">
-                            <div className="flex items-start gap-3 text-gray-700 hover:text-[#0e540b] transition-colors group">
-                                <MapPin className="w-5 h-5 text-[#0e540b] mt-0.5 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm">Vashiyar Valley, Valsad, Gujarat 396007</span>
+                        <div className="space-y-2.5">
+                            <div className="flex items-start gap-2.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                <MapPin className="w-4 h-4 text-[var(--color-brand-green)] mt-0.5 shrink-0" />
+                                <span className="text-xs">Vashiyar Valley, Valsad, Gujarat 396007</span>
                             </div>
 
-                            <a href="tel:+918780564115" className="flex items-center gap-3 text-gray-700 hover:text-[#0e540b] transition-colors group">
-                                <Phone className="w-5 h-5 text-[#0e540b] group-hover:scale-110 transition-transform" />
-                                <span className="text-sm">+91-8780564115</span>
+                            <a href="tel:+918780564115" className="flex items-center gap-2.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                <Phone className="w-4 h-4 text-[var(--color-brand-green)] shrink-0" />
+                                <span className="text-xs font-mono">+91-8780564115</span>
                             </a>
 
-                            <a href="mailto:info.vegbazar@gmail.com" className="flex items-center gap-3 text-gray-700 hover:text-[#0e540b] transition-colors group">
-                                <Mail className="w-5 h-5 text-[#0e540b] group-hover:scale-110 transition-transform" />
-                                <span className="text-sm">info.vegbazar@gmail.com</span>
+                            <a href="mailto:info.vegbazar@gmail.com" className="flex items-center gap-2.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                <Mail className="w-4 h-4 text-[var(--color-brand-green)] shrink-0" />
+                                <span className="text-xs font-mono">info.vegbazar@gmail.com</span>
                             </a>
 
-                            <a href="https://vegbazar.store" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-[#0e540b] transition-colors group">
-                                <Globe className="w-5 h-5 text-[#0e540b] group-hover:scale-110 transition-transform" />
-                                <span className="text-sm">https://vegbazar.store</span>
+                            <a href="https://vegbazar.store" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                <Globe className="w-4 h-4 text-[var(--color-brand-green)] shrink-0" />
+                                <span className="text-xs font-mono">https://vegbazar.store</span>
                             </a>
                         </div>
                     </div>
 
                     {/* Service Areas */}
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-[#0e540b]/20 pb-2 inline-block">
+                        <h3 className="text-sm font-display font-semibold text-[var(--color-text-primary)] mb-3 pb-1 border-b border-[var(--color-border)] inline-block">
                             Service Areas
                         </h3>
                         <ul className="space-y-2">
                             {['Valsad', 'Abrama', 'Tithal Road', 'Halar', 'Parnera Pardi'].map((area) => (
-                                <li key={area} className="flex items-center gap-2 text-gray-600 hover:text-[#0e540b] transition-colors">
-                                    <span className="w-1.5 h-1.5 bg-[#0e540b] rounded-full"></span>
+                                <li key={area} className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    <span className="w-1.5 h-1.5 bg-[var(--color-brand-green)] rounded-full" />
                                     {area}
                                 </li>
                             ))}
@@ -59,28 +61,28 @@ const Footer = () => {
 
                     {/* Delivery Info */}
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-[#0e540b]/20 pb-2 inline-block">
+                        <h3 className="text-sm font-display font-semibold text-[var(--color-text-primary)] mb-3 pb-1 border-b border-[var(--color-border)] inline-block">
                             Delivery Information
                         </h3>
-                        <div className="space-y-4">
-                            <div className="bg-white p-4 rounded-xl shadow-sm border border-[#0e540b]/10 hover:shadow-md transition-shadow">
-                                <div className="flex items-center gap-3 mb-2 text-[#0e540b] font-medium">
-                                    <Clock className="w-5 h-5" />
+                        <div className="space-y-3">
+                            <div className="bg-[var(--color-bg-app)] p-3.5 rounded-[10px] border border-[var(--color-border)]">
+                                <div className="flex items-center gap-2 mb-1.5 text-[var(--color-brand-green)] font-medium text-xs">
+                                    <Clock className="w-4 h-4" />
                                     Delivery Hours
                                 </div>
-                                <p className="text-gray-600 text-sm ml-8">
+                                <p className="text-[var(--color-text-secondary)] text-xs ml-6 font-mono">
                                     Monday - Sunday<br />
                                     7:00 AM - 11:00 AM
                                 </p>
                             </div>
 
-                            <div className="bg-gradient-to-r from-[#0e540b] to-[#063a06] p-4 rounded-xl shadow-md text-white transform hover:-translate-y-1 transition-transform duration-300">
-                                <div className="flex items-center gap-3 font-bold mb-1">
-                                    <Truck className="w-5 h-5 animate-bounce" />
+                            <div className="bg-[var(--color-brand-green)] p-3.5 rounded-[10px] text-white">
+                                <div className="flex items-center gap-2 font-display font-semibold text-xs mb-1">
+                                    <Truck className="w-4 h-4" />
                                     Free Delivery
                                 </div>
-                                <p className="text-green-50 text-sm ml-8 opacity-90">
-                                    On all orders above <span className="font-bold text-white text-base">₹269+</span>
+                                <p className="text-white/90 text-xs ml-6 font-body">
+                                    On all orders above <span className="font-mono font-medium text-white">₹269+</span>
                                 </p>
                             </div>
                         </div>
@@ -88,36 +90,36 @@ const Footer = () => {
 
                     {/* Quick Links & Social */}
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-[#0e540b]/20 pb-2 inline-block">
+                        <h3 className="text-sm font-display font-semibold text-[var(--color-text-primary)] mb-3 pb-1 border-b border-[var(--color-border)] inline-block">
                             Quick Links
                         </h3>
-                        <ul className="space-y-2 mb-6">
-                            <li><Link to="/" className="text-gray-600 hover:text-[#0e540b] transition-colors hover:translate-x-1 inline-block">Home</Link></li>
-                            <li><Link to="/offers" className="text-gray-600 hover:text-[#0e540b] transition-colors hover:translate-x-1 inline-block">Offers</Link></li>
-                            <li><Link to="/support" className="text-gray-600 hover:text-[#0e540b] transition-colors hover:translate-x-1 inline-block">Support & Help</Link></li>
-                            <li><Link to="/wallet" className="text-gray-600 hover:text-[#0e540b] transition-colors hover:translate-x-1 inline-block">My Wallet</Link></li>
+                        <ul className="space-y-2 mb-6 text-xs font-body">
+                            <li><Link to="/" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">Home</Link></li>
+                            <li><Link to="/offers" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">Offers & Baskets</Link></li>
+                            <li><Link to="/support" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">Support & Help</Link></li>
+                            <li><Link to="/wallet" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">My Wallet</Link></li>
                         </ul>
 
-                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Follow Us</h4>
-                        <div className="flex gap-4">
-                            <a href="https://www.facebook.com/vegbazar" target="_blank" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all border border-blue-100">
-                                <Facebook className="w-5 h-5" />
+                        <h4 className="text-xs font-display font-semibold text-[var(--color-text-primary)] mb-2.5">Follow Us</h4>
+                        <div className="flex gap-2.5">
+                            <a href="https://www.facebook.com/vegbazar" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-[var(--color-bg-app)] rounded-full flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition-colors">
+                                <Facebook className="w-4 h-4" />
                             </a>
-                            <a href="https://www.instagram.com/vegbazar.store" target="_blank" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-pink-600 shadow-sm hover:shadow-md hover:bg-pink-50 transition-all border border-pink-100">
-                                <Instagram className="w-5 h-5" />
+                            <a href="https://www.instagram.com/vegbazar.store" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-[var(--color-bg-app)] rounded-full flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition-colors">
+                                <Instagram className="w-4 h-4" />
                             </a>
-                            <a href="https://www.twitter.com/vegbazar.store" target="_blank" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-sky-500 shadow-sm hover:shadow-md hover:bg-sky-50 transition-all border border-sky-100">
-                                <Twitter className="w-5 h-5" />
+                            <a href="https://www.twitter.com/vegbazar.store" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-[var(--color-bg-app)] rounded-full flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition-colors">
+                                <Twitter className="w-4 h-4" />
                             </a>
                         </div>
                     </div>
                 </div>
 
                 {/* Copyright */}
-                <div className="border-t font-funnel border-[#0e540b]/20 pt-6 text-center text-gray-500 text-sm flex flex-col md:flex-row justify-center items-center gap-2">
+                <div className="border-t border-[var(--color-border)] pt-5 text-center text-[var(--color-text-muted)] text-xs flex flex-col md:flex-row justify-center items-center gap-2 font-mono">
                     <p>© {currentYear} VegBazar. All rights reserved.</p>
                     <span className="hidden md:inline">•</span>
-                    <p>Made with 💚 in Valsad</p>
+                    <p className="font-body">Made with 💚 in Valsad</p>
                 </div>
             </div>
         </footer>

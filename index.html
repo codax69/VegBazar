@@ -626,12 +626,25 @@
 
     <!-- Service Worker for PWA -->
     <script>
+      const isDevEnv =
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        window.location.hostname.startsWith("192.168.");
+
       if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("/service-worker.js")
-            .then((reg) => {
-              console.log("✅ Service Worker registered:", reg.scope);
+        if (isDevEnv) {
+          // Unregister service worker in dev mode to prevent cached HTML breaking Vite HMR/SWC preamble
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            for (let reg of registrations) {
+              reg.unregister();
+            }
+          });
+        } else {
+          window.addEventListener("load", () => {
+            navigator.serviceWorker
+              .register("/service-worker.js")
+              .then((reg) => {
+                console.log("✅ Service Worker registered:", reg.scope);
 
               // Check for updates
               reg.addEventListener("updatefound", () => {
@@ -718,6 +731,7 @@
           refreshing = true;
           window.location.reload();
         });
+        }
       }
     </script>
   </body>

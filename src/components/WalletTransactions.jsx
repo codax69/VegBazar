@@ -1,3 +1,4 @@
+// src/components/WalletTransactions.jsx — Rebuilt with v2 1px hairline cards, IBM Plex Mono transaction amounts, and Fraunces title
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTransactions } from '../services/walletService';
@@ -30,8 +31,6 @@ const WalletTransactions = () => {
                 type: filter.type,
                 source: filter.source,
             });
-            // ✅ BUG-W1 Fix: Backend returns ApiResponse { data: { transactions, pagination } }
-            // Since service returns response.data (the json), we access .data.transactions
             if (response && response.data) {
                 setTransactions(response.data.transactions || []);
                 setTotalPages(response.data.pagination?.totalPages || 1);
@@ -78,30 +77,32 @@ const WalletTransactions = () => {
     };
 
     return (
-        <div className="min-h-[calc(100vh-80px)] bg-gray-50 py-6">
+        <div className="min-h-[calc(100vh-80px)] bg-[var(--color-bg-app)] py-6 transition-colors duration-150">
             <div className="max-w-[800px] mx-auto px-4">
                 <div className="flex items-center gap-4 mb-6">
                     <button
-                        className="bg-white border border-gray-200 rounded-[10px] w-10 h-10 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-gray-50 hover:border-gray-300"
+                        className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] rounded-[10px] w-9 h-9 flex items-center justify-center transition-colors text-[var(--color-text-primary)]"
                         onClick={() => navigate('/wallet')}
+                        aria-label="Go back to wallet"
                     >
-                        <ChevronLeft size={24} />
+                        <ChevronLeft size={20} />
                     </button>
-                    <h1 className="flex-1 text-2xl font-bold text-gray-900 font-funnel m-0">Transaction History</h1>
+                    <h1 className="flex-1 text-xl font-display font-semibold text-[var(--color-text-primary)] m-0">Transaction History</h1>
                     <button
-                        className="bg-white border border-gray-200 rounded-[10px] w-10 h-10 flex items-center justify-center cursor-pointer transition-all duration-200 text-gray-500 hover:bg-gray-50 hover:border-[#0e540b] hover:text-[#0e540b]"
+                        className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] rounded-[10px] w-9 h-9 flex items-center justify-center transition-colors text-[var(--color-text-secondary)]"
                         onClick={() => setShowFilters(!showFilters)}
+                        aria-label="Toggle filters"
                     >
-                        <Filter size={20} />
+                        <Filter size={18} />
                     </button>
                 </div>
 
                 {showFilters && (
-                    <div className="bg-white rounded-xl p-5 mb-5 shadow-sm flex gap-4 flex-wrap items-end">
-                        <div className="flex-1 min-w-[150px]">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2 font-funnel">Type</label>
+                    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] p-4 mb-5 flex gap-4 flex-wrap items-end font-body">
+                        <div className="flex-1 min-w-[140px]">
+                            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 font-body">Type</label>
                             <select
-                                className="w-full py-2.5 px-3 border border-gray-300 rounded-lg text-sm font-funnel bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:border-[#0e540b] focus:shadow-[0_0_0_3px_rgba(14,84,11,0.1)]"
+                                className="w-full py-2 px-3 border border-[var(--color-border)] rounded-[8px] text-xs font-body bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-brand-green)]"
                                 value={filter.type || 'all'}
                                 onChange={(e) => handleFilterChange('type', e.target.value)}
                             >
@@ -110,15 +111,14 @@ const WalletTransactions = () => {
                                 <option value="debit">Debit</option>
                             </select>
                         </div>
-                        <div className="flex-1 min-w-[150px]">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2 font-funnel">Source</label>
+                        <div className="flex-1 min-w-[140px]">
+                            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 font-body">Source</label>
                             <select
-                                className="w-full py-2.5 px-3 border border-gray-300 rounded-lg text-sm font-funnel bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:border-[#0e540b] focus:shadow-[0_0_0_3px_rgba(14,84,11,0.1)]"
+                                className="w-full py-2 px-3 border border-[var(--color-border)] rounded-[8px] text-xs font-body bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-brand-green)]"
                                 value={filter.source || 'all'}
                                 onChange={(e) => handleFilterChange('source', e.target.value)}
                             >
                                 <option value="all">All</option>
-                                {/* ✅ BUG-W3 Fix: Values must match DB enum: order_payment, refund, cashback, reversal, adjustment */}
                                 <option value="order_payment">Order Payment</option>
                                 <option value="refund">Refund</option>
                                 <option value="cashback">Cashback</option>
@@ -127,7 +127,7 @@ const WalletTransactions = () => {
                             </select>
                         </div>
                         <button
-                            className="bg-transparent text-[#0e540b] border border-[#0e540b] py-2.5 px-5 rounded-lg text-sm font-semibold font-funnel cursor-pointer transition-all duration-200 hover:bg-[rgba(14,84,11,0.1)]"
+                            className="bg-transparent text-[var(--color-brand-green)] border border-[var(--color-brand-green)] py-2 px-4 rounded-[8px] text-xs font-medium font-body transition-colors hover:bg-[var(--color-tint-green)]"
                             onClick={clearFilters}
                         >
                             Clear Filters
@@ -136,42 +136,39 @@ const WalletTransactions = () => {
                 )}
 
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                        <div className="w-12 h-12 border-4 border-gray-200 border-t-[#0e540b] rounded-full animate-spin"></div>
-                        <p className="text-gray-500 font-funnel">Loading transactions...</p>
+                    <div className="flex flex-col items-center justify-center min-h-[300px] gap-3">
+                        <div className="w-10 h-10 border-2 border-[var(--color-border)] border-t-[var(--color-brand-green)] rounded-full animate-spin"></div>
+                        <p className="text-[var(--color-text-muted)] text-xs font-body">Loading transactions...</p>
                     </div>
                 ) : transactions.length === 0 ? (
-                    <div className="bg-white rounded-2xl py-12 px-8 text-center shadow-sm">
-                        <p className="text-base font-semibold text-gray-500 m-0 mb-2 font-funnel">No transactions found</p>
-                        <span className="text-sm text-gray-400 font-funnel">Your transaction history will appear here</span>
+                    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] py-12 px-6 text-center">
+                        <p className="text-sm font-display font-semibold text-[var(--color-text-primary)] mb-1">No transactions found</p>
+                        <span className="text-xs text-[var(--color-text-muted)] font-body">Your transaction history will appear here</span>
                     </div>
                 ) : (
                     <>
-                        <div className="bg-white rounded-2xl p-4 shadow-sm flex flex-col gap-3">
+                        <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] p-3 flex flex-col gap-2.5">
                             {transactions.map((transaction) => (
-                                // ✅ BUG-W4 Fix: formatTransaction returns `id` not `_id`
-                                <div key={transaction.id || transaction._id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100">
-                                    <div className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0">
+                                <div key={transaction.id || transaction._id} className="flex items-start gap-3 p-3 bg-[var(--color-bg-app)] rounded-[10px] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition-colors">
+                                    <div className="w-9 h-9 rounded-[8px] flex items-center justify-center shrink-0">
                                         {transaction.type === 'credit' ? (
-                                            <ArrowDownLeft className="text-green-500 bg-[rgba(34,197,94,0.1)] p-2.5 rounded-[10px]" size={20} />
+                                            <ArrowDownLeft className="text-[var(--color-brand-green)] bg-[var(--color-tint-green)] p-2 rounded-[8px]" size={18} />
                                         ) : (
-                                            <ArrowUpRight className="text-red-500 bg-[rgba(239,68,68,0.1)] p-2.5 rounded-[10px]" size={20} />
+                                            <ArrowUpRight className="text-red-500 bg-red-50 dark:bg-red-950/40 p-2 rounded-[8px]" size={18} />
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        {/* ✅ BUG-W5 Fix: Show human-readable source label instead of raw enum */}
-                                        <div className="text-[15px] font-semibold text-gray-900 capitalize font-funnel mb-1">
+                                        <div className="text-xs sm:text-sm font-body font-medium text-[var(--color-text-primary)] capitalize mb-0.5">
                                             {SOURCE_LABELS[transaction.source] || transaction.source}
                                         </div>
-                                        <div className="text-[13px] text-gray-500 font-funnel">
+                                        <div className="text-[11px] text-[var(--color-text-muted)] font-body">
                                             {formatDate(transaction.createdAt)} • {formatTime(transaction.createdAt)}
                                         </div>
                                         {transaction.description && (
-                                            <div className="text-[13px] text-gray-400 mt-1 font-funnel">{transaction.description}</div>
+                                            <div className="text-[11px] text-[var(--color-text-secondary)] mt-0.5 font-body">{transaction.description}</div>
                                         )}
                                     </div>
-                                    {/* ✅ BUG-W2 Fix: Backend formatTransaction returns `amount` (rupees), NOT `amountInRupees` */}
-                                    <div className={`text-base font-bold font-funnel flex-shrink-0 ${transaction.type === 'credit' ? 'text-green-500' : 'text-red-500'}`}>
+                                    <div className={`text-xs sm:text-sm font-mono font-medium flex-shrink-0 ${transaction.type === 'credit' ? 'text-[var(--color-brand-green)]' : 'text-red-500'}`}>
                                         {transaction.type === 'credit' ? '+' : '-'}₹{(transaction.amount ?? 0).toFixed(2)}
                                     </div>
                                 </div>
@@ -179,19 +176,19 @@ const WalletTransactions = () => {
                         </div>
 
                         {totalPages > 1 && (
-                            <div className="flex justify-center items-center gap-4 mt-6 p-5 bg-white rounded-xl shadow-sm">
+                            <div className="flex justify-center items-center gap-4 mt-6 p-4 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px]">
                                 <button
-                                    className="bg-[#0e540b] text-white border-0 py-2.5 px-5 rounded-lg text-sm font-semibold font-funnel cursor-pointer transition-all duration-200 hover:bg-[#165a13] hover:-translate-y-px disabled:bg-gray-300 disabled:cursor-not-allowed disabled:transform-none"
+                                    className="bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white py-2 px-4 rounded-[8px] text-xs font-medium font-body transition-colors disabled:bg-[var(--color-border)] disabled:text-[var(--color-text-muted)] disabled:cursor-not-allowed"
                                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                                     disabled={page === 1}
                                 >
                                     Previous
                                 </button>
-                                <span className="text-sm font-semibold text-gray-700 font-funnel">
+                                <span className="text-xs font-mono font-medium text-[var(--color-text-primary)]">
                                     Page {page} of {totalPages}
                                 </span>
                                 <button
-                                    className="bg-[#0e540b] text-white border-0 py-2.5 px-5 rounded-lg text-sm font-semibold font-funnel cursor-pointer transition-all duration-200 hover:bg-[#165a13] hover:-translate-y-px disabled:bg-gray-300 disabled:cursor-not-allowed disabled:transform-none"
+                                    className="bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white py-2 px-4 rounded-[8px] text-xs font-medium font-body transition-colors disabled:bg-[var(--color-border)] disabled:text-[var(--color-text-muted)] disabled:cursor-not-allowed"
                                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                     disabled={page === totalPages}
                                 >

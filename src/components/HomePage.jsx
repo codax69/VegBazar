@@ -199,18 +199,16 @@ const VegetableCard = memo(
 
     return (
       <div
-        className={`w-full p-2 md:p-4 rounded-lg sm:rounded-xl border-2 shadow-md transition-all duration-200 relative ${isCompletelyOutOfStock
-          ? "bg-gray-100 border-gray-300 opacity-75"
-          : "bg-[#f3efe6] border-gray-300 hover:border-[#0e540b] hover:shadow-xl"
-          }`}
+        className={`w-full p-3.5 sm:p-4 rounded-[12px] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] bg-[var(--color-bg-surface)] transition-colors duration-150 relative flex flex-col justify-between ${
+          isCompletelyOutOfStock ? "opacity-60" : ""
+        }`}
       >
-        {/* Vegetable Image */}
-        <div className="text-center">
-          <div className="relative w-28 h-28 sm:w-30 sm:h-30 md:w-32 md:h-32 mx-auto mb-1.5 sm:mb-2">
+        <div>
+          {/* Flat Tint Image Area (1:1 Aspect Ratio Square) */}
+          <div className="relative w-full aspect-square bg-[var(--color-tint-green)] rounded-[10px] flex items-center justify-center overflow-hidden mb-2.5">
             {veg.image ? (
               <img
-                className={`w-full h-full object-cover rounded-lg sm:rounded-xl ${isCompletelyOutOfStock ? "grayscale" : ""
-                  }`}
+                className={`w-full h-full object-cover ${isCompletelyOutOfStock ? "grayscale" : ""}`}
                 src={veg.image}
                 alt={veg.name}
                 loading="lazy"
@@ -219,149 +217,120 @@ const VegetableCard = memo(
                 height="100"
               />
             ) : (
-              <div
-                className={`w-full h-full bg-linear-to-br rounded-lg sm:rounded-xl flex items-center justify-center ${isCompletelyOutOfStock
-                  ? "from-gray-200 to-gray-300"
-                  : "from-gray-50 to-[#f3efe6]"
-                  }`}
-              >
-                <Leaf
-                  className={`w-8 h-8 sm:w-10 sm:h-10 ${isCompletelyOutOfStock
-                    ? "text-gray-400"
-                    : "text-[#0e540b]/30"
-                    }`}
-                />
-              </div>
+              <Leaf className="w-6 h-6 text-[var(--color-brand-green)] opacity-60" />
             )}
             {isCompletelyOutOfStock && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg sm:rounded-xl">
-                <span className="bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-                  SOLD OUT
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                <span className="bg-[#16241A] text-white px-2 py-0.5 rounded-[6px] text-[10px] font-mono font-medium">
+                  Sold Out
                 </span>
               </div>
             )}
           </div>
-          <p
-            className={`font-medium text-xs sm:text-sm leading-tight mb-1.5 sm:mb-2 px-1 ${isCompletelyOutOfStock ? "text-gray-500" : "text-black"
-              }`}
-          >
-            {veg.name}
-            {isSetModel && (
-              <span className="ml-1 text-[10px] text-purple-600">📦</span>
-            )}
-          </p>
-        </div>
 
-        {/* Stock Warning Banner */}
-        {stockWarning && (
-          <div className="mb-2 px-2 py-1.5 bg-orange-50 border border-orange-200 rounded-lg">
-            <p className="text-[10px] sm:text-[11px] text-orange-700 font-medium text-center">
-              ⚠️ {stockWarning.message}
-            </p>
-            <p className="text-[9px] sm:text-[10px] text-orange-600 text-center mt-0.5">
-              Try: {stockWarning.alternatives}
+          {/* Product Title & Subtitle */}
+          <div className="mb-2">
+            <h3 className="font-body font-medium text-[13px] sm:text-[14px] text-[var(--color-text-primary)] leading-tight truncate">
+              {veg.name}
+              {isSetModel && <span className="ml-1 text-[10px] text-[var(--color-text-muted)]">📦</span>}
+            </h3>
+            <p className="font-body text-[11px] text-[var(--color-text-muted)] mt-0.5">
+              {veg.category || "Farm Fresh"}
             </p>
           </div>
-        )}
 
-        {/* Weight/Set Selection */}
-        {!isCompletelyOutOfStock && availableOptions.length > 1 && (
-          <div className="flex gap-2 mb-3 justify-center flex-wrap">
-            {availableOptions.map((option) => {
-              const isActive = currentOption === option.value;
-              const disabled = !option.inStock;
+          {/* Stock Warning Pill (Plain Copy, Alert Icon, Amber Tint) */}
+          {stockWarning && (
+            <div className="mb-2.5 px-2 py-1 bg-[var(--color-amber-tint)] text-[var(--color-amber-ink)] rounded-[20px] text-[10px] sm:text-[11px] font-body font-medium flex items-center gap-1">
+              <span className="text-[11px]">⚠️</span>
+              <span className="truncate">{stockWarning.message}</span>
+            </div>
+          )}
 
-              return (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    if (option.inStock) {
-                      isSetModel
-                        ? onSetChange(veg._id, option.value)
-                        : onWeightChange(veg._id, option.value);
-                    }
-                  }}
-                  disabled={disabled}
-                  className={`px-3 py-1.5 text-[11px] font-medium rounded-lg transition-all duration-300 relative
-            ${disabled
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 line-through"
-                      : isActive
-                        ? "bg-[#0e540b] text-white shadow-md scale-[1.02]"
-                        : "bg-[#f3efe6] text-black hover:bg-[#e8f2e8] hover:text-[#0e540b] shadow-sm"
+          {/* Weight/Set Selector — Border Only Active State, No Solid Fill */}
+          {!isCompletelyOutOfStock && availableOptions.length > 1 && (
+            <div className="flex gap-1.5 mb-3 flex-wrap">
+              {availableOptions.map((option) => {
+                const isActive = currentOption === option.value;
+                const disabled = !option.inStock;
+
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      if (option.inStock) {
+                        isSetModel
+                          ? onSetChange(veg._id, option.value)
+                          : onWeightChange(veg._id, option.value);
+                      }
+                    }}
+                    disabled={disabled}
+                    className={`px-2.5 py-1 text-[11px] font-body rounded-[20px] border transition-colors ${
+                      disabled
+                        ? "border-[var(--color-border)] text-[var(--color-text-muted)] opacity-50 line-through cursor-not-allowed"
+                        : isActive
+                        ? "border-[var(--color-brand-green)] text-[var(--color-brand-green)] font-medium"
+                        : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-strong)]"
                     }`}
-                >
-                  {option.label}
-                  {disabled && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-[8px] text-white flex items-center justify-center">
-                      ✕
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
-        {/* Price Display */}
-        {!isCompletelyOutOfStock && !isCurrentOptionOutOfStock && (
-          <div className="mt-1 sm:mt-2 text-center mb-2">
-            <div className="flex items-center justify-center gap-1 sm:gap-2">
-              <p className="text-[#0e540b] font-bold text-sm sm:text-base">
-                ₹{actualPrice.toFixed(2)}
-              </p>
+          {/* Signature Price Ledger Tag (Mono + Dashed Border) */}
+          {!isCompletelyOutOfStock && !isCurrentOptionOutOfStock && (
+            <div className="flex items-center justify-between gap-1 mb-3">
+              <span className="font-mono font-medium text-[12px] sm:text-[13px] text-[var(--color-text-primary)] border border-dashed border-[var(--color-border-strong)] rounded-[6px] px-2 py-0.5">
+                ₹{actualPrice.toFixed(2)} / {selectedOptionData?.label}
+              </span>
               {marketPrice > actualPrice && (
-                <p className="text-gray-400 line-through text-[10px] sm:text-xs">
+                <span className="font-mono text-[11px] text-[var(--color-text-muted)] line-through">
                   ₹{marketPrice.toFixed(2)}
-                </p>
+                </span>
               )}
             </div>
-            <p className="text-[11px] sm:text-[11px] text-black">
-              per {selectedOptionData?.label}
-            </p>
-            {savings > 0 && (
-              <p className="text-[9px] sm:text-[10px] text-green-600 font-semibold mt-0.5">
-                Save ₹{savings.toFixed(2)}
-              </p>
-            )}
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Add to Cart Button or Quantity Controls */}
+        {/* Add to Cart Button or Stepper */}
         {isCompletelyOutOfStock ? (
-          <div className="w-full bg-gray-300 text-black font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm text-center cursor-not-allowed">
+          <div className="w-full bg-[var(--color-border)] text-[var(--color-text-muted)] font-body text-[12px] font-medium py-2 px-3 rounded-[10px] text-center cursor-not-allowed">
             Unavailable
           </div>
         ) : isCurrentOptionOutOfStock ? (
-          <div className="w-full bg-orange-100 text-orange-700 font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm text-center cursor-not-allowed">
-            SOLD OUT
+          <div className="w-full bg-[var(--color-amber-tint)] text-[var(--color-amber-ink)] font-body text-[12px] font-medium py-2 px-3 rounded-[10px] text-center cursor-not-allowed">
+            Sold Out
           </div>
         ) : quantity === 0 ? (
           <button
             onClick={() => onAddToCart(veg)}
-            className="w-full bg-linear-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+            className="w-full bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white font-body text-[12px] font-medium py-2 px-3 rounded-[10px] active:scale-[0.98] transition-all duration-100 flex items-center justify-center gap-1.5"
             aria-label={`Add ${veg.name} to cart`}
           >
-            <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            Add
+            <Plus className="w-3.5 h-3.5" />
+            Add to cart
           </button>
         ) : (
-          <div className="flex items-center justify-between bg-[#0e540b] rounded-lg px-2 py-1.5">
+          <div className="flex items-center justify-between bg-[var(--color-brand-green)] text-white rounded-[10px] px-2 py-1">
             <button
               onClick={() => onRemoveFromCart(veg)}
-              className="w-7 h-7 flex items-center justify-center bg-[#f3efe6] rounded-md hover:bg-gray-100 transition"
+              className="w-6 h-6 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-[6px] transition-colors"
               aria-label="Decrease quantity"
             >
-              <Minus size={14} className="text-[#0e540b]" />
+              <Minus size={14} className="text-white" />
             </button>
-            <span className="font-bold text-white text-sm px-2">
+            <span className="font-mono font-medium text-xs px-2">
               {quantity}
             </span>
             <button
               onClick={() => onAddToCart(veg)}
-              className="w-7 h-7 flex items-center justify-center bg-[#f3efe6] rounded-md hover:bg-gray-100 transition"
+              className="w-6 h-6 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-[6px] transition-colors"
               aria-label="Increase quantity"
             >
-              <Plus size={14} className="text-[#0e540b]" />
+              <Plus size={14} className="text-white" />
             </button>
           </div>
         )}
@@ -378,62 +347,53 @@ const OfferCard = memo(({ offer, onNavigate }) => {
   return (
     <div
       onClick={onNavigate}
-      className="group relative bg-[#f3efe6] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-[#0e540b] active:scale-95 sm:hover:-translate-y-1 sm:hover:scale-[1.02] overflow-hidden flex flex-col"
+      className="group relative bg-[var(--color-bg-surface)] rounded-[12px] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition-colors duration-150 cursor-pointer overflow-hidden flex flex-col"
     >
-      <div className="bg-linear-to-br from-green-100 to-emerald-100 p-3 sm:p-4 text-center relative overflow-hidden shrink-0">
-        <div className="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 bg-[#0e540b] opacity-10 rounded-bl-full"></div>
-        <div className="relative z-10">
-          <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#f3efe6] rounded-full shadow-md mb-2 group-hover:scale-110 transition-transform">
-            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-[#0e540b]" />
-          </div>
-          <h3 className="text-base font-funnel sm:text-lg font-bold text-gray-800 mb-1">
-            {offer.title}
-          </h3>
-          <div className="flex font-funnel items-center justify-center gap-1 text-gray-600 text-xs">
-            <Leaf className="w-3 h-3" />
-            <span>{offer.vegetables?.length || 0} vegetables</span>
-          </div>
+      <div className="bg-[var(--color-tint-green)] p-3.5 text-center relative overflow-hidden shrink-0">
+        <div className="inline-flex items-center justify-center w-10 h-10 bg-[var(--color-bg-surface)] rounded-full border border-[var(--color-border)] mb-2 group-hover:scale-105 transition-transform">
+          <ShoppingCart className="w-5 h-5 text-[var(--color-brand-green)]" />
+        </div>
+        <h3 className="text-base font-display font-semibold text-[var(--color-text-primary)] mb-1">
+          {offer.title}
+        </h3>
+        <div className="flex font-body items-center justify-center gap-1 text-[var(--color-text-secondary)] text-xs">
+          <Leaf className="w-3.5 h-3.5" />
+          <span>{offer.vegetables?.length || 0} vegetables</span>
         </div>
       </div>
 
-      <div className="p-3 sm:p-4 flex-1 flex flex-col">
+      <div className="p-3.5 flex-1 flex flex-col">
         <div className="text-center mb-3 shrink-0">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0e540b]" />
-            <span className="text-xs font-medium font-funnel text-gray-600">
-              Price
-            </span>
-          </div>
-          <p className="text-2xl sm:text-3xl font-funnel font-bold text-[#0e540b]">
+          <span className="font-mono font-medium text-lg sm:text-xl text-[var(--color-text-primary)] border border-dashed border-[var(--color-border-strong)] rounded-[6px] px-2.5 py-0.5 inline-block">
             ₹{offer.price}
-          </p>
+          </span>
         </div>
 
         {offer.description && (
-          <p className="text-gray-900 font-funnel text-sm font-bold text-center mb-3 leading-relaxed shrink-0 px-2">
+          <p className="text-[var(--color-text-secondary)] font-body text-xs text-center mb-3 leading-relaxed shrink-0">
             {offer.description}
           </p>
         )}
 
         {offer.vegetables && offer.vegetables.length > 0 && (
-          <div className="bg-green-50 rounded-lg p-2.5 sm:p-3 mb-3 border border-green-100 shrink-0">
-            <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 font-funnel text-[#0e540b]" />
+          <div className="bg-[var(--color-bg-app)] rounded-[8px] p-2.5 mb-3 border border-[var(--color-border)] shrink-0">
+            <p className="text-xs font-medium text-[var(--color-text-primary)] mb-1.5 flex items-center gap-1 font-body">
+              <Check className="w-3.5 h-3.5 text-[var(--color-brand-green)]" />
               What's Included:
             </p>
-            <ul className="space-y-1.5 font-funnel">
+            <ul className="space-y-1 font-body text-xs text-[var(--color-text-secondary)]">
               {offer.vegetables.slice(0, 3).map((veg, index) => (
                 <li
                   key={veg._id || index}
-                  className="text-xs text-gray-700 flex items-center gap-1.5"
+                  className="flex items-center gap-1.5 truncate"
                 >
-                  <div className="w-1 h-1 rounded-full bg-[#0e540b] shrink-0"></div>
-                  <span className="truncate font-funnel">{veg.vegetable?.name || veg.name || 'Vegetable'}</span>
+                  <div className="w-1 h-1 rounded-full bg-[var(--color-brand-green)] shrink-0" />
+                  <span className="truncate">{veg.vegetable?.name || veg.name || 'Vegetable'}</span>
                 </li>
               ))}
               {offer.vegetables.length > 3 && (
-                <li className="text-xs text-[#0e540b] font-medium flex items-center gap-1.5">
-                  <div className="w-1 h-1 rounded-full font-funnel bg-[#0e540b] shrink-0"></div>
+                <li className="text-[var(--color-brand-green)] font-medium flex items-center gap-1.5 text-[11px]">
+                  <div className="w-1 h-1 rounded-full bg-[var(--color-brand-green)] shrink-0" />
                   +{offer.vegetables.length - 3} more vegetables
                 </li>
               )}
@@ -443,7 +403,7 @@ const OfferCard = memo(({ offer, onNavigate }) => {
 
         <button
           aria-label={`Select ${offer.title} package`}
-          className="w-full font-funnel bg-linear-to-r from-[#0e540b] to-[#063a06] text-white font-semibold py-2.5 sm:py-2 px-3 rounded-lg hover:opacity-90 active:opacity-80 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 group-hover:scale-105 text-xs sm:text-sm mt-auto"
+          className="w-full font-body bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white font-medium py-2 px-3 rounded-[10px] transition-colors text-xs flex items-center justify-center gap-1.5 mt-auto"
         >
           <ShoppingCart className="w-4 h-4" />
           Select
@@ -451,7 +411,7 @@ const OfferCard = memo(({ offer, onNavigate }) => {
       </div>
 
       {offer.popular && (
-        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
+        <div className="absolute top-2 right-2 bg-[var(--color-amber)] text-[var(--color-amber-ink)] text-[10px] font-mono font-medium px-2 py-0.5 rounded-full">
           Popular
         </div>
       )}
@@ -867,16 +827,16 @@ const Homepage = () => {
   }, [navigate, setSelectedOffer, setSelectedVegetables, setVegetableOrder, handleOfferClick]);
 
   return (
-    <div className="min-h-screen bg-[#f3efe6] md:pt-10">
+    <div className="min-h-screen bg-[var(--color-bg-app)] md:pt-10 transition-colors duration-150 font-body">
       {/* Floating Cart Button */}
       {totalCartItems > 0 && (
         <button
           onClick={handleNavigateToVegBag}
-          className="fixed bottom-24 md:bottom-20 right-10 z-50 bg-[#0e540b] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform duration-300 flex items-center gap-2"
+          className="fixed bottom-24 md:bottom-20 right-8 z-50 bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white p-3.5 rounded-full shadow-lg transition-transform duration-150 hover:scale-105 flex items-center gap-2"
           aria-label={`View cart with ${totalCartItems} items`}
         >
-          <ShoppingCart className="w-6 h-6" />
-          <span className="font-bold">{totalCartItems}</span>
+          <ShoppingCart className="w-5 h-5 text-white" />
+          <span className="font-mono font-medium text-xs text-white">{totalCartItems}</span>
         </button>
       )}
 
@@ -884,155 +844,147 @@ const Homepage = () => {
       <VegBazarBanner />
 
       {/* Main Content */}
-      <div className="w-full sm:w-full md:max-w-7xl lg:max-w-7xl h-full mx-auto px-1 md:py-5">
+      <div className="w-full max-w-7xl mx-auto px-4 md:py-5 space-y-6 sm:space-y-8">
         {/* Top 10 Selling Vegetables Section */}
-        <div className="w-full bg-[#f3efe6] shadow-lg rounded-xl mt-8 pb-6">
-          <div className="md:p-6 lg:p-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Top 10 Selling Vegetables
-            </h3>
-            {vegLoading ? (
-              <div className="flex justify-center py-16">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#0e540b]"></div>
-              </div>
-            ) : topSellingVegetables.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No vegetables available</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 xl:grid-cols-5">
-                {topSellingVegetables.map((veg) => (
-                  <VegetableCard
-                    key={veg._id}
-                    veg={veg}
-                    onAddToCart={handleAddToCart}
-                    onRemoveFromCart={handleRemoveFromCart}
-                    selectedWeight={selectedWeights[veg._id] || "250g"}
-                    onWeightChange={setSelectedWeight}
-                    selectedSet={selectedSets[veg._id] || "set0"}
-                    onSetChange={setSelectedSet}
-                    quantity={getCartQuantity(veg)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="w-full bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] p-4 sm:p-6 transition-colors duration-150">
+          <h3 className="text-xl sm:text-2xl font-display font-semibold text-[var(--color-text-primary)] mb-6">
+            Top 10 Selling Vegetables
+          </h3>
+          {vegLoading ? (
+            <div className="flex justify-center py-16">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border)] border-t-[var(--color-brand-green)]" />
+            </div>
+          ) : topSellingVegetables.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-[var(--color-text-muted)] text-xs sm:text-sm font-body">No vegetables available</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 xl:grid-cols-5">
+              {topSellingVegetables.map((veg) => (
+                <VegetableCard
+                  key={veg._id}
+                  veg={veg}
+                  onAddToCart={handleAddToCart}
+                  onRemoveFromCart={handleRemoveFromCart}
+                  selectedWeight={selectedWeights[veg._id] || "250g"}
+                  onWeightChange={setSelectedWeight}
+                  selectedSet={selectedSets[veg._id] || "set0"}
+                  onSetChange={setSelectedSet}
+                  quantity={getCartQuantity(veg)}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Top 6 Suggest Vegetables for this Session */}
-        <div className="w-full bg-[#f3efe6] shadow-lg rounded-xl mt-8 pb-6">
-          <div className="md:p-6 lg:p-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Top 6 Suggested Vegetables for this Session
-            </h3>
-            {vegLoading ? (
-              <div className="flex justify-center py-16">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#0e540b]"></div>
-              </div>
-            ) : suggestedVegetables.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">
-                  No suggested vegetables available
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6 xl:grid-cols-6">
-                {suggestedVegetables.map((veg) => (
-                  <VegetableCard
-                    key={veg._id}
-                    veg={veg}
-                    onAddToCart={handleAddToCart}
-                    onRemoveFromCart={handleRemoveFromCart}
-                    selectedWeight={selectedWeights[veg._id] || "250g"}
-                    onWeightChange={setSelectedWeight}
-                    selectedSet={selectedSets[veg._id] || "set0"}
-                    onSetChange={setSelectedSet}
-                    quantity={getCartQuantity(veg)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="w-full bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] p-4 sm:p-6 transition-colors duration-150">
+          <h3 className="text-xl sm:text-2xl font-display font-semibold text-[var(--color-text-primary)] mb-6">
+            Top 6 Suggested Vegetables for this Session
+          </h3>
+          {vegLoading ? (
+            <div className="flex justify-center py-16">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border)] border-t-[var(--color-brand-green)]" />
+            </div>
+          ) : suggestedVegetables.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-[var(--color-text-muted)] text-xs sm:text-sm font-body">
+                No suggested vegetables available
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6 xl:grid-cols-6">
+              {suggestedVegetables.map((veg) => (
+                <VegetableCard
+                  key={veg._id}
+                  veg={veg}
+                  onAddToCart={handleAddToCart}
+                  onRemoveFromCart={handleRemoveFromCart}
+                  selectedWeight={selectedWeights[veg._id] || "250g"}
+                  onWeightChange={setSelectedWeight}
+                  selectedSet={selectedSets[veg._id] || "set0"}
+                  onSetChange={setSelectedSet}
+                  quantity={getCartQuantity(veg)}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Offers Section */}
-        <div className="w-full bg-[#f3efe6] shadow-lg rounded-xl mt-8 pb-6">
-          <div className="md:p-6 lg:p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">Top Offers</h3>
-              <button
-                onClick={handleNavigateToOffers}
-                className="text-sm text-[#0e540b] font-semibold hover:underline"
-              >
-                View all offers →
-              </button>
-            </div>
-
-            {topOffers.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No offers available</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {topOffers.map((offer) => (
-                  <OfferCard
-                    key={offer._id || offer.id}
-                    offer={offer}
-                    onNavigate={() => handleOfferSelect(offer)}
-                  />
-                ))}
-              </div>
-            )}
+        {/* Baskets Section */}
+        <div className="w-full bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] p-4 sm:p-6 transition-colors duration-150">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl sm:text-2xl font-display font-semibold text-[var(--color-text-primary)]">Top Baskets</h3>
+            <button
+              onClick={handleNavigateToOffers}
+              className="text-xs sm:text-sm text-[var(--color-brand-green)] font-body font-medium hover:underline"
+            >
+              View all baskets →
+            </button>
           </div>
+
+          {topOffers.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-[var(--color-text-muted)] text-xs sm:text-sm font-body">No baskets available</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {topOffers.map((offer) => (
+                <OfferCard
+                  key={offer._id || offer.id}
+                  offer={offer}
+                  onNavigate={() => handleOfferSelect(offer)}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Testimonials */}
         <TestimonialsCarousel testimonials={testimonials} />
 
         {/* Features / Why choose us */}
-        <div className="w-full bg-[#f3efe6] shadow-lg rounded-xl mt-8 pb-6">
-          <div className="md:p-6 lg:p-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Why VegBazar
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {features.map((f, idx) => (
-                <div
-                  key={idx}
-                  className="bg-[#f3efe6] rounded-lg p-4 flex flex-col items-center text-center shadow-sm"
-                >
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#0e540b]/10 mb-3">
-                    <f.icon className="w-5 h-5 text-[#0e540b]" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900">{f.title}</h4>
-                  <p className="text-sm text-gray-600 mt-2">{f.desc}</p>
+        <div className="w-full bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] p-4 sm:p-6 transition-colors duration-150">
+          <h3 className="text-xl sm:text-2xl font-display font-semibold text-[var(--color-text-primary)] mb-6">
+            Why VegBazar
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {features.map((f, idx) => (
+              <div
+                key={idx}
+                className="bg-[var(--color-bg-app)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col items-center text-center transition-colors"
+              >
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-tint-green)] mb-3">
+                  <f.icon className="w-5 h-5 text-[var(--color-brand-green)]" />
                 </div>
-              ))}
-            </div>
+                <h4 className="font-display font-semibold text-sm text-[var(--color-text-primary)]">{f.title}</h4>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-1 font-body">{f.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Footer CTA */}
-        <div className="w-full mt-8 pb-12">
-          <div className="max-w-4xl mx-auto bg-linear-to-r from-[#0e540b] to-[#063a06] text-white rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="w-full pt-4 pb-12">
+          <div className="max-w-4xl mx-auto bg-[var(--color-brand-green)] text-white rounded-[12px] p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 border border-[var(--color-border)]">
             <div>
-              <h3 className="text-xl font-bold">
+              <h3 className="text-lg sm:text-xl font-display font-semibold text-white">
                 Ready to order fresh vegetables?
               </h3>
-              <p className="text-sm opacity-90">
+              <p className="text-xs sm:text-sm text-white/80 font-body mt-1">
                 Fast delivery · Farm fresh · Great prices
               </p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={handleNavigateToVegBag}
-                className="px-4 py-2 bg-[#f3efe6] text-[#0e540b] rounded-md font-semibold hover:brightness-95 transition"
+                className="px-4 py-2 bg-white text-[var(--color-brand-green)] font-medium font-body text-xs rounded-[10px] hover:bg-white/90 transition-colors"
               >
                 View Cart
               </button>
               <button
                 onClick={() => navigate("/vegetables")}
-                className="px-4 py-2 border border-white rounded-md hover:bg-[#f3efe6]/10 transition"
+                className="px-4 py-2 border border-white text-white font-medium font-body text-xs rounded-[10px] hover:bg-white/10 transition-colors"
               >
                 Browse Vegetables
               </button>

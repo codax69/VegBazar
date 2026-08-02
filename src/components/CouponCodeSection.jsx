@@ -49,38 +49,38 @@ const CouponCodeSection = ({
   }, [handleApplyCoupon]);
 
   return (
-    <div className={`bg-[#f3efe6] rounded-xl shadow-md border-2 border-dashed border-green-300 ${isMobile ? 'p-3' : 'p-4'}`}>
+    <div className={`bg-[var(--color-bg-app)] rounded-[10px] border border-[var(--color-border)] ${isMobile ? 'p-3' : 'p-4'} font-body`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="bg-green-100 p-1.5 rounded-lg">
-            <FiTag className={`${isMobile ? 'size-4' : 'size-5'} text-green-700`} />
+          <div className="bg-[var(--color-tint-green)] p-1.5 rounded-[6px]">
+            <FiTag className={`${isMobile ? 'size-4' : 'size-5'} text-[var(--color-brand-green)]`} />
           </div>
-          <h3 className={`font-funnel font-bold text-gray-800 ${isMobile ? 'text-sm' : 'text-base'}`}>
+          <h3 className={`font-display font-semibold text-[var(--color-text-primary)] ${isMobile ? 'text-xs' : 'text-sm'}`}>
             Apply Coupon
           </h3>
         </div>
         {appliedCoupon && (
-          <div className="bg-green-600 text-white px-2.5 py-1 rounded-full flex items-center gap-1">
+          <div className="bg-[var(--color-brand-green)] text-white px-2.5 py-0.5 rounded-full flex items-center gap-1">
             <FiCheck className="size-3" />
-            <span className="text-[10px] font-semibold font-funnel">Applied</span>
+            <span className="text-[10px] font-mono">Applied</span>
           </div>
         )}
       </div>
 
       {/* Applied Coupon Display */}
       {appliedCoupon ? (
-        <div className="bg-white rounded-lg p-3 border-2 border-green-500 shadow-sm">
+        <div className="bg-[var(--color-bg-surface)] rounded-[8px] p-3 border border-[var(--color-brand-green)]">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="bg-green-100 p-1.5 rounded-md">
-                <FiPercent className="size-4 text-green-700" />
+              <div className="bg-[var(--color-tint-green)] p-1.5 rounded-md">
+                <FiPercent className="size-4 text-[var(--color-brand-green)]" />
               </div>
               <div>
-                <p className={`font-bold text-green-700 font-funnel ${isMobile ? 'text-sm' : 'text-base'}`}>
+                <p className={`font-mono font-medium text-[var(--color-brand-green)] ${isMobile ? 'text-xs' : 'text-sm'}`}>
                   {appliedCoupon.code}
                 </p>
-                <p className={`text-gray-600 font-funnel ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+                <p className={`text-[var(--color-text-secondary)] font-body ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
                   {appliedCoupon.discountType === "percentage"
                     ? `${appliedCoupon.discountValue}% OFF`
                     : `₹${appliedCoupon.discountValue} OFF`}
@@ -97,11 +97,11 @@ const CouponCodeSection = ({
           </div>
 
           {/* Discount Amount */}
-          <div className="bg-[#f3efe6] text-white rounded-lg p-2 flex justify-between items-center">
-            <span className={`font-semibold font-funnel ${isMobile ? 'text-xs' : 'text-sm'}`}>
+          <div className="bg-[var(--color-tint-green)] text-[var(--color-brand-green)] rounded-[6px] p-2 flex justify-between items-center">
+            <span className={`font-body font-medium ${isMobile ? 'text-xs' : 'text-sm'}`}>
               You save
             </span>
-            <span className={`font-bold font-funnel ${isMobile ? 'text-base' : 'text-lg'}`}>
+            <span className={`font-mono font-medium ${isMobile ? 'text-sm' : 'text-base'}`}>
               ₹{appliedCoupon.discount?.toFixed(2) || "0.00"}
             </span>
           </div>

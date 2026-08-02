@@ -22,6 +22,7 @@ import RestPassword from "./components/ResetPassword"
 import ForgotPassword from "./components/ForgotPassword"
 import PWAInstallBanner from "./components/PWAInstallBanner";
 import OrderSuccess from "./components/OrderSuccess";
+import AIChatBot from "./components/AIChatBot";
 import Footer from "./components/Footer";
 
 const HomePage = lazy(() => import("./components/HomePage"));
@@ -258,10 +259,11 @@ const AppWithOrderContext = () => {
       <CartProvider>
         <BillProvider>
           <BackButtonHandler />
-          <div className="min-h-screen bg-[#f5f1e8] flex flex-col">
+          <div className="min-h-screen bg-[var(--color-bg-app)] text-[var(--color-text-primary)] flex flex-col transition-colors duration-150 font-body">
             <PWAInstallBanner />
             <Navbar />
-            <div className="pt-10 flex-1 container max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-2">
+            <AIChatBot />
+            <div className="pt-16 sm:pt-20 flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-4 sm:py-6">
               {!hideProgressRoutes.includes(location.pathname) && (
                 <ProgressIndicator />
               )}

@@ -32,31 +32,29 @@ const AddressCard = memo(({
 }) => (
   <div
     onClick={() => onSelect(address)}
-    className={`bg-white rounded-xl shadow-md p-4 cursor-pointer 
-      transform-gpu will-change-transform
-      transition-all duration-300 ease-out
+    className={`bg-[var(--color-bg-surface)] rounded-[12px] p-4 cursor-pointer 
+      border transition-colors duration-150
       ${isSelected
-        ? "ring-2 ring-[#0e540b] bg-green-50 scale-[1.01]"
-        : "hover:shadow-lg hover:scale-[1.005]"
+        ? "border-2 border-[var(--color-brand-green)] bg-[var(--color-tint-green)] font-medium"
+        : "border-[var(--color-border)] hover:border-[var(--color-border-strong)]"
       }`}
   >
     <div className="flex items-start justify-between">
       <div className="flex-1">
-        <div className="flex items-center gap-2 mb-2">
-          <h4 className="font-bold text-gray-800 capitalize">{address.type || 'Home'}</h4>
+        <div className="flex items-center gap-2 mb-1.5">
+          <h4 className="font-body font-medium text-[var(--color-text-primary)] capitalize text-sm">{address.type || 'Home'}</h4>
           {address.isDefault && (
-            <span className="px-2 py-0.5 bg-[#0e540b] text-white text-xs rounded-full
-              animate-pulse-subtle flex items-center gap-1">
+            <span className="px-2 py-0.5 bg-[var(--color-brand-green)] text-white text-[10px] font-mono rounded-full flex items-center gap-1">
               <FiStar className="w-3 h-3" />
               Default
             </span>
           )}
-          <div className={`transform transition-all duration-200 ease-out
-            ${isSelected ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}>
-            <FiCheck className="w-5 h-5 text-[#0e540b]" />
+          <div className={`transition-opacity duration-150
+            ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
+            <FiCheck className="w-5 h-5 text-[var(--color-brand-green)]" />
           </div>
         </div>
-        <p className="text-sm text-gray-600 mb-1">{address.street}</p>
+        <p className="text-xs font-body text-[var(--color-text-secondary)] mb-0.5">{address.street}</p>
         {address.area && (
           <p className="text-sm text-gray-600 mb-1">{address.area}</p>
         )}

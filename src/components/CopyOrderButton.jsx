@@ -1,5 +1,7 @@
-import React,{ useState } from "react";
-import {FaCopy} from "react-icons/fa6"
+// src/components/CopyOrderButton.jsx — Rebuilt with v2 tokens & IBM Plex Mono text
+import React, { useState } from "react";
+import { FaCopy } from "react-icons/fa6";
+
 const CopyOrderButton = ({ orderId }) => {
   const [copied, setCopied] = useState(false);
 
@@ -17,10 +19,10 @@ const CopyOrderButton = ({ orderId }) => {
     <button
       onClick={handleCopy}
       title="Copy Order ID For Tracking"
-      className="text-gray-600 hover:text-green-600 transition flex items-center gap-1"
+      className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors flex items-center gap-1 px-2 py-0.5 rounded-[6px] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] bg-[var(--color-bg-surface)] text-xs font-mono"
     >
       <FaCopy className="w-3 h-3" />
-      <span className="text-xs sm:text-sm">{copied ? "Copied" : "Copy"}</span>
+      <span>{copied ? "Copied!" : "Copy"}</span>
     </button>
   );
 };

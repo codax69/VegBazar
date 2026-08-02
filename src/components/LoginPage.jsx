@@ -76,12 +76,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3efe6]  flex items-center justify-center p-3 font-funnel">
+    <div className="py-6 sm:py-12 flex items-center justify-center p-3 font-funnel">
       <div className="w-full max-w-sm">
         {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-slate-800 transition-colors duration-300">
           {/* Header Section */}
-          <div className="bg-[#0e540b] p-6 text-white text-center relative">
+          <div className="bg-[#0e540b] dark:bg-emerald-900/80 p-6 text-white text-center relative">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-full mb-3 backdrop-blur-sm">
               <img src={vegbazarLogo} className="w-12 h-12" alt="vegbazar logo" />
             </div>
@@ -95,8 +95,8 @@ const LoginPage = () => {
             {message.text && (
               <div
                 className={`mb-4 p-3 rounded-lg flex items-start gap-2 text-sm ${message.type === "success"
-                  ? "bg-green-50 text-green-800 border border-green-200"
-                  : "bg-red-50 text-red-800 border border-red-200"
+                  ? "bg-green-50 dark:bg-emerald-950/60 text-green-800 dark:text-emerald-300 border border-green-200 dark:border-emerald-800"
+                  : "bg-red-50 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800"
                   }`}
               >
                 {message.type === "success" ? (
@@ -111,11 +111,11 @@ const LoginPage = () => {
             <form onSubmit={handleSubmit} className="space-y-3.5">
               {/* Email Input */}
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500 w-4 h-4" />
                   <input
                     type="email"
                     name="email"
@@ -123,7 +123,7 @@ const LoginPage = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     disabled={loading}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-slate-100 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-[#0e540b] dark:focus:ring-emerald-500 focus:border-transparent outline-none transition font-funnel text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="yourname@email.com"
                   />
                 </div>
@@ -132,20 +132,20 @@ const LoginPage = () => {
               {/* Password Input */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold text-gray-700">
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300">
                     Password
                   </label>
                   <button
                     type="button"
                     onClick={handleForgotPassword}
                     disabled={loading}
-                    className="text-xs text-[#e24100] hover:text-[#c93800] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Forgot Password?
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500 w-4 h-4" />
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
@@ -153,14 +153,14 @@ const LoginPage = () => {
                     value={formData.password}
                     onChange={handleInputChange}
                     disabled={loading}
-                    className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="w-full pl-10 pr-12 py-2.5 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-slate-100 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-[#0e540b] dark:focus:ring-emerald-500 focus:border-transparent outline-none transition font-funnel text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={loading}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors disabled:cursor-not-allowed"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors disabled:cursor-not-allowed"
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -175,7 +175,7 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#e24100] hover:bg-[#c93800] text-white font-semibold py-2.5 rounded-lg transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md hover:shadow-lg mt-4 text-sm"
+                className="w-full bg-[#0e540b] hover:bg-[#093907] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md hover:shadow-lg mt-4 text-sm"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -209,10 +209,10 @@ const LoginPage = () => {
             {/* Divider */}
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t border-gray-300 dark:border-slate-700"></div>
               </div>
               <div className="relative flex justify-center">
-                <span className="px-4 bg-white text-gray-500 text-xs">
+                <span className="px-4 bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 text-xs">
                   New to VegBazar?
                 </span>
               </div>
@@ -223,7 +223,7 @@ const LoginPage = () => {
               type="button"
               onClick={handleSignUp}
               disabled={loading}
-              className="w-full border-2 border-[#0e540b] text-[#0e540b] hover:bg-[#0e540b] hover:text-white font-semibold py-2.5 rounded-lg transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full border-2 border-[#0e540b] dark:border-emerald-500 text-[#0e540b] dark:text-emerald-400 hover:bg-[#0e540b] dark:hover:bg-emerald-600 hover:text-white font-semibold py-2.5 rounded-lg transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Create New Account
             </button>
@@ -231,18 +231,18 @@ const LoginPage = () => {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-gray-600 mt-4 px-4">
+        <p className="text-center text-xs text-gray-600 dark:text-slate-400 mt-4 px-4">
           By continuing, you agree to VegBazar's{" "}
           <a
             href="/terms"
-            className="text-[#e24100] hover:underline font-medium"
+            className="text-orange-600 dark:text-orange-400 hover:underline font-medium"
           >
             Terms of Service
           </a>{" "}
           and{" "}
           <a
             href="/privacy"
-            className="text-[#e24100] hover:underline font-medium"
+            className="text-orange-600 dark:text-orange-400 hover:underline font-medium"
           >
             Privacy Policy
           </a>

@@ -1,3 +1,4 @@
+// src/components/VideoPlayer.jsx — Rebuilt with v2 1px hairline controls, Fraunces titles, and Inter typography
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -25,53 +26,50 @@ const VideoPlayer = () => {
       case "fullscreen":
         return "fixed inset-0 z-[9999] w-screen h-screen bg-black flex flex-col justify-center items-center";
       case "theater":
-        // Break out of container to be full width
         return "w-[100vw] relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] h-auto bg-black flex flex-col justify-center items-center pb-4";
       case "mini":
-        // Fixed bottom right small player
-        return "fixed bottom-6 right-6 w-80 aspect-video z-[9999] bg-black rounded-xl shadow-2xl flex justify-center items-center overflow-hidden border border-gray-700/50";
+        return "fixed bottom-6 right-6 w-80 aspect-video z-[9999] bg-black rounded-[12px] shadow-xl flex justify-center items-center overflow-hidden border border-[var(--color-border)]";
       case "default":
       default:
-        // Standard view within the container boundaries
-        return "w-full max-w-5xl mx-auto bg-black rounded-2xl shadow-lg flex flex-col justify-center items-center overflow-hidden relative pb-4";
+        return "w-full max-w-5xl mx-auto bg-black rounded-[12px] border border-[var(--color-border)] shadow-sm flex flex-col justify-center items-center overflow-hidden relative pb-4";
     }
   };
 
   return (
-    <div className={`w-full ${viewMode === "fullscreen" ? "" : "pb-10"}`}>
+    <div className={`w-full bg-[var(--color-bg-app)] min-h-screen pt-4 font-body transition-colors duration-150 ${viewMode === "fullscreen" ? "" : "pb-10"}`}>
       
       {/* Controls / Header */}
       {viewMode !== "fullscreen" && viewMode !== "mini" && (
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4 px-2">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4 px-2">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-[var(--color-bg-surface)] hover:bg-[var(--color-bg-app)] text-[var(--color-text-primary)] border border-[var(--color-border)] px-3.5 py-1.5 rounded-[10px] text-xs font-medium transition-colors"
           >
             ← Back
           </button>
           
-          <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg">
+          <div className="flex flex-wrap gap-1 bg-[var(--color-bg-surface)] p-1 rounded-[10px] border border-[var(--color-border)] text-xs font-body">
             <button 
               onClick={() => setViewMode("default")}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'default' ? 'bg-white shadow-sm text-green-700' : 'text-gray-600 hover:text-gray-900'}`}
+              className={`px-3 py-1 rounded-[6px] text-xs font-medium transition-colors ${viewMode === 'default' ? 'bg-[var(--color-brand-green)] text-white' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
             >
               Default
             </button>
             <button 
               onClick={() => setViewMode("theater")}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'theater' ? 'bg-white shadow-sm text-green-700' : 'text-gray-600 hover:text-gray-900'}`}
+              className={`px-3 py-1 rounded-[6px] text-xs font-medium transition-colors ${viewMode === 'theater' ? 'bg-[var(--color-brand-green)] text-white' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
             >
               Theater
             </button>
             <button 
               onClick={() => setViewMode("fullscreen")}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'fullscreen' ? 'bg-white shadow-sm text-green-700' : 'text-gray-600 hover:text-gray-900'}`}
+              className={`px-3 py-1 rounded-[6px] text-xs font-medium transition-colors ${viewMode === 'fullscreen' ? 'bg-[var(--color-brand-green)] text-white' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
             >
               Full Screen
             </button>
             <button 
               onClick={() => setViewMode("mini")}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'mini' ? 'bg-white shadow-sm text-green-700' : 'text-gray-600 hover:text-gray-900'}`}
+              className={`px-3 py-1 rounded-[6px] text-xs font-medium transition-colors ${viewMode === 'mini' ? 'bg-[var(--color-brand-green)] text-white' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
             >
               Mini Player
             </button>
@@ -81,11 +79,11 @@ const VideoPlayer = () => {
 
       {/* When in Mini mode, show placeholder in place of video */}
       {viewMode === "mini" && (
-        <div className="w-full max-w-5xl mx-auto aspect-video bg-gray-100 rounded-2xl shadow-sm flex flex-col justify-center items-center border border-gray-200 mb-6">
-            <span className="text-gray-500 font-medium mb-4">Video is playing in mini player</span>
+        <div className="w-full max-w-5xl mx-auto aspect-video bg-[var(--color-bg-surface)] rounded-[12px] border border-[var(--color-border)] flex flex-col justify-center items-center mb-6 font-body">
+            <span className="text-[var(--color-text-secondary)] text-xs font-medium mb-3">Video is playing in mini player</span>
             <button 
               onClick={() => setViewMode("default")}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+              className="bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white px-4 py-2 rounded-[10px] text-xs font-medium transition-colors"
             >
               Restore Video
             </button>
@@ -93,12 +91,12 @@ const VideoPlayer = () => {
       )}
 
       {/* Video Container */}
-      <div className={`${getContainerClasses()} transition-all duration-300 ease-in-out`}>
+      <div className={`${getContainerClasses()} transition-all duration-200 ease-in-out`}>
         
         {viewMode === "fullscreen" && (
           <button
             onClick={() => setViewMode("default")}
-            className="absolute top-4 left-4 z-[10000] bg-white/10 hover:bg-white/30 text-white backdrop-blur-md px-4 py-2 rounded-lg font-bold transition-all"
+            className="absolute top-4 left-4 z-[10000] bg-white/10 hover:bg-white/30 text-white backdrop-blur-md px-4 py-2 rounded-[10px] font-body text-xs font-medium transition-colors"
           >
             ← Exit Fullscreen
           </button>
@@ -107,7 +105,7 @@ const VideoPlayer = () => {
         {viewMode === "mini" && (
           <button
             onClick={() => setViewMode("default")}
-            className="absolute top-2 right-2 z-[10000] bg-black/50 hover:bg-black/80 text-white p-1.5 rounded-full backdrop-blur-sm transition-all"
+            className="absolute top-2 right-2 z-[10000] bg-black/50 hover:bg-black/80 text-white p-1 rounded-full backdrop-blur-sm transition-colors"
             title="Expand to Default"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -130,17 +128,17 @@ const VideoPlayer = () => {
 
         {/* Description / Ad Info below the video */}
         {viewMode !== "mini" && viewMode !== "fullscreen" && (
-            <div className="w-full max-w-[95%] mx-auto mt-4 px-2 text-white">
-                <div className="bg-gray-800/80 backdrop-blur-sm border border-gray-700 p-4 rounded-xl flex items-center justify-between">
+            <div className="w-full max-w-[95%] mx-auto mt-4 px-2">
+                <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] p-4 rounded-[12px] flex items-center justify-between font-body">
                     <div>
-                        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">
+                        <h2 className="text-base font-display font-semibold text-[var(--color-text-primary)]">
                             Advertisement
                         </h2>
-                        <p className="text-gray-300 text-sm mt-1">
+                        <p className="text-[var(--color-text-secondary)] text-xs mt-0.5">
                             This is an ad only. Support us by learning more about our featured product.
                         </p>
                     </div>
-                    <span className="text-xs font-semibold uppercase tracking-wider bg-gray-700 text-gray-300 px-3 py-1 rounded-full border border-gray-600">
+                    <span className="text-[10px] font-mono font-medium uppercase tracking-wider bg-[var(--color-tint-green)] text-[var(--color-brand-green)] px-2.5 py-1 rounded-full border border-[var(--color-border)]">
                         Ad
                     </span>
                 </div>

@@ -184,9 +184,9 @@ const OrderHistory = () => {
     if (large) {
       return (
         <span
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-funnel font-bold shadow-sm whitespace-nowrap border ${config.color}`}
+          className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[8px] text-xs font-mono font-medium whitespace-nowrap border ${config.color}`}
         >
-          <Icon size={18} className="flex-shrink-0" />
+          <Icon size={16} className="flex-shrink-0" />
           <span>{config.label}</span>
         </span>
       );
@@ -194,9 +194,9 @@ const OrderHistory = () => {
 
     return (
       <span
-        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-funnel font-bold whitespace-nowrap border ${config.color}`}
+        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] text-xs font-mono font-medium whitespace-nowrap border ${config.color}`}
       >
-        <Icon size={14} className="flex-shrink-0" />
+        <Icon size={13} className="flex-shrink-0" />
         <span>{config.label}</span>
       </span>
     );
@@ -205,18 +205,17 @@ const OrderHistory = () => {
   const formatDate = (dateString, includeTime = false) => {
     const options = {
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
     };
     if (includeTime) {
       options.hour = "2-digit";
       options.minute = "2-digit";
     }
-    return new Date(dateString).toLocaleDateString("en-US", options);
+    return new Date(dateString).toLocaleDateString("en-IN", options);
   };
 
   const formatCurrency = (amount) => {
-    console.log(amount)
     return `₹${amount.toString()}`;
   };
 
@@ -244,27 +243,27 @@ const OrderHistory = () => {
     setPage(1);
   };
 
-  // Order List View - Visual Hierarchy Enforced
+  // Order List View
   const OrderListView = () => (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 font-body transition-colors duration-150">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-funnel text-2xl font-bold text-gray-800 tracking-tight">
+          <h1 className="font-display text-xl sm:text-2xl font-semibold text-[var(--color-text-primary)]">
             Order History
           </h1>
-          <p className="font-funnel text-gray-500 text-sm mt-1">
+          <p className="font-body text-[var(--color-text-secondary)] text-xs mt-1">
             Track, manage and view all your past orders in one place.
           </p>
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`font-funnel text-sm flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 font-bold border-2 ${showFilters ? "bg-[#0e540b] text-white border-[#0e540b]" : "bg-[#f5f1e8] text-gray-800 border-gray-300 hover:border-[#0e540b] hover:shadow-xl"}`}
+          className={`font-body text-xs font-medium flex items-center justify-center gap-2 px-4 py-2 rounded-[10px] transition-colors border ${showFilters ? "bg-[var(--color-brand-green)] text-white border-[var(--color-brand-green)]" : "bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] border-[var(--color-border)] hover:border-[var(--color-border-strong)]"}`}
         >
-          <Filter size={18} />
+          <Filter size={16} />
           <span>Filters</span>
           {(status || startDate || endDate) && (
-            <span className={`flex items-center justify-center w-5 h-5 text-[10px] rounded-full ${showFilters ? 'bg-[#f5f1e8] text-[#0e540b]' : 'bg-[#f04700] text-white'}`}>
+            <span className={`flex items-center justify-center w-4 h-4 text-[10px] font-mono rounded-full ${showFilters ? 'bg-white text-[var(--color-brand-green)]' : 'bg-[var(--color-brand-green)] text-white'}`}>
               {[status, startDate, endDate].filter(Boolean).length}
             </span>
           )}

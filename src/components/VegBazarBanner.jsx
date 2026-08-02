@@ -1,3 +1,4 @@
+// src/components/VegBazarBanner.jsx — Rebuilt with v2 CSS design tokens and Fraunces/Inter typography
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -23,20 +24,19 @@ function VegCard({ emoji, image, name, price }) {
   return (
     <div style={{
       width: "clamp(64px, 18vw, 88px)",
-      background: "#fff",
-      border: "1.5px solid #d4e8c8",
-      borderRadius: 16,
+      background: "var(--color-bg-surface)",
+      border: "1px solid var(--color-border)",
+      borderRadius: 12,
       padding: "10px 6px 8px",
       textAlign: "center",
-      boxShadow: "0 2px 10px rgba(14,84,11,0.08)",
       flexShrink: 0,
     }}>
       {image
-        ? <img src={image} alt={name} style={{ width: "clamp(28px,7vw,38px)", height: "clamp(28px,7vw,38px)", objectFit: "cover", borderRadius: 10, margin: "0 auto", display: "block" }} />
+        ? <img src={image} alt={name} style={{ width: "clamp(28px,7vw,38px)", height: "clamp(28px,7vw,38px)", objectFit: "cover", borderRadius: 8, margin: "0 auto", display: "block" }} />
         : <div style={{ fontSize: "clamp(20px,5vw,28px)", lineHeight: 1 }}>{emoji}</div>
       }
-      <div style={{ fontSize: "clamp(8px,2vw,10px)", fontWeight: 700, color: "#2d5a1a", marginTop: 5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</div>
-      <div style={{ fontSize: "clamp(9px,2.2vw,11px)", fontWeight: 800, color: "#0e540b", marginTop: 2 }}>{price}</div>
+      <div style={{ fontSize: "clamp(8px,2vw,10px)", fontWeight: 500, color: "var(--color-text-primary)", marginTop: 5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "var(--font-body)" }}>{name}</div>
+      <div style={{ fontSize: "clamp(9px,2.2vw,11px)", fontWeight: 600, color: "var(--color-brand-green)", marginTop: 2, fontFamily: "var(--font-mono)" }}>{price}</div>
     </div>
   );
 }
@@ -44,8 +44,8 @@ function VegCard({ emoji, image, name, price }) {
 /* ─── feature chip ──────────────────────────────────────────────────── */
 function Chip({ Icon, label }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 20, background: "#fff", border: "1.5px solid #cde4c0", fontSize: "clamp(9px,2.2vw,11px)", fontWeight: 600, color: "#1a3d0a", whiteSpace: "nowrap" }}>
-      <Icon c="#2a7a1a" s={11} /> {label}
+    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 20, background: "var(--color-bg-surface)", border: "1px solid var(--color-border)", fontSize: "clamp(9px,2.2vw,11px)", fontWeight: 500, color: "var(--color-text-primary)", whiteSpace: "nowrap", fontFamily: "var(--font-body)" }}>
+      <Icon c="var(--color-brand-green)" s={11} /> {label}
     </div>
   );
 }
@@ -98,44 +98,46 @@ export default function VegBazarBanner({
       .catch(() => {});
   }, []);
 
-  /* auto-play */
+  /* timer */
   useEffect(() => {
     if (paused) return;
-    timerRef.current = setInterval(() => setCur(c => (c + 1) % TOTAL), 5000);
+    timerRef.current = setInterval(() => {
+      setCur((c) => (c + 1) % TOTAL);
+    }, 4500);
     return () => clearInterval(timerRef.current);
   }, [paused]);
 
-  /* drag */
-  const dragRef = useRef({ startX: 0 });
-  const onTouchStart = (e) => { dragRef.current.startX = e.touches[0].clientX; setPaused(true); };
+  /* swipe */
+  const touchStart = useRef(0);
+  const onTouchStart = (e) => { touchStart.current = e.touches[0].clientX; };
   const onTouchEnd   = (e) => {
-    const dx = e.changedTouches[0].clientX - dragRef.current.startX;
-    if (Math.abs(dx) > 40) setCur(c => dx < 0 ? (c + 1) % TOTAL : (c - 1 + TOTAL) % TOTAL);
-    setPaused(false);
+    const delta = touchStart.current - e.changedTouches[0].clientX;
+    if (Math.abs(delta) > 40) {
+      setCur((c) => (delta > 0 ? (c + 1) % TOTAL : (c - 1 + TOTAL) % TOTAL));
+    }
   };
 
-  /* ─── shared btn ─── */
-  const Btn = ({ children, onClick, light }) => (
+  /* ─── action button ─── */
+  const Btn = ({ children, onClick, light = false }) => (
     <motion.button
       onClick={onClick}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       style={{
         display: "inline-flex", alignItems: "center", gap: 6,
-        padding: "9px 20px", borderRadius: 999, border: "none", cursor: "pointer",
-        fontSize: "clamp(10px,2.5vw,12px)", fontWeight: 700,
-        background: light ? "#fff" : "#063a06",
-        color: light ? "#063a06" : "#fff",
-        boxShadow: light ? "0 2px 12px rgba(0,0,0,0.10)" : "0 4px 16px rgba(6,58,6,0.35)",
-        fontFamily: "'Poppins', sans-serif",
+        padding: "8px 18px", borderRadius: 10, border: "none", cursor: "pointer",
+        fontSize: "clamp(10px,2.5vw,12px)", fontWeight: 500,
+        background: light ? "var(--color-bg-surface)" : "var(--color-brand-green)",
+        color: light ? "var(--color-brand-green)" : "#ffffff",
+        fontFamily: "var(--font-body)",
         marginTop: "clamp(10px,2.5vw,18px)",
       }}
     >
-      {children} <IC.Arrow c={light ? "#063a06" : "#86efac"} s={12} />
+      {children} <IC.Arrow c={light ? "var(--color-brand-green)" : "#ffffff"} s={12} />
     </motion.button>
   );
 
-  /* ─── slide wrapper (always row, clips overflow) ─── */
+  /* ─── slide wrapper ─── */
   const slideStyle = {
     position: "absolute", inset: 0,
     display: "flex", flexDirection: "row",
@@ -146,17 +148,12 @@ export default function VegBazarBanner({
   const LP = ({ bg, children }) => (
     <div style={{
       flex: "0 0 55%", maxWidth: "55%",
-      background: bg || "#063a06",
+      background: bg || "var(--color-brand-green)",
       padding: "clamp(16px,4vw,32px) clamp(14px,3.5vw,28px)",
       display: "flex", flexDirection: "column", justifyContent: "center",
       position: "relative", overflow: "hidden",
       boxSizing: "border-box",
     }}>
-      {/* subtle dot grid */}
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.06, pointerEvents: "none" }}>
-        <defs><pattern id="dpg" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.5" fill="#fff"/></pattern></defs>
-        <rect width="100%" height="100%" fill="url(#dpg)"/>
-      </svg>
       {children}
     </div>
   );
@@ -165,16 +162,12 @@ export default function VegBazarBanner({
   const RP = ({ bg, children }) => (
     <div style={{
       flex: "0 0 45%", maxWidth: "45%",
-      background: bg || "#f0f7ea",
+      background: bg || "var(--color-tint-green)",
       padding: "clamp(12px,3vw,24px) clamp(10px,2.5vw,20px)",
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       position: "relative", overflow: "hidden",
       boxSizing: "border-box",
     }}>
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.06, pointerEvents: "none" }}>
-        <defs><pattern id="gp" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M 24 0 L 0 0 0 24" fill="none" stroke="#063a06" strokeWidth="0.8"/></pattern></defs>
-        <rect width="100%" height="100%" fill="url(#gp)"/>
-      </svg>
       {children}
     </div>
   );
@@ -182,18 +175,18 @@ export default function VegBazarBanner({
   /* fluid heading */
   const H = ({ children, color }) => (
     <h2 style={{
-      margin: 0, lineHeight: 1.05, color: color || "#fff",
-      fontFamily: "'Funnel Display', Georgia, serif",
+      margin: 0, lineHeight: 1.1, color: color || "#ffffff",
+      fontFamily: "var(--font-display)",
       fontSize: "clamp(18px, 4.5vw, 30px)",
-      fontWeight: 800, letterSpacing: "-0.01em",
+      fontWeight: 600,
     }}>{children}</h2>
   );
 
   /* label row */
   const Label = ({ icon: Icon, text, color }) => (
     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "clamp(6px,1.5vw,12px)" }}>
-      <Icon c={color || "#86efac"} s={11} />
-      <span style={{ color: color || "#86efac", fontSize: "clamp(8px,2vw,10px)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", fontFamily: "'Poppins', sans-serif" }}>
+      <Icon c={color || "#ffffff"} s={11} />
+      <span style={{ color: color || "#ffffff", fontSize: "clamp(8px,2vw,10px)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "var(--font-mono)" }}>
         {text}
       </span>
     </div>
@@ -201,7 +194,7 @@ export default function VegBazarBanner({
 
   /* badge pill */
   const Pill = ({ bg, color, children }) => (
-    <span style={{ display: "inline-block", background: bg, color, fontSize: "clamp(9px,2vw,11px)", fontWeight: 800, padding: "4px 10px", borderRadius: 999, fontFamily: "'Poppins', sans-serif" }}>
+    <span style={{ display: "inline-block", background: bg, color, fontSize: "clamp(9px,2vw,11px)", fontWeight: 600, padding: "3px 8px", borderRadius: 6, fontFamily: "var(--font-mono)" }}>
       {children}
     </span>
   );
@@ -210,14 +203,15 @@ export default function VegBazarBanner({
 
   return (
     <div
-      style={{ width: "100%", marginTop: "clamp(12px,3vw,20px)", fontFamily: "'Funnel Sans', Poppins, sans-serif" }}
+      style={{ width: "100%", marginTop: "clamp(12px,3vw,20px)", fontFamily: "var(--font-body)" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       <div style={{
-        width: "100%", borderRadius: "clamp(14px,3vw,22px)",
-        overflow: "hidden", boxShadow: "0 6px 30px rgba(14,84,11,0.12)",
-        background: "#f0f7ea",
+        width: "100%", borderRadius: 12,
+        overflow: "hidden",
+        border: "1px solid var(--color-border)",
+        background: "var(--color-bg-surface)",
       }}>
 
         {/* ── slide track ── */}
@@ -232,61 +226,50 @@ export default function VegBazarBanner({
             animate={{ x: cur === 0 ? "0%" : cur === 1 ? "-100%" : cur === 2 ? "-200%" : cur === 3 ? "-300%" : "0%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
           >
-            <LP bg="#7f1d1d">
-              <div style={{ position: "absolute", top: -24, right: -24, width: 80, height: 80, borderRadius: "50%", background: "#dc2626", opacity: 0.3, filter: "blur(24px)", pointerEvents: "none" }} />
-              <Label icon={IC.Shield} text="Important Notice" color="#fca5a5" />
-              <H>Service<br /><span style={{ color: "#fca5a5" }}>Temporarily Closed</span></H>
-              <p style={{ margin: "clamp(8px,2vw,14px) 0 0", fontSize: "clamp(9px,2.2vw,11px)", color: "#fecaca", lineHeight: 1.6, maxWidth: 250 }}>
-                We are currently closed for maintenance and improvements. Thank you for your patience. We'll be back soon with better service!
+            <LP bg="var(--color-brand-green)">
+              <Label icon={IC.Shield} text="Important Notice" color="var(--color-amber)" />
+              <H>Service<br /><span style={{ color: "var(--color-amber)" }}>Temporarily Closed</span></H>
+              <p style={{ margin: "clamp(8px,2vw,14px) 0 0", fontSize: "clamp(9px,2.2vw,11px)", color: "rgba(255,255,255,0.85)", lineHeight: 1.6, maxWidth: 250, fontFamily: "var(--font-body)" }}>
+                We are currently closed for maintenance. Thank you for your patience. We'll be back soon!
               </p>
-              <div style={{ marginTop: "clamp(8px,2vw,12px)", display: "inline-flex", alignItems: "center", gap: 7, padding: "6px 10px", borderRadius: 10, border: "1.5px solid rgba(252,165,165,0.4)", background: "rgba(153,27,27,0.3)" }}>
-                <IC.Shield c="#fca5a5" s={10} />
-                <span style={{ color: "#fca5a5", fontSize: "clamp(8px,2vw,10px)", fontWeight: 700, fontFamily: "'Poppins', sans-serif" }}>WE'LL BE BACK SOON</span>
+              <div style={{ marginTop: "clamp(8px,2vw,12px)", display: "inline-flex", items: "center", gap: 7, padding: "4px 8px", borderRadius: 6, border: "1px solid var(--color-amber)", background: "var(--color-amber-tint)" }}>
+                <IC.Shield c="var(--color-amber-ink)" s={10} />
+                <span style={{ color: "var(--color-amber-ink)", fontSize: "clamp(8px,2vw,10px)", fontWeight: 600, fontFamily: "var(--font-mono)" }}>WE'LL BE BACK SOON</span>
               </div>
             </LP>
 
-            <RP bg="#fee2e2">
-              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                <div style={{ width: "130%", aspectRatio: "1", borderRadius: "50%", border: "40px solid rgba(127,29,29,0.05)" }} />
-              </div>
+            <RP bg="var(--color-amber-tint)">
               <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
-                <div style={{ fontSize: "clamp(60px,15vw,100px)", marginBottom: 16 }}>🔧</div>
-                <p style={{ fontSize: "clamp(12px,3vw,14px)", color: "#7f1d1d", fontWeight: 700, fontFamily: "'Poppins', sans-serif" }}>
+                <div style={{ fontSize: "clamp(50px,12vw,80px)", marginBottom: 8 }}>🔧</div>
+                <p style={{ fontSize: "clamp(12px,3vw,14px)", color: "var(--color-amber-ink)", fontWeight: 600, fontFamily: "var(--font-display)" }}>
                   Under Maintenance
                 </p>
               </div>
             </RP>
           </motion.div>
+
           {/* SLIDE 1 — Challenge */}
           <motion.div
             style={{ ...slideStyle }}
             animate={{ x: cur === 0 ? "100%" : cur === 1 ? "0%" : cur === 2 ? "-100%" : cur === 3 ? "-200%" : "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
           >
-            <LP bg="#063a06">
-              <div style={{ position: "absolute", top: -24, right: -24, width: 80, height: 80, borderRadius: "50%", background: "#0e540b", opacity: 0.5, filter: "blur(24px)", pointerEvents: "none" }} />
+            <LP bg="var(--color-brand-green)">
               <Label icon={IC.Trophy} text="Limited Time" />
-              <H>VegBazar<br /><span style={{ color: "#86efac" }}>Fresh Challenge</span></H>
+              <H>VegBazar<br /><span style={{ color: "var(--color-amber)" }}>Fresh Challenge</span></H>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: "clamp(8px,2vw,14px)", alignItems: "center" }}>
-                <Pill bg="#86efac" color="#063a06">5 orders</Pill>
-                <span style={{ color: "#86efac88", fontSize: "clamp(9px,2vw,11px)" }}>in just</span>
-                <Pill bg="#fbbf24" color="#78350f">20 days</Pill>
-              </div>
-              <div style={{ marginTop: "clamp(8px,2vw,12px)", display: "inline-flex", alignItems: "center", gap: 7, padding: "6px 10px", borderRadius: 10, border: "1.5px solid rgba(167,139,250,0.4)", background: "rgba(109,40,217,0.2)" }}>
-                <IC.Trophy c="#c4b5fd" s={10} />
-                <span style={{ color: "#c4b5fd", fontSize: "clamp(8px,2vw,10px)", fontWeight: 700, fontFamily: "'Poppins', sans-serif" }}>WIN ₹5,000 PRIZE POOL</span>
+                <Pill bg="var(--color-bg-surface)" color="var(--color-brand-green)">5 orders</Pill>
+                <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "clamp(9px,2vw,11px)", fontFamily: "var(--font-mono)" }}>in just</span>
+                <Pill bg="var(--color-amber)" color="var(--color-amber-ink)">20 days</Pill>
               </div>
               <Btn onClick={() => navigate("/challenge")} light>Join Now</Btn>
             </LP>
 
-            <RP bg="#e8f5e0">
-              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                <div style={{ width: "130%", aspectRatio: "1", borderRadius: "50%", border: "40px solid rgba(14,84,11,0.05)" }} />
-              </div>
+            <RP bg="var(--color-tint-green)">
               <img
                 src="https://res.cloudinary.com/dltmiswel/image/upload/v1775998292/reward_dhzmno.webp"
                 alt="Prizes"
-                style={{ position: "relative", zIndex: 1, width: "90%", maxWidth: 220, objectFit: "contain", filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.15))" }}
+                style={{ position: "relative", zIndex: 1, width: "85%", maxWidth: 200, objectFit: "contain" }}
               />
             </RP>
           </motion.div>
@@ -297,20 +280,19 @@ export default function VegBazarBanner({
             animate={{ x: cur === 0 ? "200%" : cur === 1 ? "100%" : cur === 2 ? "0%" : cur === 3 ? "-100%" : "200%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
           >
-            <LP bg="#fff">
-              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: "linear-gradient(to bottom, #063a06, #16a34a, #063a06)", borderRadius: "0 4px 4px 0" }} />
-              <img src={vegbazarLogo} alt="VegBazar" style={{ height: "clamp(16px,3.5vw,22px)", marginBottom: "clamp(8px,2vw,14px)", opacity: 0.85 }} />
-              <H color="#0d2a06">
+            <LP bg="var(--color-bg-surface)">
+              <img src={vegbazarLogo} alt="VegBazar" style={{ height: "clamp(16px,3.5vw,22px)", width: "auto", marginBottom: "clamp(8px,2vw,14px)", opacity: 0.9 }} />
+              <H color="var(--color-text-primary)">
                 Fresh Veggies,<br />
-                <span style={{ color: "#0e540b" }}>Doorstep Ready.</span>
+                <span style={{ color: "var(--color-brand-green)" }}>Doorstep Ready.</span>
               </H>
-              <p style={{ margin: "clamp(6px,1.5vw,10px) 0 0", fontSize: "clamp(9px,2.2vw,11px)", color: "#5a7a4a", lineHeight: 1.6, maxWidth: 200 }}>
+              <p style={{ margin: "clamp(6px,1.5vw,10px) 0 0", fontSize: "clamp(9px,2.2vw,11px)", color: "var(--color-text-secondary)", lineHeight: 1.6, maxWidth: 200, fontFamily: "var(--font-body)" }}>
                 Direct from Valsad farms. Harvested today, delivered today.
               </p>
               <Btn onClick={() => navigate("/vegetables")}>Shop Now</Btn>
             </LP>
 
-            <RP bg="#f4f9f0">
+            <RP bg="var(--color-bg-app)">
               <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(5px,1.5vw,9px)", justifyContent: "center", position: "relative", zIndex: 1 }}>
                 {features.map((f, i) => <Chip key={i} {...f} />)}
               </div>
@@ -323,19 +305,18 @@ export default function VegBazarBanner({
             animate={{ x: cur === 0 ? "300%" : cur === 1 ? "200%" : cur === 2 ? "100%" : cur === 3 ? "0%" : "300%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
           >
-            <LP bg="#063a06">
-              <div style={{ position: "absolute", bottom: -20, left: -20, width: 80, height: 80, borderRadius: "50%", background: "#16a34a", opacity: 0.3, filter: "blur(20px)", pointerEvents: "none" }} />
+            <LP bg="var(--color-brand-green)">
               <Label icon={IC.Pulse} text="Today's Picks" />
-              <H>Farm-fresh<br /><span style={{ color: "#86efac" }}>every order.</span></H>
+              <H>Farm-fresh<br /><span style={{ color: "rgba(255,255,255,0.9)" }}>every order.</span></H>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: "clamp(8px,2vw,12px)" }}>
                 {tags.map(t => (
-                  <span key={t} style={{ fontSize: "clamp(8px,2vw,10px)", fontWeight: 600, padding: "3px 8px", borderRadius: 999, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.15)" }}>{t}</span>
+                  <span key={t} style={{ fontSize: "clamp(8px,2vw,10px)", fontWeight: 500, padding: "2px 6px", borderRadius: 4, background: "rgba(255,255,255,0.15)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)", fontFamily: "var(--font-mono)" }}>{t}</span>
                 ))}
               </div>
               <Btn onClick={() => navigate("/vegetables")} light>Browse Veggies</Btn>
             </LP>
 
-            <RP bg="#f0f7ea">
+            <RP bg="var(--color-tint-green)">
               <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(6px,1.8vw,10px)", justifyContent: "center", position: "relative", zIndex: 1 }}>
                 {vegs.map((v, i) => <VegCard key={i} {...v} />)}
               </div>
@@ -346,18 +327,18 @@ export default function VegBazarBanner({
         {/* ── bottom bar ── */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "10px clamp(14px,3.5vw,24px)",
-          background: "#fff", borderTop: "1px solid #e2f0da",
+          padding: "8px clamp(14px,3.5vw,24px)",
+          background: "var(--color-bg-surface)", borderTop: "1px solid var(--color-border)",
         }}>
           {/* progress bar */}
-          <div style={{ flex: 1, margin: "0 14px", height: 3, borderRadius: 999, background: "#e2f0da", overflow: "hidden" }}>
+          <div style={{ flex: 1, margin: "0 14px", height: 3, borderRadius: 999, background: "var(--color-border)", overflow: "hidden" }}>
             <motion.div
               animate={{ width: `${((cur + 1) / TOTAL) * 100}%` }}
               transition={{ duration: 0.4 }}
-              style={{ height: "100%", borderRadius: 999, background: "linear-gradient(90deg, #063a06, #16a34a)" }}
+              style={{ height: "100%", borderRadius: 999, background: "var(--color-brand-green)" }}
             />
           </div>
-          <span style={{ fontSize: "clamp(9px,2vw,11px)", fontWeight: 600, color: "#7aaa5a", fontFamily: "'Poppins', sans-serif" }}>
+          <span style={{ fontSize: "clamp(9px,2vw,11px)", fontWeight: 500, color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>
             {cur + 1}/{TOTAL}
           </span>
         </div>

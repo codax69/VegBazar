@@ -1,222 +1,164 @@
-@import url('https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+/* v2 Design System Tokens & Global Base Styles */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@500&display=swap');
 @import "tailwindcss";
 
+@variant dark ([data-theme="dark"] &);
+
+@theme {
+  --color-bg-app: var(--color-bg-app);
+  --color-bg-surface: var(--color-bg-surface);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+
+  --color-brand-green: var(--color-brand-green);
+  --color-brand-green-hover: var(--color-brand-green-hover);
+  --color-tint-green: var(--color-tint-green);
+
+  --color-amber: var(--color-amber);
+  --color-amber-ink: var(--color-amber-ink);
+  --color-amber-tint: var(--color-amber-tint);
+
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-pill: 20px;
+}
+
 :root {
-  --font-heading: 'Poppins', sans-serif;
-  --font-body: 'Funnel Sans', sans-serif;
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Light Theme Tokens */
+  --color-bg-app: #F6F7F3;
+  --color-bg-surface: #FFFFFF;
+  --color-border: #E4E3DC;
+  --color-border-strong: #C9C7BC;
+  --color-text-primary: #16241A;
+  --color-text-secondary: #56604F;
+  --color-text-muted: #8B9184;
+  --color-brand-green: #1B4D2B;
+  --color-brand-green-hover: #143A20;
+  --color-tint-green: rgba(27,77,43,0.08);
+  --color-amber: #E2A33B;
+  --color-amber-ink: #6B4813;
+  --color-amber-tint: rgba(226,163,59,0.15);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-pill: 20px;
+
+  /* Legacy alias mappings for backward compatibility across components */
+  --color-bg-card: var(--color-bg-surface);
+  --bg-primary: var(--color-bg-app);
+  --bg-card: var(--color-bg-surface);
+  --text-main: var(--color-text-primary);
+  --text-muted: var(--color-text-muted);
+  --border-color: var(--color-border);
+  --brand-green: var(--color-brand-green);
+  --brand-orange: var(--color-amber);
+}
+
+[data-theme="dark"] {
+  /* Dark Theme Tokens */
+  --color-bg-app: #0F1712;
+  --color-bg-surface: #17211B;
+  --color-border: #263429;
+  --color-border-strong: #33473A;
+  --color-text-primary: #F3F6F1;
+  --color-text-secondary: #B9C2B3;
+  --color-text-muted: #7C8778;
+  --color-brand-green: #3FA85C;
+  --color-brand-green-hover: #4FBF6E;
+  --color-tint-green: rgba(63,168,92,0.16);
+  --color-amber: #F0B94D;
+  --color-amber-ink: #2A1D06;
+  --color-amber-tint: rgba(240,185,77,0.18);
+
+  --color-bg-card: var(--color-bg-surface);
+  --bg-primary: var(--color-bg-app);
+  --bg-card: var(--color-bg-surface);
+  --text-main: var(--color-text-primary);
+  --text-muted: var(--color-text-muted);
+  --border-color: var(--color-border);
+  --brand-green: var(--color-brand-green);
+  --brand-orange: var(--color-amber);
 }
 
 @font-face {
   font-family: nyght;
   src: url("/Font/NyghtSerif-Regular.ttf");
 }
-.font-nyght{
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.font-nyght {
   font-family: 'nyght';
 }
-.font-poppins {
-  font-family: var(--font-heading);
-}
 
-.font-funnel {
-  font-family: var(--font-body);
-}
-
-/* Legacy support - mapping assistant to funnel */
-.font-assistant {
-  font-family: var(--font-body);
-}
+/* Backward compatibility font class aliases */
+.font-trirong { font-family: var(--font-display); }
+.font-poppins { font-family: var(--font-display); }
+.font-funnel { font-family: var(--font-body); }
+.font-amiko { font-family: var(--font-body); }
+.font-assistant { font-family: var(--font-body); }
 
 body {
   font-family: var(--font-body);
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
+  transition: background-color 0.15s ease-out, color 0.15s ease-out;
   scroll-behavior: smooth;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-heading);
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Custom Animations */
-
 @keyframes addToCart {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.05);
-  }
-
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 @keyframes pulse-border {
-
-  0%,
-  100% {
-    border-color: #0e540b;
-  }
-
-  50% {
-    border-color: #22c55e;
-  }
-}
-
-@keyframes popupBounce {
-  0% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-  }
-
-  50% {
-    transform: translate(-50%, -50%) scale(1.2);
-    opacity: 1;
-  }
-
-  70% {
-    transform: translate(-50%, -50%) scale(0.9);
-  }
-
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeOut {
-  0% {
-    opacity: 1;
-  }
-
-  70% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
+  0%, 100% { border-color: var(--color-brand-green); }
+  50% { border-color: var(--color-border-strong); }
 }
 
 .animate-add-to-cart {
-  animation: addToCart 0.4s ease-out;
+  animation: addToCart 0.3s ease-out;
 }
 
 .animate-pulse-border {
   animation: pulse-border 0.4s ease-out;
-}
-
-.popup-animation {
-  animation: popupBounce 0.4s ease-out, fadeOut 0.6s ease-out;
-}
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-fade-up {
-  animation: fadeUp 0.8s ease-out forwards;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-}
-
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 25s linear infinite;
-  display: inline-block;
-}
-
-@media (max-width: 640px) {
-  .animate-marquee {
-    animation-duration: 20s;
-  }
-}
-
-@keyframes kite-fly-loop {
-  0% {
-    transform: translate(0px, 0px) rotate(-4deg);
-  }
-
-  25% {
-    transform: translate(6px, -8px) rotate(2deg);
-  }
-
-  50% {
-    transform: translate(0px, -14px) rotate(5deg);
-  }
-
-  75% {
-    transform: translate(-6px, -8px) rotate(1deg);
-  }
-
-  100% {
-    transform: translate(0px, 0px) rotate(-4deg);
-  }
-}
-
-/* Wallet Component Custom Animations */
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-@keyframes confetti-fall {
-  to {
-    transform: translateY(500px) rotate(720deg);
-    opacity: 0;
-  }
-}
-
-@keyframes pulse-glow {
-
-  0%,
-  100% {
-    box-shadow: 0 8px 24px rgba(251, 191, 36, 0.3);
-    transform: scale(1);
-  }
-
-  50% {
-    box-shadow: 0 12px 32px rgba(251, 191, 36, 0.5);
-    transform: scale(1.05);
-  }
 }

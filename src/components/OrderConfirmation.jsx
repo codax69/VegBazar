@@ -246,35 +246,35 @@ const OrderConfirmation = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#ffffff] py-4 pt-20">
-      <div className="max-w-5xl mx-auto px-4">
+    <div className="max-w-5xl mx-auto py-2 sm:py-4 px-4 transition-colors duration-150">
+      <div>
         <button
           onClick={() => {
             navigate(isCustomOrder ? "/cart" : "/billing");
             window.scrollTo(0, 0);
           }}
-          className="flex items-center gap-2 mb-3 text-gray-700 hover:text-[#0e540b] transition-colors group"
+          className="flex items-center gap-2 mb-3 text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium font-funnel text-sm">Back</span>
+          <span className="font-medium font-body text-xs sm:text-sm">Back</span>
         </button>
 
-        <div className="bg-[#ffffff] rounded-xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-[#0e540b] to-green-700 p-4">
+        <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden">
+          <div className="bg-[var(--color-brand-green)] p-5 text-white">
             <div className="flex items-center justify-center gap-2 mb-1">
               <Package className="w-6 h-6 text-white" />
-              <h2 className="text-xl font-bold text-white font-amiko">
-                Confirm Your Order
-              </h2>
+              <h1 className="text-xl font-display font-semibold text-white text-center">
+                Order Confirmation
+              </h1>
             </div>
-            <p className="text-center text-green-100 text-xs font-funnel">
+            <p className="text-center text-white/80 text-xs font-body">
               Review your order details before confirmation
             </p>
           </div>
 
           <div className="p-5">
             {/* Customer & Order Info */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200 mb-4">
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-emerald-950/40 dark:to-slate-800 p-4 rounded-lg border border-green-200 dark:border-slate-700 mb-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">

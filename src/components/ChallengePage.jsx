@@ -152,12 +152,11 @@ export default function ChallengePage() {
 
   // ── loading ──
   if (loading) return (
-    <div className="min-h-screen bg-[#f5f1e8] py-8 sm:py-12">
+    <div className="min-h-screen bg-[var(--color-bg-app)] py-8 sm:py-12 transition-colors duration-150">
       <div className="container mx-auto px-4 sm:px-6 max-w-4xl space-y-4">
         <Skeleton className="h-44 w-full" />
         <div className="grid grid-cols-2 gap-4"><Skeleton className="h-32" /><Skeleton className="h-32" /></div>
         <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-56 w-full" />
         <Skeleton className="h-56 w-full" />
       </div>
     </div>
@@ -165,13 +164,13 @@ export default function ChallengePage() {
 
   // ── error ──
   if (error) return (
-    <div className="min-h-screen bg-[#f5f1e8] flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full text-center">
-        <div className="text-4xl mb-3">⚠️</div>
-        <h2 className="text-lg font-bold text-slate-800 mb-2">Something went wrong</h2>
-        <p className="text-sm text-slate-500 mb-5">{error}</p>
+    <div className="min-h-screen bg-[var(--color-bg-app)] flex items-center justify-center px-4 transition-colors duration-150">
+      <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] p-8 max-w-sm w-full text-center">
+        <div className="text-3xl mb-3">⚠️</div>
+        <h2 className="text-base font-display font-semibold text-[var(--color-text-primary)] mb-2">Something went wrong</h2>
+        <p className="text-xs text-[var(--color-text-muted)] font-body mb-5">{error}</p>
         <button onClick={() => window.location.reload()}
-          className="inline-flex items-center gap-2 bg-[#063a06] text-white font-bold text-sm px-5 py-2.5 rounded-full">
+          className="inline-flex items-center gap-2 bg-[var(--color-brand-green)] text-white font-medium text-xs px-4 py-2 rounded-[10px] font-body">
           <Loader2 size={14} /> Retry
         </button>
       </div>
@@ -180,40 +179,36 @@ export default function ChallengePage() {
 
   // ── main ──
   return (
-    <div className="min-h-screen bg-[#f5f1e8] py-8 sm:py-12 mt-5">
+    <div className="min-h-screen bg-[var(--color-bg-app)] py-8 sm:py-12 mt-5 transition-colors duration-150">
       <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
-        <div className="bg-white rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.08)] overflow-hidden">
+        <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] overflow-hidden">
 
           {/* header */}
-          <div className="bg-gradient-to-br from-[#063a06] via-[#0e540b] to-[#16a34a] p-6 sm:p-8 text-white relative overflow-hidden">
-            <svg className="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none">
-              <defs><pattern id="hd" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="2" fill="#fff"/></pattern></defs>
-              <rect width="100%" height="100%" fill="url(#hd)"/>
-            </svg>
+          <div className="bg-[var(--color-brand-green)] p-6 sm:p-8 text-white relative overflow-hidden">
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <Trophy size={15} className="text-amber-300" />
-                  <p className="text-xs uppercase tracking-[0.28em] text-emerald-200 font-semibold">VegBazar Fresh Challenge</p>
+                  <Trophy size={15} className="text-[var(--color-amber)]" />
+                  <p className="text-[11px] uppercase tracking-wider text-white/80 font-mono font-medium">VegBazar Fresh Challenge</p>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight">
+                <h1 className="text-2xl sm:text-3xl font-display font-semibold leading-tight">
                   {isCompleted ? "🎉 Challenge Complete!" : "Your Challenge Progress"}
                 </h1>
-                <p className="mt-2 text-sm text-emerald-100 max-w-xl leading-relaxed">
-                  Place <strong className="text-white">5 orders</strong> within <strong className="text-white">20 days</strong> —{" "}
-                  <strong className="text-white">12 Apr</strong> to <strong className="text-white">03 May 2026</strong> — to win from the ₹5,000 prize pool.
+                <p className="mt-2 text-xs sm:text-sm text-white/90 max-w-xl font-body leading-relaxed">
+                  Place <strong className="font-mono">5 orders</strong> within <strong className="font-mono">20 days</strong> —{" "}
+                  <span className="font-mono">12 Apr to 03 May 2026</span> — to win from the ₹5,000 prize pool.
                 </p>
-                <div className="mt-3 inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-3 py-1.5 text-xs font-semibold text-white/90">
+                <div className="mt-3 inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-xs font-mono text-white">
                   <CalendarDays size={12} />
                   12 Apr 2026 – 03 May 2026
-                  <span className="ml-1 bg-white/20 rounded-full px-2 py-0.5">
+                  <span className="ml-1 bg-white/20 rounded-full px-2 py-0.5 text-[10px]">
                     {completedOrders} order{completedOrders !== 1 ? "s" : ""} placed
                   </span>
                 </div>
               </div>
               <button onClick={() => navigate("/orders")}
-                className="self-start inline-flex items-center gap-2 rounded-full bg-white text-[#063a06] font-bold text-sm px-5 py-2.5 shadow-lg transition hover:-translate-y-0.5">
-                View Orders <ArrowRight size={15} />
+                className="self-start inline-flex items-center gap-2 rounded-[10px] bg-white text-[var(--color-brand-green)] font-medium text-xs font-body px-4 py-2.5 transition-colors">
+                View Orders <ArrowRight size={14} />
               </button>
             </div>
           </div>

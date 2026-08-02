@@ -274,8 +274,8 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 pb-12 px-3 font-funnel">
-      <div className="max-w-xl mx-auto">
+    <div className="max-w-xl mx-auto py-2 sm:py-4 px-3 font-funnel transition-colors duration-300">
+      <div>
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">

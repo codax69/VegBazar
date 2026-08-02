@@ -646,28 +646,28 @@ const VegetableCart = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-5 py-14 lg:pb-0">
+      <div className="min-h-screen bg-[var(--color-bg-app)] pt-5 py-14 lg:pb-0 transition-colors duration-150">
         <div className="container mx-auto px-4 md:py-4 lg:py-3">
           <div className="mb-4 md:mb-3">
             <div className="flex gap-1 flex-col items-center justify-between">
               <button
                 onClick={handleContinueShopping}
-                className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-[#0e540b] hover:bg-green-50 rounded-lg transition font-funnel text-sm font-semibold"
+                className="flex items-center gap-1 px-3 py-1.5 text-[var(--color-brand-green)] hover:bg-[var(--color-tint-green)] rounded-[10px] transition font-body text-xs font-medium"
               >
                 <ArrowLeft size={16} className="mr-1" /> Continue Shopping
               </button>
-              <h2 className="font-amiko text-xl font-bold text-[#0e540b] flex items-center gap-1 sm:gap-2">
-                <ShoppingBag size={20} /> Your Vegetable Bag
+              <h2 className="font-display text-xl font-semibold text-[var(--color-text-primary)] flex items-center gap-2">
+                <ShoppingBag size={20} className="text-[var(--color-brand-green)]" /> Your Vegetable Bag
               </h2>
             </div>
           </div>
-          <div className="bg-white p-8 rounded-lg shadow-md text-center">
-            <ShoppingBag size={48} className="mx-auto text-gray-300 mb-2" />
-            <h3 className="font-funnel text-lg font-semibold text-gray-600 mb-1">Your cart is empty</h3>
-            <p className="font-funnel text-gray-500 mb-4 text-sm">Add fresh vegetables to get started!</p>
+          <div className="bg-[var(--color-bg-surface)] p-8 rounded-[12px] border border-[var(--color-border)] text-center">
+            <ShoppingBag size={48} className="mx-auto text-[var(--color-text-muted)] mb-2" />
+            <h3 className="font-display text-lg font-semibold text-[var(--color-text-primary)] mb-1">Your cart is empty</h3>
+            <p className="font-body text-[var(--color-text-muted)] mb-4 text-xs">Add fresh vegetables to get started!</p>
             <button
               onClick={handleBrowseVegetables}
-              className="font-funnel px-4 py-2 bg-[#0e540b] text-white rounded-lg font-semibold text-sm hover:bg-green-800 transition"
+              className="font-body px-5 py-2.5 bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white rounded-[10px] font-medium text-xs transition"
             >
               Browse Vegetables
             </button>
@@ -689,7 +689,7 @@ const VegetableCart = () => {
   };
 
   return (
-    <div className="min-h-screen max-w-7xl mx-auto bg-gray-50 pb-14 pt-4 lg:pb-0">
+    <div className="max-w-7xl mx-auto py-2 sm:py-4 transition-colors duration-150">
       <div className="container mx-auto px-4 md:py-4 lg:py-3">
 
         {/* Header */}
@@ -697,12 +697,12 @@ const VegetableCart = () => {
           <div className="flex gap-1 flex-col items-center justify-baseline">
             <button
               onClick={handleContinueShopping}
-              className="flex items-center gap-1 px-3 py-1.5 md:py-1 text-[#0e540b] hover:bg-green-50 rounded-lg transition font-funnel text-sm font-semibold"
+              className="flex items-center gap-1 px-3 py-1.5 text-[var(--color-brand-green)] hover:bg-[var(--color-tint-green)] rounded-[10px] transition font-body text-xs font-medium"
             >
               <ArrowLeft size={16} className="mr-1" /> Continue Shopping
             </button>
-            <h2 className="font-amiko text-xl font-bold text-[#0e540b] flex items-center gap-1 sm:gap-2">
-              <ShoppingBag size={20} /> Your Vegetable Bag
+            <h2 className="font-display text-xl font-semibold text-[var(--color-text-primary)] flex items-center gap-2">
+              <ShoppingBag size={20} className="text-[var(--color-brand-green)]" /> Your Vegetable Bag
             </h2>
           </div>
         </div>
@@ -909,49 +909,49 @@ const WalletToggle = React.memo(
 // ─── BillRows ─────────────────────────────────────────────────────────────────
 const BillRows = React.memo(
   ({ subtotal, couponDiscount, deliveryCharge, useWalletBalance, walletDeduction, amountAfterWallet, total, isWalletSufficient }) => (
-    <div className="space-y-2 text-sm">
+    <div className="space-y-2 text-xs font-body">
       <div className="flex justify-between items-center">
-        <span className="font-funnel text-gray-600">Subtotal</span>
-        <span className="font-funnel font-semibold text-gray-800">₹{subtotal.toFixed(2)}</span>
+        <span className="text-[var(--color-text-secondary)]">Subtotal</span>
+        <span className="font-mono font-medium text-[var(--color-text-primary)]">₹{subtotal.toFixed(2)}</span>
       </div>
       {couponDiscount > 0 && (
-        <div className="flex justify-between items-center text-green-600">
-          <span className="font-funnel">Coupon Discount</span>
-          <span className="font-funnel font-semibold">-₹{couponDiscount.toFixed(2)}</span>
+        <div className="flex justify-between items-center text-[var(--color-brand-green)]">
+          <span>Coupon Discount</span>
+          <span className="font-mono font-medium">-₹{couponDiscount.toFixed(2)}</span>
         </div>
       )}
       <div className="flex justify-between items-center">
-        <span className="font-funnel text-gray-600">Delivery Charge</span>
-        <span className="font-funnel font-semibold text-gray-800">
+        <span className="text-[var(--color-text-secondary)]">Delivery Charge</span>
+        <span className="font-mono font-medium text-[var(--color-text-primary)]">
           {subtotal > 269  ? "FREE" : `₹${deliveryCharge.toFixed(2)}`}
         </span>
       </div>
       {deliveryCharge > 0 && subtotal < 269 && (
-        <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
-          <p className="font-funnel text-xs text-green-700 font-semibold">
+        <div className="p-2 bg-[var(--color-tint-green)] border border-[var(--color-border)] rounded-[8px]">
+          <p className="text-[11px] text-[var(--color-brand-green)] font-medium">
             🎉 Add ₹{(269 - subtotal).toFixed(2)} more for FREE delivery!
           </p>
         </div>
       )}
       {useWalletBalance && walletDeduction > 0 && (
-        <div className="flex justify-between items-center text-[#0e540b]">
-          <span className="font-funnel flex items-center gap-1">
+        <div className="flex justify-between items-center text-[var(--color-brand-green)]">
+          <span className="flex items-center gap-1">
             <Wallet size={13} /> Wallet Deduction
           </span>
-          <span className="font-funnel font-semibold">-₹{walletDeduction.toFixed(2)}</span>
+          <span className="font-mono font-medium">-₹{walletDeduction.toFixed(2)}</span>
         </div>
       )}
-      <div className="border-t border-gray-200 pt-2 mt-2">
+      <div className="border-t border-[var(--color-border)] pt-2 mt-2">
         <div className="flex justify-between items-center">
-          <span className="font-funnel font-bold text-gray-800">
+          <span className="font-medium text-[var(--color-text-primary)]">
             {useWalletBalance && !isWalletSufficient ? "Amount to Pay" : "Total Amount"}
           </span>
-          <span className="font-amiko font-bold text-[#0e540b] text-lg">
+          <span className="font-mono font-medium text-[var(--color-brand-green)] text-base">
             ₹{(useWalletBalance ? amountAfterWallet : total).toFixed(2)}
           </span>
         </div>
         {useWalletBalance && walletDeduction > 0 && (
-          <p className="font-funnel text-[10px] text-gray-400 text-right mt-0.5">
+          <p className="text-[10px] text-[var(--color-text-muted)] text-right mt-0.5 font-mono">
             (₹{walletDeduction.toFixed(2)} paid via wallet)
           </p>
         )}
@@ -962,11 +962,11 @@ const BillRows = React.memo(
 
 // ─── CartItems ────────────────────────────────────────────────────────────────
 const CartItems = React.memo(({ items, updateQuantity, removeItem }) => (
-  <div className="bg-white p-3 md:p-2.5 rounded-lg shadow-md">
-    <h3 className="font-funnel text-base md:text-sm font-bold text-gray-800 mb-2 border-b pb-1.5">
-      Order Items ({items.length} items, {items.reduce((s, i) => s + i.quantity, 0)} total quantity)
+  <div className="bg-[var(--color-bg-surface)] p-3.5 rounded-[12px] border border-[var(--color-border)]">
+    <h3 className="font-display text-sm font-medium text-[var(--color-text-primary)] mb-2.5 border-b border-[var(--color-border)] pb-2">
+      Order Items ({items.length} items, {items.reduce((s, i) => s + i.quantity, 0)} total)
     </h3>
-    <div className="space-y-2.5 md:space-y-2">
+    <div className="space-y-2.5">
       {items.map((item, index) => (
         <CartItem
           key={`${item.vegetableId || item.id}-${item.weight}-${index}`}
@@ -989,56 +989,53 @@ const CartItem = React.memo(({ item, index, updateQuantity, removeItem }) => {
     : null;
 
   return (
-    <div className="flex gap-2.5 md:gap-2 p-2.5 md:p-2 bg-gray-50 rounded-lg border border-gray-200 hover:border-green-300 transition">
-      <img
-        src={item.image || "/placeholder-vegetable.jpg"}
-        alt={item.name}
-        className="w-14 h-14 md:w-12 md:h-12 object-cover rounded-lg flex-shrink-0"
-        loading="lazy"
-        onError={(e) => { e.target.src = "/placeholder-vegetable.jpg"; }}
-      />
+    <div className="flex gap-3 p-2.5 bg-[var(--color-bg-app)] rounded-[10px] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition-colors">
+      <div className="w-14 h-14 bg-[var(--color-tint-green)] rounded-[8px] overflow-hidden flex-shrink-0 flex items-center justify-center">
+        <img
+          src={item.image || "/placeholder-vegetable.jpg"}
+          alt={item.name}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => { e.target.src = "/placeholder-vegetable.jpg"; }}
+        />
+      </div>
       <div className="flex-1 flex flex-col justify-between">
         <div>
-          <h4 className="font-funnel font-semibold text-gray-800 text-sm md:text-xs">
+          <h4 className="font-body font-medium text-[var(--color-text-primary)] text-xs sm:text-sm">
             {item.name} ({item.weight})
           </h4>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <p className="font-funnel text-sm md:text-xs font-semibold text-[#0e540b]">
-              ₹{itemPrice.toFixed(2)} per {item.weight}
-            </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="font-mono text-xs text-[var(--color-brand-green)] font-medium border border-dashed border-[var(--color-border-strong)] rounded-[4px] px-1.5 py-0.2">
+              ₹{itemPrice.toFixed(2)} / {item.weight}
+            </span>
             {marketPriceForWeight && marketPriceForWeight > itemPrice && (
-              <p className="font-funnel text-xs line-through text-gray-400">₹{marketPriceForWeight.toFixed(2)}</p>
+              <span className="font-mono text-[11px] line-through text-[var(--color-text-muted)]">₹{marketPriceForWeight.toFixed(2)}</span>
             )}
           </div>
-          {marketPriceForWeight && marketPriceForWeight > itemPrice && (
-            <p className="font-funnel text-[10px] text-green-600 font-semibold mt-0.5">
-              Save ₹{(marketPriceForWeight - itemPrice).toFixed(2)} per {item.weight}
-            </p>
-          )}
         </div>
-        <div className="flex items-center justify-between mt-1.5">
+        <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => updateQuantity(index, -1)}
-              className="w-6 h-6 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full transition"
+              className="w-6 h-6 flex items-center justify-center bg-[var(--color-bg-surface)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] rounded-[6px] transition-colors"
               aria-label="Decrease quantity"
             >
-              <Minus size={12} className="text-gray-700" />
+              <Minus size={12} className="text-[var(--color-text-primary)]" />
             </button>
-            <span className="font-funnel font-semibold text-gray-800 text-sm w-7 text-center">{item.quantity}</span>
+            <span className="font-mono font-medium text-[var(--color-text-primary)] text-xs w-6 text-center">{item.quantity}</span>
             <button
               onClick={() => updateQuantity(index, 1)}
-              className="w-6 h-6 flex items-center justify-center bg-[#0e540b] hover:bg-green-800 rounded-full transition"
+              className="w-6 h-6 flex items-center justify-center bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white rounded-[6px] transition-colors"
               aria-label="Increase quantity"
             >
               <Plus size={12} className="text-white" />
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <p className="font-funnel font-bold text-gray-800 text-sm">₹{itemTotal.toFixed(2)}</p>
+            <span className="font-mono font-medium text-[var(--color-text-primary)] text-xs">₹{itemTotal.toFixed(2)}</span>
             <button
               onClick={() => removeItem(index)}
-              className="p-1 text-red-500 hover:bg-red-50 rounded-lg transition"
+              className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-[6px] transition-colors"
               aria-label="Remove item"
             >
               <Trash2 size={14} />
@@ -1116,7 +1113,7 @@ const PriceSummary = React.memo((props) => {
           amountAfterWallet={amountAfterWallet}
         />
         <div>
-          <h3 className="font-funnel text-sm font-bold text-gray-800 mb-2.5 border-b pb-1.5">Price Summary</h3>
+          <h3 className="font-display text-xs sm:text-sm font-semibold text-[var(--color-text-primary)] mb-2.5 border-b border-[var(--color-border)] pb-1.5">Price Summary</h3>
           <BillRows
             subtotal={subtotal}
             couponDiscount={couponDiscount}
@@ -1128,8 +1125,8 @@ const PriceSummary = React.memo((props) => {
             isWalletSufficient={isWalletSufficient}
           />
           {isCheckoutDisabled && (
-            <div className="my-3 p-2 bg-orange-50 border border-orange-200 rounded-lg">
-              <p className="font-funnel text-[10px] text-orange-700 font-semibold">
+            <div className="my-3 p-2 bg-amber-50 border border-amber-200 rounded-[8px] font-body">
+              <p className="text-[10px] text-amber-800 font-medium">
                 ⚠️ Please select delivery address and payment method to proceed
               </p>
             </div>
@@ -1149,9 +1146,9 @@ const PriceSummary = React.memo((props) => {
             <button
               onClick={handleCheckout}
               disabled={isCheckoutDisabled}
-              className={`w-full font-funnel py-3 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm flex items-center justify-center gap-2 ${isCheckoutDisabled
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
+              className={`w-full font-body py-2.5 sm:py-3 rounded-[10px] font-medium transition-colors text-xs sm:text-sm flex items-center justify-center gap-2 ${isCheckoutDisabled
+                  ? "bg-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed"
+                  : "bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white"
                 }`}
             >
               {isCheckoutDisabled
@@ -1170,7 +1167,7 @@ const PriceSummary = React.memo((props) => {
 // ─── MobileCheckoutButton ─────────────────────────────────────────────────────
 const MobileCheckoutButton = React.memo(
   ({ paymentMethod, vegetableOrder, isCheckoutDisabled, total, handleCheckout, appliedCoupon, customerInfo, selectedAddress, useWalletBalance, amountAfterWallet, isWalletSufficient, walletDeduction }) => (
-    <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-white border-t border-gray-200 shadow-2xl z-50">
+    <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[var(--color-bg-surface)] border-t border-[var(--color-border)] shadow-lg z-50 font-body">
       <div className="px-4 py-3">
         {paymentMethod === "ONLINE" && !(useWalletBalance && isWalletSufficient) ? (
           <RazorpayPayment
@@ -1187,9 +1184,9 @@ const MobileCheckoutButton = React.memo(
           <button
             onClick={handleCheckout}
             disabled={isCheckoutDisabled}
-            className={`w-full font-funnel py-3 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm flex items-center justify-center gap-2 ${isCheckoutDisabled
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
+            className={`w-full font-body py-2.5 sm:py-3 rounded-[10px] font-medium transition-colors text-xs sm:text-sm flex items-center justify-center gap-2 ${isCheckoutDisabled
+                ? "bg-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed"
+                : "bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white"
               }`}
           >
             {isCheckoutDisabled

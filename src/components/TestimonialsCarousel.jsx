@@ -1,8 +1,8 @@
+// src/components/TestimonialsCarousel.jsx — Rebuilt with v2 1px hairline cards, Fraunces title, and Inter typography
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Star } from "lucide-react";
 
 const TestimonialsCarousel = ({ testimonials }) => {
-  // Normalize input once
   const safeTestimonials = useMemo(
     () => (Array.isArray(testimonials) ? testimonials : []),
     [testimonials]
@@ -11,7 +11,6 @@ const TestimonialsCarousel = ({ testimonials }) => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Clamp index if data changes
   useEffect(() => {
     if (currentTestimonial >= safeTestimonials.length) {
       setCurrentTestimonial(0);
@@ -27,7 +26,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
         c === safeTestimonials.length - 1 ? 0 : c + 1
       );
       setIsTransitioning(false);
-    }, 300);
+    }, 200);
   }, [safeTestimonials.length]);
 
   const handlePrev = useCallback(() => {
@@ -39,7 +38,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
         c === 0 ? safeTestimonials.length - 1 : c - 1
       );
       setIsTransitioning(false);
-    }, 300);
+    }, 200);
   }, [safeTestimonials.length]);
 
   const handleDotClick = (index) => {
@@ -49,10 +48,9 @@ const TestimonialsCarousel = ({ testimonials }) => {
     setTimeout(() => {
       setCurrentTestimonial(index);
       setIsTransitioning(false);
-    }, 300);
+    }, 200);
   };
 
-  // Auto slide (single interval, safe dependency)
   useEffect(() => {
     if (safeTestimonials.length <= 1) return;
 
@@ -63,22 +61,24 @@ const TestimonialsCarousel = ({ testimonials }) => {
   const active = safeTestimonials[currentTestimonial];
 
   return (
-    <div className="w-full bg-[#f3efe6] shadow-lg rounded-xl mt-8 pb-6">
-      <div className="md:p-6 lg:p-6 p-4">
+    <div className="w-full bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] mt-8 pb-6 transition-colors duration-150 font-body">
+      <div className="p-4 md:p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">
+          <h3 className="text-xl font-display font-semibold text-[var(--color-text-primary)]">
             What Customers Say
           </h3>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrev}
-              className="p-2 rounded-md bg-[#f3efe6] shadow-sm hover:bg-gray-50 transition-all hover:scale-110 active:scale-95"
+              className="w-8 h-8 rounded-[8px] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] flex items-center justify-center transition-colors text-sm"
+              aria-label="Previous testimonial"
             >
               ‹
             </button>
             <button
               onClick={handleNext}
-              className="p-2 rounded-md bg-[#f3efe6] shadow-sm hover:bg-gray-50 transition-all hover:scale-110 active:scale-95"
+              className="w-8 h-8 rounded-[8px] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] flex items-center justify-center transition-colors text-sm"
+              aria-label="Next testimonial"
             >
               ›
             </button>
@@ -87,11 +87,11 @@ const TestimonialsCarousel = ({ testimonials }) => {
 
         {/* Empty State */}
         {safeTestimonials.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-[var(--color-text-muted)] text-xs font-body">
             No testimonials available
           </div>
         ) : !active ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-[var(--color-text-muted)] text-xs font-body">
             Invalid testimonial data
           </div>
         ) : (
@@ -100,28 +100,28 @@ const TestimonialsCarousel = ({ testimonials }) => {
               {/* Main Testimonial */}
               <div className="md:col-span-2">
                 <div
-                  className={`bg-[#f3efe6] rounded-lg p-6 shadow-sm h-full flex flex-col justify-between transition-all duration-300 ${isTransitioning
-                      ? "opacity-0 scale-95"
-                      : "opacity-100 scale-100"
-                    }`}
+                  className={`bg-[var(--color-bg-app)] border border-[var(--color-border)] rounded-[10px] p-5 sm:p-6 h-full flex flex-col justify-between transition-opacity duration-200 ${
+                    isTransitioning ? "opacity-0" : "opacity-100"
+                  }`}
                 >
                   <div>
-                    <p className="text-lg font-semibold text-gray-900 mb-2">
+                    <p className="text-sm sm:text-base font-body font-medium text-[var(--color-text-primary)] mb-2 leading-relaxed">
                       “{active.comment ?? "No comment provided"}”
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs text-[var(--color-text-secondary)] font-body">
                       — {active.name ?? "Anonymous"}
                     </p>
                   </div>
 
-                  <div className="mt-4 flex items-center gap-2">
+                  <div className="mt-4 flex items-center gap-1.5">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-5 h-5 ${i < (active.rating ?? 0)
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-gray-300"
-                          }`}
+                        className={`w-4 h-4 ${
+                          i < (active.rating ?? 0)
+                            ? "text-[var(--color-amber)] fill-[var(--color-amber)]"
+                            : "text-[var(--color-border)]"
+                        }`}
                       />
                     ))}
                   </div>
@@ -131,23 +131,19 @@ const TestimonialsCarousel = ({ testimonials }) => {
               {/* Side Card */}
               <div className="hidden md:block">
                 <div
-                  className={`bg-[#f3efe6] rounded-lg p-6 shadow-sm h-full flex flex-col justify-center items-center transition-all duration-300 ${isTransitioning
-                      ? "opacity-0 scale-95"
-                      : "opacity-100 scale-100"
-                    }`}
+                  className={`bg-[var(--color-bg-app)] border border-[var(--color-border)] rounded-[10px] p-5 h-full flex flex-col justify-center items-center text-center transition-opacity duration-200 ${
+                    isTransitioning ? "opacity-0" : "opacity-100"
+                  }`}
                 >
-                  <div className="w-16 h-16 rounded-full bg-[#f54a00] flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                    {active.initial ??
-                      active.name?.charAt(0)?.toUpperCase() ??
-                      "?"}
+                  <div className="w-12 h-12 rounded-full bg-[var(--color-brand-green)] text-white text-base font-mono font-medium flex items-center justify-center mb-3">
+                    {active.initial ?? active.name?.charAt(0)?.toUpperCase() ?? "?"}
                   </div>
 
-                  <p className="mt-3 text-sm text-gray-600 text-center">
-                    {(active.comment ?? "").slice(0, 120)}
-                    {active.comment?.length > 120 ? "..." : ""}
+                  <p className="text-xs text-[var(--color-text-secondary)] font-body line-clamp-3">
+                    {active.comment}
                   </p>
 
-                  <p className="mt-2 text-xs text-gray-500 font-medium">
+                  <p className="mt-2 text-[11px] text-[var(--color-text-muted)] font-mono">
                     Rating: {active.rating ?? 0}/5
                   </p>
                 </div>
@@ -160,10 +156,11 @@ const TestimonialsCarousel = ({ testimonials }) => {
                 <button
                   key={index}
                   onClick={() => handleDotClick(index)}
-                  className={`transition-all duration-300 rounded-full ${index === currentTestimonial
-                      ? "w-8 h-3 bg-[#0e540b]"
-                      : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
-                    }`}
+                  className={`transition-all duration-200 rounded-full ${
+                    index === currentTestimonial
+                      ? "w-6 h-2 bg-[var(--color-brand-green)]"
+                      : "w-2 h-2 bg-[var(--color-border)] hover:bg-[var(--color-border-strong)]"
+                  }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
               ))}

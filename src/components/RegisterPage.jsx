@@ -132,11 +132,11 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3efe6]  flex items-center justify-center p-3 font-funnel">
+    <div className="py-6 sm:py-12 flex items-center justify-center p-3 font-funnel">
       <div className="w-full max-w-sm">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-slate-800 transition-colors duration-300">
           {/* Header */}
-          <div className="bg-[#0e540b] p-6 text-white text-center relative">
+          <div className="bg-[#0e540b] dark:bg-emerald-900/80 p-6 text-white text-center relative">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-full mb-3 backdrop-blur-sm">
               <UserPlus className="w-8 h-8" />
             </div>

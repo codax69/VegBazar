@@ -29,32 +29,34 @@ const PaymentMethodButton = memo(({ method, isActive, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`w-full p-3 rounded-xl border-2 transition-all duration-300 ${isActive
-        ? "border-[#023D01] bg-gradient-to-r from-green-50 to-emerald-50 shadow-md"
-        : "border-gray-200 hover:border-[#023D01] hover:bg-gray-100"
-        }`}
+      className={`w-full p-3.5 rounded-[10px] border transition-colors duration-150 ${
+        isActive
+          ? "border-2 border-[var(--color-brand-green)] bg-[var(--color-tint-green)] font-medium"
+          : "border-[var(--color-border)] hover:border-[var(--color-border-strong)] bg-[var(--color-bg-surface)]"
+      }`}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2.5">
           <div
-            className={`size-4 rounded-full border-2 flex items-center justify-center ${isActive ? "border-[#0e540b]" : "border-gray-300"
-              }`}
+            className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+              isActive ? "border-[var(--color-brand-green)]" : "border-[var(--color-border-strong)]"
+            }`}
           >
-            {isActive && <div className="size-2 rounded-full bg-[#0e540b]" />}
+            {isActive && <div className="w-2 h-2 rounded-full bg-[var(--color-brand-green)]" />}
           </div>
           <div className="text-left">
-            <p className="font-semibold text-gray-800 text-sm">
+            <p className="font-body font-medium text-[var(--color-text-primary)] text-xs sm:text-sm">
               {isOnline ? "Online Payment" : "Cash on Delivery"}
             </p>
-            <p className="text-[10px] text-black">
+            <p className="font-body text-[11px] text-[var(--color-text-muted)]">
               {isOnline ? "UPI, Cards, Net Banking" : "Pay when you receive"}
             </p>
           </div>
         </div>
         {isOnline ? (
-          <FiCreditCard className="size-5 text-[#0e540b]" />
+          <FiCreditCard className="w-5 h-5 text-[var(--color-brand-green)]" />
         ) : (
-          <LuBanknote className="size-5 text-[#0e540b]" />
+          <LuBanknote className="w-5 h-5 text-[var(--color-brand-green)]" />
         )}
       </div>
     </button>
@@ -399,12 +401,12 @@ const BillingPage = () => {
     );
   // console.log(defaultAddress);
   return (
-    <div className="min-h-screen bg-[#f3efe6] pt-8 md:pt-20 pb-20 lg:pb-0">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="max-w-6xl mx-auto px-4 py-2 sm:py-4 transition-colors duration-300">
+      <div>
         {/* Back Button */}
         <button
           onClick={handleBack}
-          className="flex items-center gap-1.5 mb-3 text-gray-700 hover:text-[#0e540b] transition-colors group"
+          className="flex items-center gap-1.5 mb-3 text-gray-700 dark:text-slate-300 hover:text-[#0e540b] dark:hover:text-emerald-400 transition-colors group"
           aria-label="Go back to select vegetables"
         >
           <FiArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
@@ -413,10 +415,10 @@ const BillingPage = () => {
 
         {/* Header */}
         <div className="text-center mb-4">
-          <h1 className="text-xl font-amiko sm:text-2xl font-bold text-[#0e540b] mb-1">
+          <h1 className="text-xl font-amiko sm:text-2xl font-bold text-[#0e540b] dark:text-emerald-400 mb-1">
             Checkout
           </h1>
-          <p className="text-xs font-funnel text-gray-600">
+          <p className="text-xs font-funnel text-gray-600 dark:text-slate-400">
             Review your order and complete payment
           </p>
         </div>
@@ -525,20 +527,20 @@ const BillingPage = () => {
           {/* Left Section */}
           <div className="lg:col-span-2 space-y-3">
             {/* Selected Plan */}
-            <div className="bg-[#f3efe6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+            <div className="bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] rounded-[12px] p-4 border border-[var(--color-border)]">
               <div className="flex justify-between items-center mb-2">
-                <h2 className="text-base font-funnel font-bold text-gray-800 flex items-center gap-1.5">
-                  <FiPackage className="size-4 text-[#0e540b]" />
+                <h2 className="text-sm font-display font-semibold text-[var(--color-text-primary)] flex items-center gap-1.5">
+                  <FiPackage className="size-4 text-[var(--color-brand-green)]" />
                   Your Plan
                 </h2>
-                <span className="bg-green-100 font-funnel text-green-800 px-2.5 py-0.5 rounded-full text-sm font-semibold">
+                <span className="bg-[var(--color-tint-green)] font-body text-[var(--color-brand-green)] px-2.5 py-0.5 rounded-full text-xs font-medium border border-[var(--color-border)]">
                   {selectedOffer.title}
                 </span>
               </div>
-              <div className="bg-[#ffff] rounded-lg p-3 border border-green-200">
+              <div className="bg-[var(--color-bg-app)] rounded-[8px] p-3 border border-[var(--color-border)] font-body">
                 <div className="flex justify-between items-center">
-                  <p className="text-gray-600 text-xs">Plan Value</p>
-                  <p className="text-xl font-bold font-assistant text-[#0e540b]">
+                  <p className="text-[var(--color-text-secondary)] text-xs">Plan Value</p>
+                  <p className="text-lg font-mono font-medium text-[var(--color-brand-green)]">
                     ₹{selectedOffer.price}
                   </p>
                 </div>
@@ -546,13 +548,13 @@ const BillingPage = () => {
             </div>
 
             {/* Vegetables */}
-            <div className="bg-[#f5f5f5] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+            <div className="bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] rounded-[12px] p-4 border border-[var(--color-border)]">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-base font-funnel font-bold text-gray-800 flex items-center gap-1.5">
-                  <BiLeaf className="size-4 text-[#0e540b]" />
+                <h2 className="text-sm font-display font-semibold text-[var(--color-text-primary)] flex items-center gap-1.5">
+                  <BiLeaf className="size-4 text-[var(--color-brand-green)]" />
                   Selected Vegetables
                 </h2>
-                <span className="text-xs font-assistant text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                <span className="text-xs font-body text-[var(--color-text-muted)] bg-[var(--color-bg-app)] px-2 py-0.5 rounded-full border border-[var(--color-border)]">
                   {selectedVegetables.length} items
                 </span>
               </div>
@@ -576,9 +578,9 @@ const BillingPage = () => {
             />
 
             {/* Payment Method */}
-            <div className="bg-[#f3efe6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
-              <h2 className="text-base font-funnel font-bold text-gray-800 mb-2 flex items-center gap-1.5">
-                <FiCreditCard className="size-4 text-[#0e540b]" />
+            <div className="bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] rounded-[12px] p-4 border border-[var(--color-border)] font-body">
+              <h2 className="text-sm font-display font-semibold text-[var(--color-text-primary)] mb-2 flex items-center gap-1.5">
+                <FiCreditCard className="size-4 text-[var(--color-brand-green)]" />
                 Payment Method
               </h2>
 
@@ -596,9 +598,9 @@ const BillingPage = () => {
               </div>
 
               {!paymentMethod && (
-                <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-lg flex items-start gap-1.5">
+                <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-[8px] flex items-start gap-1.5">
                   <FiAlertCircle className="size-3.5 text-red-600 shrink-0 mt-0.5" />
-                  <p className="text-xs font-assistant text-red-600">
+                  <p className="text-xs font-body text-red-600">
                     Please select a payment method to continue
                   </p>
                 </div>
@@ -608,7 +610,7 @@ const BillingPage = () => {
 
           {/* Right Section - Desktop Sidebar */}
           <div className="lg:col-span-1 hidden lg:block">
-            <div className="bg-[#f3efe6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100 lg:sticky lg:top-4 space-y-3">
+            <div className="bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] rounded-[12px] p-4 border border-[var(--color-border)] lg:sticky lg:top-4 space-y-3 font-body">
               {/* Coupon Section - Desktop (Top of sidebar) */}
               <CouponCodeSection
                 onApplyCoupon={handleApplyCoupon}
@@ -620,50 +622,50 @@ const BillingPage = () => {
 
               {/* Quick Summary */}
               <div>
-                <h2 className="text-base font-funnel font-bold text-gray-800 mb-3 flex items-center gap-1.5">
-                  <FiShield className="size-4 text-[#0e540b]" />
+                <h2 className="text-sm font-display font-semibold text-[var(--color-text-primary)] mb-3 flex items-center gap-1.5">
+                  <FiShield className="size-4 text-[var(--color-brand-green)]" />
                   Quick Summary
                 </h2>
 
-                <div className="space-y-2 mb-3 text-sm">
-                  <div className="flex justify-between text-gray-600">
-                    <span className="font-assistant">Plan Price</span>
-                    <span className="font-semibold font-assistant text-gray-800">
+                <div className="space-y-2 mb-3 text-xs font-body">
+                  <div className="flex justify-between text-[var(--color-text-secondary)]">
+                    <span>Plan Price</span>
+                    <span className="font-mono font-medium text-[var(--color-text-primary)]">
                       ₹{selectedOffer.price}
                     </span>
                   </div>
 
                   {/* Coupon Discount */}
                   {couponDiscount > 0 && (
-                    <div className="flex justify-between font-assistant text-green-700 bg-green-50 px-2 py-1 rounded-lg">
-                      <span className="font-semibold">Coupon Discount</span>
-                      <span className="font-bold">
+                    <div className="flex justify-between font-mono text-[var(--color-brand-green)] bg-[var(--color-tint-green)] px-2 py-1 rounded-[6px]">
+                      <span>Coupon Discount</span>
+                      <span>
                         -₹{couponDiscount.toFixed(2)}
                       </span>
                     </div>
                   )}
 
-                  <div className="flex justify-between font-assistant text-gray-600">
+                  <div className="flex justify-between text-[var(--color-text-secondary)]">
                     <span>Delivery Charge</span>
-                    <span className="font-semibold text-gray-800">
+                    <span className="font-mono font-medium text-[var(--color-text-primary)]">
                       {deliveryCharge === 0 ? "FREE" : `₹${deliveryCharge}`}
                     </span>
                   </div>
 
                   {calculations.savings > 0 && (
-                    <div className="flex justify-between font-assistant text-green-700 bg-green-50 px-2 py-1 rounded-lg">
-                      <span className="font-semibold">Total Savings</span>
-                      <span className="font-bold">
+                    <div className="flex justify-between font-mono text-[var(--color-brand-green)] bg-[var(--color-tint-green)] px-2 py-1 rounded-[6px]">
+                      <span>Total Savings</span>
+                      <span>
                         ₹{calculations.savings.toFixed(2)}
                       </span>
                     </div>
                   )}
 
-                  <div className="border-t border-dashed border-gray-300 pt-2 flex justify-between items-center">
-                    <span className="font-bold font-assistant text-gray-800">
+                  <div className="border-t border-[var(--color-border)] pt-2 flex justify-between items-center">
+                    <span className="font-display font-semibold text-[var(--color-text-primary)]">
                       Total Amount
                     </span>
-                    <span className="text-xl font-bold text-[#0e540b]">
+                    <span className="text-lg font-mono font-medium text-[var(--color-brand-green)]">
                       ₹{totalAmount.toFixed(2)}
                     </span>
                   </div>
@@ -682,7 +684,7 @@ const BillingPage = () => {
                     <button
                       onClick={handleCOD}
                       disabled={!orderData}
-                      className="w-full py-2.5 rounded-xl font-assistant bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-2.5 rounded-[10px] font-body text-xs bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Place Order
                     </button>
@@ -690,14 +692,14 @@ const BillingPage = () => {
                   {!paymentMethod && (
                     <button
                       disabled
-                      className="w-full py-2.5 rounded-xl font-assistant bg-gray-300 text-gray-500 font-bold cursor-not-allowed"
+                      className="w-full py-2.5 rounded-[10px] font-body bg-[var(--color-border)] text-[var(--color-text-muted)] font-medium text-xs cursor-not-allowed"
                     >
                       Select Payment Method
                     </button>
                   )}
                 </div>
 
-                <div className="mt-3 flex items-center font-assistant justify-center space-x-1.5 text-[10px] text-gray-500">
+                <div className="mt-3 flex items-center font-body justify-center space-x-1.5 text-[10px] text-[var(--color-text-muted)]">
                   <FiLock className="size-3" />
                   <span>Secure Checkout</span>
                 </div>
@@ -707,7 +709,7 @@ const BillingPage = () => {
         </div>
 
         {/* Trust Badges */}
-        <div className="mt-4 bg-[#f3efe6] text-[#023D01] rounded-xl shadow-lg p-4 border border-green-100">
+        <div className="mt-4 bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] rounded-[12px] p-4 border border-[var(--color-border)]">
           <div className="grid grid-cols-3 gap-3 text-center">
             {trustBadges.map((badge, i) => (
               <TrustBadge
@@ -722,13 +724,13 @@ const BillingPage = () => {
       </div>
 
       {/* Mobile Sticky Payment Button */}
-      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[#f3efe6] border-t border-gray-200 shadow-2xl z-50">
+      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-[var(--color-bg-surface)] border-t border-[var(--color-border)] shadow-lg z-50 font-body">
         <div className="px-4 py-3">
           {/* Bill Summary - Compact */}
           <div className="space-y-1 mb-2">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600 font-assistant">Total Amount</span>
-              <span className="text-xl font-bold text-[#0e540b]">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-[var(--color-text-secondary)] font-body">Total Amount</span>
+              <span className="text-lg font-mono font-medium text-[var(--color-brand-green)]">
                 ₹{totalAmount.toFixed(2)}
               </span>
             </div>

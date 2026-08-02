@@ -374,7 +374,7 @@ const RazorpayPayment = ({
           city: deliveryAddress?.city || "",
           orderId: actualOrderId,
         },
-        theme: { color: "#0e540b" },
+        theme: { color: "#1B4D2B" },
         modal: {
           ondismiss: function () {
             setIsLoading(false);
@@ -407,23 +407,23 @@ const RazorpayPayment = ({
   // ─── UI ───────────────────────────────────────────────────────────────────
   if (error) {
     return (
-      <div className="w-full max-w-md mx-auto p-4 sm:p-6">
-        <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 sm:p-6 mb-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+      <div className="w-full max-w-md mx-auto p-4 font-body">
+        <div className="bg-red-50 border border-red-200 rounded-[10px] p-4 mb-4">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h3 className="font-bold text-red-900 mb-2 text-sm sm:text-base">
+              <h3 className="font-medium text-red-900 mb-1 text-xs sm:text-sm">
                 Payment Error
               </h3>
-              <p className="text-red-700 text-xs sm:text-sm">{error}</p>
+              <p className="text-red-700 text-xs">{error}</p>
             </div>
           </div>
         </div>
         <button
           onClick={() => { setError(null); createOrder(); }}
-          className="w-full font-funnel py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#0e540b] to-green-700 text-white font-bold hover:from-green-700 hover:to-[#0e540b] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base flex items-center justify-center gap-2"
+          className="w-full font-body py-2.5 sm:py-3 rounded-[10px] bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white font-medium transition-colors text-xs sm:text-sm flex items-center justify-center gap-2"
         >
-          <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
+          <CreditCard className="w-4 h-4" />
           Retry Payment
         </button>
       </div>
@@ -438,55 +438,55 @@ const RazorpayPayment = ({
         </div>
       )}
 
-      {totalAmount > 0 ? (  // use totalAmount — chargeAmount can be 0 when wallet covers all
+      {totalAmount > 0 ? (
         <>
           <button
             onClick={createOrder}
             disabled={isCheckoutDisabled || isLoading}
-            className={`w-full font-funnel py-3 sm:py-4 rounded-xl font-bold transition-all duration-300 shadow-lg text-sm sm:text-base flex items-center justify-center gap-2 ${
+            className={`w-full font-body py-2.5 sm:py-3 rounded-[10px] font-medium transition-colors text-xs sm:text-sm flex items-center justify-center gap-2 ${
               isCheckoutDisabled || isLoading
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#0e540b] to-green-700 text-white hover:from-green-700 hover:to-[#0e540b] hover:shadow-xl transform hover:-translate-y-0.5"
+                ? "bg-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed"
+                : "bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white"
             }`}
           >
             {isLoading ? (
               <>
-                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
                 Processing...
               </>
             ) : isCheckoutDisabled ? (
               <>
-                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                <AlertCircle className="w-4 h-4" />
                 Select Address & Payment
               </>
             ) : (
               <>
-                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
-                Pay Now ₹{displayAmount.toFixed(2)}
+                <CreditCard className="w-4 h-4" />
+                Pay Now <span className="font-mono">₹{displayAmount.toFixed(2)}</span>
               </>
             )}
           </button>
 
           {!scriptLoaded && (
-            <div className="mt-2 text-center text-xs text-gray-500 flex items-center justify-center gap-2">
-              <Loader2 className="w-3 h-3 animate-spin" />
+            <div className="mt-2 text-center text-xs text-[var(--color-text-muted)] flex items-center justify-center gap-2 font-body">
+              <Loader2 className="w-3 h-3 animate-spin text-[var(--color-brand-green)]" />
               Loading payment gateway...
             </div>
           )}
 
           {isBasketOrder && selectedOffer && (
-            <div className="mt-3 text-xs sm:text-sm text-gray-600 text-center space-y-1">
+            <div className="mt-3 text-xs text-[var(--color-text-secondary)] text-center space-y-1 font-body">
               <div>
-                Package: ₹{selectedOffer.price}
+                Package: <span className="font-mono">₹{selectedOffer.price}</span>
                 {couponCode && couponCode.discount > 0 && (
-                  <span className="text-green-600 font-semibold">
+                  <span className="text-[var(--color-brand-green)] font-mono">
                     {" "}- ₹{couponCode.discount} (Coupon)
                   </span>
                 )}
                 {` + ₹${selectedOffer.deliveryCharges ?? 30} delivery`}
               </div>
               {couponCode && couponCode.code && (
-                <div className="text-green-600 font-semibold">
+                <div className="text-[var(--color-brand-green)] font-medium">
                   Coupon "{couponCode.code}" applied ✓
                 </div>
               )}
@@ -494,19 +494,19 @@ const RazorpayPayment = ({
           )}
 
           {isCustomOrder && (
-            <div className="mt-3 text-xs sm:text-sm text-gray-600 text-center space-y-1">
+            <div className="mt-3 text-xs text-[var(--color-text-secondary)] text-center space-y-1 font-body">
               <div>
                 {vegetableOrder?.summary?.deliveryCharges === 0
                   ? "Free Delivery (Order above ₹269)"
                   : `Includes ₹${vegetableOrder?.summary?.deliveryCharges ?? 30} delivery charge`}
               </div>
               {couponCode && (typeof couponCode === "string" || couponCode.code) && (
-                <div className="text-green-600 font-semibold">
+                <div className="text-[var(--color-brand-green)] font-medium">
                   Coupon "{typeof couponCode === "string" ? couponCode : couponCode.code}" applied ✓
                 </div>
               )}
               {walletCreditUsed > 0 && (
-                <div className="text-[#0e540b] font-semibold">
+                <div className="text-[var(--color-brand-green)] font-mono">
                   ₹{walletCreditUsed.toFixed(2)} paid via wallet
                 </div>
               )}
@@ -516,7 +516,7 @@ const RazorpayPayment = ({
       ) : (
         <button
           disabled
-          className="w-full font-funnel py-3 sm:py-4 rounded-xl bg-gray-300 text-gray-500 cursor-not-allowed font-bold text-sm sm:text-base"
+          className="w-full font-body py-2.5 sm:py-3 rounded-[10px] bg-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed font-medium text-xs sm:text-sm"
         >
           Invalid Order Amount
         </button>

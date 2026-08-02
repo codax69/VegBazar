@@ -1,6 +1,6 @@
-// Fixed Navbar.jsx with Glassmorphism (No Active Lines in Bottom Nav)
+// src/components/Navbar.jsx — Rebuilt Navbar with v2 premium minimal styling, 1px hairlines, and exclusive type
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { FiHome, FiShoppingCart, FiPhone, FiUser, FiLogOut, FiMapPin } from "react-icons/fi";
+import { FiHome, FiShoppingCart, FiPhone, FiUser, FiLogOut, FiMapPin, FiSun, FiMoon } from "react-icons/fi";
 import { RiShoppingBag4Fill } from "react-icons/ri";
 import { GiBasket } from "react-icons/gi";
 import { PiPackageBold } from "react-icons/pi";
@@ -9,16 +9,11 @@ import { useOrderContext } from "../Context/OrderContext";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext.jsx";
 import { useWallet } from "../Context/WalletContext";
-import lettuce from "../assets/lettuce_17024589.png";
+import { useTheme } from "../Context/ThemeContext";
+import { useCart } from "../Context/CartContext";
 import veg1 from "../assets/vegetable_12439915.png";
-import veg2 from "../assets/vegetable_5029309.png";
-import veg3 from "../assets/vegetables_2700637.png";
-import veg4 from "../assets/vegetables_498280.png";
-import veg5 from "../assets/vegetables_9241551.png";
 
 const VegBazarLogo = "/vegbazar.svg";
-
-const vegetableImages = [lettuce, veg1, veg2, veg3, veg4, veg5];
 
 const Navbar = () => {
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
@@ -34,20 +29,34 @@ const Navbar = () => {
     const walletContext = useWallet();
     balance = walletContext.balance;
     hasWallet = walletContext.hasWallet;
-  } catch (error) {
-    // Wallet context not available yet, use defaults
+  } catch {
+    // Wallet context fallback
   }
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // Safely access theme context with fallback
+  let theme = "light";
+  let toggleTheme = () => {};
+  try {
+    const themeContext = useTheme();
+    theme = themeContext.theme;
+    toggleTheme = themeContext.toggleTheme;
+  } catch {
+    // Theme context fallback
+  }
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % vegetableImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  // Safely access cart context for live counter badge
+  let cartItemCount = 0;
+  try {
+    const cartContext = useCart();
+    cartItemCount = cartContext.cart?.reduce(
+      (sum, item) => sum + (parseInt(item.quantity) || 1),
+      0
+    ) || 0;
+  } catch {
+    // Cart context fallback
+  }
 
-  // Optimized scroll handler with debouncing
+  // Scroll handler for mobile bottom nav visibility
   useEffect(() => {
     let lastScrollY = window.scrollY;
     let rafId = null;
@@ -93,30 +102,13 @@ const Navbar = () => {
       { path: "/", icon: FiHome, label: "Home" },
       { path: "/offers", icon: GiBasket, label: "Basket" },
       { path: "/vegetables", icon: RiShoppingBag4Fill, label: "Vegetables" },
-      { path: "/cart", icon: FiShoppingCart, label: "Cart" },
+      { path: "/cart", icon: FiShoppingCart, label: "Cart", badge: cartItemCount },
       { path: "/orders", icon: PiPackageBold, label: "Orders" },
       { path: "/support", icon: FiPhone, label: "Support" },
     ],
-    []
+    [cartItemCount]
   );
 
-  const desktopNavItems = useMemo(
-    () => [
-      { path: "/", icon: FiHome, label: "Home" },
-      { path: "/offers", icon: GiBasket, label: "Basket" },
-      { path: "/vegetables", icon: RiShoppingBag4Fill, label: "Vegetables" },
-      { path: "/cart", icon: FiShoppingCart, label: "Cart" },
-      {
-        path: "/orders",
-        icon: PiPackageBold,
-        label: "Orders",
-      },
-      { path: "/support", icon: FiPhone, label: "Support" },
-    ],
-    []
-  );
-
-  // Memoized handlers
   const handleNavigate = useCallback(
     (path) => {
       window.scrollTo({ top: 0, behavior: "instant" });
@@ -124,11 +116,6 @@ const Navbar = () => {
     },
     [navigate]
   );
-
-  const handleShopNow = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
-    navigate("/vegetables");
-  }, [navigate]);
 
   const handleLogout = useCallback(async () => {
     await logout();
@@ -144,7 +131,6 @@ const Navbar = () => {
     }
   }, [isAuthenticated, showUserMenu, navigate]);
 
-  // Get user display info
   const getUserDisplayName = () => {
     if (!user) return 'User';
     return user.username || user.email?.split('@')[0] || 'User';
@@ -153,157 +139,146 @@ const Navbar = () => {
   const getUserAvatar = () => {
     if (user?.profilePicture) return user.profilePicture;
     if (user?.name) {
-      // Generate initials avatar
-      const initials = user.name
+      return user.name
         .split(' ')
         .map(n => n[0])
         .join('')
         .toUpperCase()
         .slice(0, 2);
-      return initials;
     }
     return null;
   };
 
   return (
     <>
-      {/* Top Navbar - Desktop & Mobile */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-[#f3efe6]/70 backdrop-blur-lg border-b border-white/20 shadow-sm transition-all duration-300">
+      {/* Top Navbar — v2 Hairline Border, No Glassmorphism, Premium Minimal */}
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-[var(--color-bg-surface)] border-b border-[var(--color-border)] transition-colors duration-150">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <button
               onClick={() => handleNavigate("/")}
-              className="flex flex-col items-center justify-center text-2xl cursor-pointer select-none transition-transform hover:scale-105 shrink-0"
-              style={{ fontFamily: "Trirong, serif" }}
+              className="flex items-center gap-2 cursor-pointer select-none shrink-0"
               aria-label="VegBazar Home"
             >
               <img
                 src={VegBazarLogo}
-                alt="VegBazar"
-                className="w-6 sm:w-7 md:w-8 lg:w-9"
-                loading="lazy"
+                alt="VegBazar Logo"
+                className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+                loading="eager"
               />
-              <span className="text-[#0e540b] px-0.5 text-[10px] sm:text-xs md:text-sm font-extrabold tracking-wide">
+              <span className="font-display font-semibold text-[19px] sm:text-[20px] text-[var(--color-text-primary)] tracking-tight">
                 VegBazar
               </span>
             </button>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-0 lg:gap-2">
-              {desktopNavItems.map(({ path, icon: Icon, label }) => {
+            <div className="hidden md:flex items-center gap-6">
+              {navItems.map(({ path, icon: NavIcon, label, badge }) => {
                 const isActive = currentPath === path;
                 return (
                   <button
                     key={path}
                     onClick={() => handleNavigate(path)}
                     className={`
-                      flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
-                      transition-all duration-200 ease-out
+                      relative flex items-center gap-1.5 py-4 text-[13px] font-body font-medium transition-colors duration-150
                       ${isActive
-                        ? "bg-[#f3efe6]/80 text-black shadow-sm border border-gray-200/50 backdrop-blur-sm"
-                        : "text-black hover:bg-[#f3efe6]/50 hover:backdrop-blur-sm"
+                        ? "text-[var(--color-brand-green)] font-medium border-b-2 border-[var(--color-brand-green)]"
+                        : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                       }
                     `}
                     aria-label={label}
                     aria-current={isActive ? "page" : undefined}
                   >
                     {path === "/vegetables" ? (
-                      <div className="relative w-4 h-4 flex-shrink-0">
-                        {vegetableImages.map((img, index) => (
-                          <img
-                            key={index}
-                            src={img}
-                            alt="Veg"
-                            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 ${index === currentImageIndex
-                              ? "opacity-100"
-                              : "opacity-0"
-                              }`}
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <Icon
-                        className="w-4 h-4 flex-shrink-0"
-                        aria-hidden="true"
+                      <img
+                        src={veg1}
+                        alt=""
+                        className="w-4 h-4 object-contain"
                       />
+                    ) : (
+                      <NavIcon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
                     )}
-                    <span className="font-funnel">{label}</span>
+                    <span>{label}</span>
+
+                    {/* Cart Badge */}
+                    {badge > 0 && (
+                      <span className="ml-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-mono font-medium rounded-full bg-[var(--color-amber)] text-[var(--color-amber-ink)]">
+                        {badge}
+                      </span>
+                    )}
                   </button>
                 );
               })}
             </div>
 
-            {/* Right Section - CTA & User Menu */}
+            {/* Right Controls */}
             <div className="flex items-center gap-3">
-              {/* Shop Now Button */}
+              {/* Theme Toggle — 30-32px square icon button with 1px border */}
               <button
-                onClick={handleShopNow}
-                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-orange-500/90 to-orange-600/90 backdrop-blur-sm hover:from-orange-600 hover:to-orange-700 text-white px-5 py-2 rounded-full text-sm font-semibold font-funnel shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
-                aria-label="Shop Now"
+                onClick={toggleTheme}
+                className="w-8 h-8 sm:w-[32px] sm:h-[32px] rounded-[6px] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border-strong)] transition-colors"
+                aria-label="Toggle dark mode"
+                title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
               >
-                <RiShoppingBag4Fill className="w-4 h-4" />
-                Shop Now
+                {theme === 'dark' ? (
+                  <FiSun className="w-4 h-4" />
+                ) : (
+                  <FiMoon className="w-4 h-4" />
+                )}
               </button>
 
-              {/* User Menu */}
+              {/* User Menu Trigger */}
               <div className="relative user-menu-container">
                 <button
                   onClick={handleAuthClick}
                   disabled={isLoading}
                   className={`
-                    flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-full transition-all duration-200
-                    backdrop-blur-sm border
+                    flex items-center gap-2 px-2.5 py-1.5 rounded-[10px] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition-colors text-[13px] font-body font-medium text-[var(--color-text-primary)]
                     ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
-                    ${isAuthenticated
-                      ? 'bg-[#f3efe6]/50 hover:bg-[#f3efe6]/80 border-gray-200/50'
-                      : 'bg-[#f3efe6]/50 hover:bg-[#f3efe6]/80 border-gray-200/50'
-                    }
                   `}
                   aria-label={isLoading ? 'Loading...' : (isAuthenticated ? 'User menu' : 'Sign in')}
                 >
                   {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-[var(--color-border-strong)] border-t-[var(--color-brand-green)] rounded-full animate-spin" />
                   ) : isAuthenticated && user?.profilePicture ? (
                     <img
                       src={user.profilePicture}
                       alt={getUserDisplayName()}
-                      className="w-7 h-7 rounded-full object-cover ring-2 ring-white/60"
+                      className="w-5 h-5 rounded-full object-cover"
                     />
                   ) : isAuthenticated && getUserAvatar() ? (
-                    <div className="w-7 h-7 rounded-full bg-green-600/90 text-white flex items-center justify-center text-xs font-semibold shadow-inner">
+                    <div className="w-5 h-5 rounded-full bg-[var(--color-brand-green)] text-white flex items-center justify-center text-[10px] font-mono font-medium">
                       {getUserAvatar()}
                     </div>
                   ) : (
-                    <FiUser className="w-5 h-5 text-gray-700" />
+                    <FiUser className="w-4 h-4 text-[var(--color-text-secondary)]" />
                   )}
                   {isAuthenticated && !isLoading && (
-                    <span className="text-[13px] sm:text-sm font-medium text-gray-800 max-w-[60px] sm:max-w-[100px] truncate">
+                    <span className="max-w-[80px] sm:max-w-[110px] truncate">
                       {getUserDisplayName()}
                     </span>
                   )}
                 </button>
 
-                {/* Dropdown Menu - Glassmorphism */}
+                {/* Dropdown Menu */}
                 {showUserMenu && isAuthenticated && (
-                  <div className="absolute right-0 mt-2 w-56 bg-[#f3efe6]/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                    {/* User Info */}
-                    <div className="px-4 py-3 border-b border-gray-200/50">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
+                  <div className="absolute right-0 mt-2 w-56 bg-[var(--color-bg-surface)] rounded-[12px] border border-[var(--color-border)] py-2 shadow-lg z-50 animate-in fade-in duration-150">
+                    <div className="px-4 py-2.5 border-b border-[var(--color-border)]">
+                      <p className="text-[13px] font-medium text-[var(--color-text-primary)] truncate font-body">
                         {getUserDisplayName()}
                       </p>
-                      <p className="text-xs text-gray-500 truncate mt-0.5">
+                      <p className="text-[11px] text-[var(--color-text-muted)] truncate font-body mt-0.5">
                         {user?.email}
                       </p>
                     </div>
 
-                    {/* Menu Items */}
                     <button
                       onClick={() => {
                         handleNavigate('/profile');
                         setShowUserMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#f3efe6]/60 flex items-center gap-2 transition-colors border-b border-gray-100"
+                      className="w-full px-4 py-2 text-left text-[13px] font-body text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-tint-green)] flex items-center gap-2 transition-colors border-b border-[var(--color-border)]"
                     >
                       <FiUser className="w-4 h-4" />
                       My Profile
@@ -314,12 +289,12 @@ const Navbar = () => {
                         handleNavigate('/wallet');
                         setShowUserMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#f3efe6]/60 flex items-center gap-2 transition-colors"
+                      className="w-full px-4 py-2 text-left text-[13px] font-body text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-tint-green)] flex items-center gap-2 transition-colors"
                     >
                       <Wallet className="w-4 h-4" />
                       <span>My Wallet</span>
                       {hasWallet && (
-                        <span className="ml-auto text-xs font-semibold text-green-700 bg-[#f3efe6] px-2 py-0.5 rounded-full">
+                        <span className="ml-auto text-[11px] font-mono font-medium text-[var(--color-brand-green)] bg-[var(--color-tint-green)] px-2 py-0.5 rounded-full">
                           ₹{balance?.toFixed(2) || '0.00'}
                         </span>
                       )}
@@ -330,7 +305,7 @@ const Navbar = () => {
                         handleNavigate('/orders');
                         setShowUserMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#f3efe6]/60 flex items-center gap-2 transition-colors"
+                      className="w-full px-4 py-2 text-left text-[13px] font-body text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-tint-green)] flex items-center gap-2 transition-colors"
                     >
                       <PiPackageBold className="w-4 h-4" />
                       My Orders
@@ -341,7 +316,7 @@ const Navbar = () => {
                         handleNavigate('/address');
                         setShowUserMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#f3efe6]/60 flex items-center gap-2 transition-colors"
+                      className="w-full px-4 py-2 text-left text-[13px] font-body text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-tint-green)] flex items-center gap-2 transition-colors"
                     >
                       <FiMapPin className="w-4 h-4" />
                       Address
@@ -349,7 +324,7 @@ const Navbar = () => {
 
                     <button
                       onClick={handleLogout}
-                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50/50 flex items-center gap-2 transition-colors"
+                      className="w-full px-4 py-2 text-left text-[13px] font-body text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 transition-colors border-t border-[var(--color-border)] mt-1"
                     >
                       <FiLogOut className="w-4 h-4" />
                       Sign Out
@@ -362,75 +337,54 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Bottom Navigation - Mobile Only - Glassmorphism */}
+      {/* Mobile Bottom Navigation — Flat bg-bg-surface with 1px top border, no shadow, touch targets >= 44px */}
       <nav
         className={`
           fixed bottom-0 left-0 right-0 z-50 md:hidden
-          bg-[#f3efe6]/95 backdrop-blur-lg border-t border-white/50
-          shadow-[0_-8px_32px_0_rgba(31,38,135,0.1)]
-          transition-transform duration-300 ease-out
+          bg-[var(--color-bg-surface)] border-t border-[var(--color-border)]
+          transition-transform duration-150 ease-out
           ${isBottomNavVisible ? "translate-y-0" : "translate-y-full"}
         `}
         role="navigation"
         aria-label="Mobile navigation"
       >
-        <div className="flex items-center justify-between px-1 sm:px-2 py-1 safe-area-inset-bottom w-full max-w-md mx-auto">
-          {navItems.map(({ path, icon: Icon, label }) => {
+        <div className="flex items-center justify-between px-2 py-1 safe-area-inset-bottom w-full max-w-md mx-auto min-h-[44px]">
+          {navItems.map(({ path, icon: MobileNavIcon, label, badge }) => {
             const isActive = currentPath === path;
             return (
               <button
                 key={path}
                 onClick={() => handleNavigate(path)}
-                // Removed focus:ring properties to prevent border lines on click
-                className={`
-                  relative flex flex-col items-center justify-center gap-0.5
-                  px-0.5 sm:px-2 py-1.5 rounded-xl flex-1 min-w-0
-                  transition-all duration-200 ease-out
-                  focus:outline-none
-                  ${isActive ? "transform scale-105" : "active:scale-95"}
-                `}
+                className="relative flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 transition-colors duration-150 focus:outline-none"
                 aria-label={label}
                 aria-current={isActive ? "page" : undefined}
               >
-                {/* Icon Container */}
-                <div
-                  className={`
-                    relative p-1.5 rounded-lg transition-all duration-200
-                    ${isActive ? "bg-[#f3efe6]/60 backdrop-blur-sm" : ""}
-                  `}
-                >
+                <div className="relative">
                   {path === "/vegetables" ? (
-                    <div className="relative w-5 h-5">
-                      {vegetableImages.map((img, index) => (
-                        <img
-                          key={index}
-                          src={img}
-                          alt="Veg"
-                          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 ${index === currentImageIndex
-                            ? "opacity-100"
-                            : "opacity-0"
-                            }`}
-                        />
-                      ))}
-                    </div>
+                    <img
+                      src={veg1}
+                      alt=""
+                      className="w-5 h-5 object-contain"
+                    />
                   ) : (
-                    <Icon
-                      className={`
-                      w-5 h-5 transition-colors duration-200
-                      ${isActive ? "text-green-700" : "text-black/70"}
-                    `}
+                    <MobileNavIcon
+                      className={`w-5 h-5 transition-colors ${
+                        isActive ? "text-[var(--color-brand-green)]" : "text-[var(--color-text-muted)]"
+                      }`}
                       aria-hidden="true"
                     />
                   )}
-                  {/* Removed Active Indicator Dot */}
+                  {badge > 0 && (
+                    <span className="absolute -top-1 -right-2 bg-[var(--color-amber)] text-[var(--color-amber-ink)] text-[9px] font-mono font-medium px-1 rounded-full">
+                      {badge > 99 ? '99+' : badge}
+                    </span>
+                  )}
                 </div>
 
-                {/* Label */}
                 <span
-                  className={`
-                    text-[9px] sm:text-[10px] w-full text-center truncate px-0.5 font-medium transition-all duration-200
-                    ${isActive ? "text-green-800 font-semibold" : "text-black/70"}
-                  `}
+                  className={`text-[11px] font-body mt-0.5 transition-colors ${
+                    isActive ? "text-[var(--color-brand-green)] font-medium" : "text-[var(--color-text-muted)]"
+                  }`}
                 >
                   {label}
                 </span>

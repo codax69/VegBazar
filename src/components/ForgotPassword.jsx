@@ -1,3 +1,4 @@
+// src/components/ForgotPassword.jsx — Rebuilt with v2 1px hairline card, Fraunces title, and brand green primary CTA
 import React, { useState } from "react";
 import {
   Mail,
@@ -5,10 +6,10 @@ import {
   AlertCircle,
   CheckCircle,
   Send,
-  Leaf,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import vegbazarLogo from "../assets/vegbazar.svg";
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,16 +58,16 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 font-funnel">
+    <div className="min-h-screen bg-[var(--color-bg-app)] flex items-center justify-center p-4 font-body transition-colors duration-150">
       <div className="w-full max-w-sm">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+        <div className="bg-[var(--color-bg-surface)] rounded-[12px] border border-[var(--color-border)] overflow-hidden">
           {/* Header Section */}
-          <div className="bg-[#0e540b] p-6 text-white text-center relative">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-full mb-3 backdrop-blur-sm">
-              <img src={vegbazarLogo} className="w-12 h-12" alt="VegBazar Logo" />
+          <div className="bg-[var(--color-brand-green)] p-6 text-white text-center relative">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 rounded-full mb-3">
+              <img src={vegbazarLogo} className="w-10 h-10" alt="VegBazar Logo" />
             </div>
-            <h1 className="text-2xl font-bold mb-1">Forgot Password?</h1>
-            <p className="text-white/80 text-xs">
+            <h1 className="text-xl font-display font-semibold mb-1">Forgot Password?</h1>
+            <p className="text-white/80 text-xs font-body">
               We'll send you reset instructions
             </p>
           </div>
@@ -75,8 +76,8 @@ const ForgotPassword = () => {
             {/* Message Alert */}
             {message.text && (
               <div
-                className={`mb-4 p-3 rounded-lg flex items-start gap-2 text-sm ${message.type === "success"
-                  ? "bg-green-50 text-green-800 border border-green-200"
+                className={`mb-4 p-3 rounded-[8px] flex items-start gap-2 text-xs font-body ${message.type === "success"
+                  ? "bg-[var(--color-tint-green)] text-[var(--color-brand-green)] border border-[var(--color-border)]"
                   : "bg-red-50 text-red-800 border border-red-200"
                   }`}
               >
@@ -93,20 +94,20 @@ const ForgotPassword = () => {
               <div className="space-y-4">
                 {/* Email Input */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 font-body">
                     Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--color-text-muted)] w-4 h-4" />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0e540b] focus:border-transparent outline-none transition font-funnel text-sm"
+                      className="w-full pl-9 pr-3 py-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[6px] focus:outline-none focus:border-[var(--color-brand-green)] font-body text-xs text-[var(--color-text-primary)]"
                       placeholder="yourname@email.com"
                     />
                   </div>
-                  <p className="mt-1.5 text-xs text-gray-500">
+                  <p className="mt-1 text-[11px] text-[var(--color-text-muted)] font-body">
                     Enter the email address associated with your account
                   </p>
                 </div>
@@ -115,26 +116,11 @@ const ForgotPassword = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={loading || !email}
-                  className="w-full bg-[#e24100] hover:bg-[#c93800] text-white font-semibold py-2.5 rounded-lg transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md hover:shadow-lg mt-4 text-sm"
+                  className="w-full bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white font-medium py-2.5 rounded-[10px] transition-colors disabled:bg-[var(--color-border)] disabled:text-[var(--color-text-muted)] disabled:cursor-not-allowed font-body text-xs flex items-center justify-center gap-2 mt-4"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Sending...
                     </span>
                   ) : (
@@ -148,23 +134,23 @@ const ForgotPassword = () => {
             ) : (
               /* Success State */
               <div className="text-center py-4">
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-green-100 rounded-full mb-3">
-                  <CheckCircle className="w-7 h-7 text-green-600" />
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-[var(--color-tint-green)] rounded-full mb-3">
+                  <CheckCircle className="w-6 h-6 text-[var(--color-brand-green)]" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                <h3 className="text-base font-display font-semibold text-[var(--color-text-primary)] mb-1.5">
                   Check Your Email
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-xs text-[var(--color-text-secondary)] mb-4 font-body">
                   We've sent a password reset link to <strong>{email}</strong>
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-[11px] text-[var(--color-text-muted)] font-body">
                   Didn't receive the email? Check your spam folder or{" "}
                   <button
                     onClick={() => {
                       setEmailSent(false);
                       setMessage({ type: "", text: "" });
                     }}
-                    className="text-[#0e540b] hover:text-[#0a3708] font-medium hover:underline"
+                    className="text-[var(--color-brand-green)] hover:underline font-medium"
                   >
                     try again
                   </button>
@@ -175,24 +161,13 @@ const ForgotPassword = () => {
             {/* Back to Login Button */}
             <button
               onClick={() => navigate("/login")}
-              className="w-full mt-4 flex items-center justify-center gap-2 text-[#0e540b] hover:text-[#0a3708] font-semibold py-2.5 rounded-lg hover:bg-green-50 transition-all duration-200 text-sm"
+              className="w-full mt-4 flex items-center justify-center gap-2 text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] font-medium py-2 rounded-[8px] transition-colors text-xs font-body"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Login
             </button>
           </div>
         </div>
-
-        {/* Footer Text */}
-        <p className="text-center text-xs text-gray-600 mt-4 px-4">
-          Remember your password?{" "}
-          <button
-            onClick={() => navigate("/login")}
-            className="text-[#e24100] hover:underline font-medium"
-          >
-            Sign in
-          </button>
-        </p>
       </div>
     </div>
   );

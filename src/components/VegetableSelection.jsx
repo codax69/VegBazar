@@ -16,52 +16,52 @@ const VegetableCard = memo(({
     <button
       onClick={() => !isDisabled && !isOutOfStock && onToggle(vegetable)}
       disabled={isDisabled || isOutOfStock}
-      className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl pt-10 border-2 transition-all duration-200 touch-manipulation active:scale-95 relative ${isOutOfStock
-        ? "bg-red-50 border-red-300 opacity-90 cursor-not-allowed"
-        : isSelected
-          ? "bg-green-100 border-[#0e540b] shadow-lg"
-          : "bg-[#f0fcf6] border-gray-300 shadow-md hover:border-green-400"
-        } ${isDisabled && !isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}`}
+      className={`w-full p-3.5 rounded-[12px] border transition-colors duration-150 relative text-left flex flex-col justify-between ${
+        isOutOfStock
+          ? "bg-[var(--color-bg-surface)] border-[var(--color-border)] opacity-60 cursor-not-allowed"
+          : isSelected
+          ? "bg-[var(--color-bg-surface)] border-2 border-[var(--color-brand-green)]"
+          : "bg-[var(--color-bg-surface)] border-[var(--color-border)] hover:border-[var(--color-border-strong)]"
+      } ${isDisabled && !isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}`}
       aria-label={`${isOutOfStock ? "Out of stock" : isSelected ? "Deselect" : "Select"} ${vegetable.name}`}
       aria-pressed={isSelected}
       aria-disabled={isOutOfStock}
     >
-      <div className="text-center">
-        <div className="relative">
-          <img
-            className={`w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-cover mx-auto rounded-lg sm:rounded-xl mb-2 ${isOutOfStock ? "grayscale opacity-50" : ""
-              }`}
-            src={vegetable.image}
-            alt={vegetable.name}
-            loading="lazy"
-            decoding="async"
-          />
+      <div>
+        <div className="relative w-full aspect-square bg-[var(--color-tint-green)] rounded-[10px] flex items-center justify-center overflow-hidden mb-2.5">
+          {vegetable.image ? (
+            <img
+              className={`w-full h-full object-cover ${isOutOfStock ? "grayscale opacity-50" : ""}`}
+              src={vegetable.image}
+              alt={vegetable.name}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <span className="text-2xl">🥦</span>
+          )}
           {isSelected && !isOutOfStock && (
-            <div className="absolute -top-1 -right-1 bg-[#0e540b] rounded-full p-1">
-              <CheckCircle size={16} className="text-white sm:w-5 sm:h-5" />
+            <div className="absolute top-1.5 right-1.5 bg-[var(--color-brand-green)] text-white rounded-full p-0.5">
+              <CheckCircle size={16} />
             </div>
           )}
           {isOutOfStock && (
-            <>
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg sm:rounded-xl">
-                <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold shadow-lg">
-                  SOLD OUT
-                </span>
-              </div>
-              <div className="absolute top-1 right-1 bg-red-600 rounded-full p-0.5">
-                <XCircle size={14} className="text-white" />
-              </div>
-            </>
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+              <span className="bg-[#16241A] text-white px-2 py-0.5 rounded-[6px] text-[10px] font-mono font-medium">
+                Sold Out
+              </span>
+            </div>
           )}
         </div>
-        <p className={`font-medium font-funnel text-sm sm:text-base leading-tight px-1 ${isOutOfStock ? "text-red-600 line-through" : "text-gray-800"
-          }`}>
+        <p className="font-body font-medium text-[13px] sm:text-[14px] text-[var(--color-text-primary)] leading-tight truncate">
           {vegetable.name}
         </p>
-        {isOutOfStock && (
-          <p className="font-funnel text-[10px] sm:text-xs text-red-500 font-semibold mt-1">
-            Unavailable
-          </p>
+        {vegetable.priceForOffer && (
+          <div className="mt-1.5">
+            <span className="font-mono font-medium text-[11px] text-[var(--color-text-primary)] border border-dashed border-[var(--color-border-strong)] rounded-[6px] px-1.5 py-0.5 inline-block">
+              ₹{vegetable.priceForOffer.price} / {vegetable.priceForOffer.weight}
+            </span>
+          </div>
         )}
       </div>
     </button>
