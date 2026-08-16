@@ -635,10 +635,10 @@ const VegetableCart = () => {
 
   if (cartLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--color-bg-app)] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <RefreshCw size={32} className="text-[#0e540b] animate-spin" />
-          <p className="font-funnel text-sm text-gray-500">Loading your cart...</p>
+          <RefreshCw size={32} className="text-[var(--color-brand-green)] animate-spin" />
+          <p className="font-body text-sm text-[var(--color-text-muted)]">Loading your cart...</p>
         </div>
       </div>
     );
@@ -724,8 +724,8 @@ const VegetableCart = () => {
             </div>
 
             {/* Mobile: Bill summary */}
-            <div className="lg:hidden bg-white p-4 rounded-lg shadow-md">
-              <h3 className="font-funnel text-base font-bold text-gray-800 mb-3 border-b pb-2">Bill Summary</h3>
+            <div className="lg:hidden bg-[var(--color-bg-surface)] p-4 rounded-[12px] border border-[var(--color-border)] shadow-md">
+              <h3 className="font-display text-sm font-semibold text-[var(--color-text-primary)] mb-3 border-b border-[var(--color-border)] pb-2">Bill Summary</h3>
               <BillRows
                 subtotal={subtotal}
                 couponDiscount={couponDiscount}
@@ -733,8 +733,8 @@ const VegetableCart = () => {
                 {...walletProps}
               />
               {isCheckoutDisabled && (
-                <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="font-funnel text-xs text-orange-700 font-semibold">
+                <div className="mt-3 p-3 bg-[var(--color-amber-tint)] border border-[var(--color-amber)]/30 rounded-[10px]">
+                  <p className="font-body text-xs text-[var(--color-amber-ink)] dark:text-[var(--color-amber)] font-medium">
                     ⚠️ Please select delivery address and payment method below to proceed
                   </p>
                 </div>
@@ -808,10 +808,10 @@ const RecommendationsPanel = React.memo(({ recommendations, loading, onNavigate 
   if (!recommendations?.length) return null;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
+    <div className="bg-[var(--color-bg-surface)] rounded-[12px] border border-[var(--color-border)] shadow-md p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Sparkles size={17} className="text-amber-500" />
-        <h3 className="font-funnel font-bold text-gray-800 text-sm">Frequently Bought Together</h3>
+        <Sparkles size={17} className="text-[var(--color-amber)]" />
+        <h3 className="font-display font-semibold text-[var(--color-text-primary)] text-sm">Frequently Bought Together</h3>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
         {recommendations.map((rec, i) => {
@@ -823,7 +823,7 @@ const RecommendationsPanel = React.memo(({ recommendations, loading, onNavigate 
               className="flex-shrink-0 w-28 flex flex-col items-center gap-1 cursor-pointer group"
               onClick={() => onNavigate(`/vegetable/${rec.productId}`)}
             >
-              <div className="w-20 h-20 rounded-xl overflow-hidden border border-gray-100 group-hover:border-green-300 transition">
+              <div className="w-20 h-20 rounded-xl overflow-hidden border border-[var(--color-border)] group-hover:border-[var(--color-brand-green)] transition">
                 <img
                   src={product.image || "/placeholder-vegetable.jpg"}
                   alt={product.name}
@@ -831,11 +831,11 @@ const RecommendationsPanel = React.memo(({ recommendations, loading, onNavigate 
                   onError={(e) => { e.target.src = "/placeholder-vegetable.jpg"; }}
                 />
               </div>
-              <p className="font-funnel text-xs text-gray-700 font-semibold text-center leading-tight line-clamp-2">
+              <p className="font-body text-xs text-[var(--color-text-secondary)] font-medium text-center leading-tight line-clamp-2">
                 {product.name}
               </p>
               {product.price && (
-                <p className="font-funnel text-xs text-[#0e540b] font-bold">₹{product.price}</p>
+                <p className="font-mono text-xs text-[var(--color-brand-green)] font-bold">₹{product.price}</p>
               )}
             </div>
           );
@@ -847,23 +847,23 @@ const RecommendationsPanel = React.memo(({ recommendations, loading, onNavigate 
 
 // ─── WalletToggle ─────────────────────────────────────────────────────────────
 const WalletToggle = React.memo(
-  ({ wallet, balance, useWalletBalance, setUseWalletBalance, total, isWalletSufficient, walletDeduction, amountAfterWallet }) => {
+  ({ wallet, balance, useWalletBalance, setUseWalletBalance, _total, isWalletSufficient, walletDeduction, amountAfterWallet }) => {
     if (!wallet) return null;
     return (
-      <div className={`rounded-lg border-2 p-3 transition ${useWalletBalance ? "border-[#0e540b] bg-green-50" : "border-gray-200"}`}>
+      <div className={`rounded-[10px] border-2 p-3 transition ${useWalletBalance ? "border-[var(--color-brand-green)] bg-[var(--color-tint-green)]" : "border-[var(--color-border)] bg-[var(--color-bg-surface)]"}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Wallet size={18} className="text-[#0e540b]" />
+            <Wallet size={18} className="text-[var(--color-brand-green)]" />
             <div>
-              <p className="font-funnel font-semibold text-gray-800 text-sm">Use Wallet Balance</p>
-              <p className="font-funnel text-xs text-gray-500">
-                Available: <span className="font-bold text-[#0e540b]">₹{balance.toFixed(2)}</span>
+              <p className="font-body font-semibold text-[var(--color-text-primary)] text-sm">Use Wallet Balance</p>
+              <p className="font-body text-xs text-[var(--color-text-muted)]">
+                Available: <span className="font-bold text-[var(--color-brand-green)] font-mono">₹{balance.toFixed(2)}</span>
               </p>
             </div>
           </div>
           <button
             onClick={() => setUseWalletBalance((v) => !v)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${useWalletBalance ? "bg-[#0e540b]" : "bg-gray-300"}`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${useWalletBalance ? "bg-[var(--color-brand-green)]" : "bg-[var(--color-border-strong)]"}`}
             aria-label="Toggle wallet"
           >
             <span
@@ -872,29 +872,29 @@ const WalletToggle = React.memo(
           </button>
         </div>
         {useWalletBalance && (
-          <div className="mt-2 pt-2 border-t border-green-200 space-y-1">
-            <div className="flex justify-between text-xs font-funnel">
-              <span className="text-gray-600">Wallet deduction</span>
-              <span className="font-semibold text-[#0e540b]">-₹{walletDeduction.toFixed(2)}</span>
+          <div className="mt-2 pt-2 border-t border-[var(--color-border)] space-y-1">
+            <div className="flex justify-between text-xs font-body">
+              <span className="text-[var(--color-text-secondary)]">Wallet deduction</span>
+              <span className="font-semibold text-[var(--color-brand-green)] font-mono">-₹{walletDeduction.toFixed(2)}</span>
             </div>
             {!isWalletSufficient && (
               <>
-                <div className="flex justify-between text-xs font-funnel">
-                  <span className="text-gray-600">Remaining to pay</span>
-                  <span className="font-semibold text-gray-800">₹{amountAfterWallet.toFixed(2)}</span>
+                <div className="flex justify-between text-xs font-body">
+                  <span className="text-[var(--color-text-secondary)]">Remaining to pay</span>
+                  <span className="font-semibold text-[var(--color-text-primary)] font-mono">₹{amountAfterWallet.toFixed(2)}</span>
                 </div>
-                <div className="flex items-start gap-1.5 mt-1.5 p-2 bg-orange-50 border border-orange-200 rounded-md">
-                  <AlertCircle size={13} className="text-orange-500 flex-shrink-0 mt-0.5" />
-                  <p className="font-funnel text-[10px] text-orange-700 font-semibold">
+                <div className="flex items-start gap-1.5 mt-1.5 p-2 bg-[var(--color-amber-tint)] border border-[var(--color-amber)]/30 rounded-md">
+                  <AlertCircle size={13} className="text-[var(--color-amber)] flex-shrink-0 mt-0.5" />
+                  <p className="font-body text-[10px] text-[var(--color-amber-ink)] dark:text-[var(--color-amber)] font-medium">
                     Wallet balance is insufficient. Please select a payment method for the remaining ₹{amountAfterWallet.toFixed(2)}.
                   </p>
                 </div>
               </>
             )}
             {isWalletSufficient && (
-              <div className="flex items-center gap-1.5 mt-1 p-2 bg-green-100 border border-green-300 rounded-md">
-                <CheckCircle size={13} className="text-[#0e540b] flex-shrink-0" />
-                <p className="font-funnel text-[10px] text-[#0e540b] font-semibold">
+              <div className="flex items-center gap-1.5 mt-1 p-2 bg-[var(--color-tint-green)] border border-[var(--color-brand-green)]/30 rounded-md">
+                <CheckCircle size={13} className="text-[var(--color-brand-green)] flex-shrink-0" />
+                <p className="font-body text-[10px] text-[var(--color-brand-green)] font-medium">
                   Your wallet covers the full amount. No other payment needed!
                 </p>
               </div>
@@ -1049,9 +1049,9 @@ const CartItem = React.memo(({ item, index, updateQuantity, removeItem }) => {
 
 // ─── PaymentMethodSection ─────────────────────────────────────────────────────
 const PaymentMethodSection = React.memo(({ paymentMethod, setPaymentMethod }) => (
-  <div className="bg-white p-4 md:p-3 rounded-lg shadow-md">
-    <h3 className="font-funnel text-base md:text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-      <CreditCard size={18} className="text-[#0e540b]" /> Select Payment Method
+  <div className="bg-[var(--color-bg-surface)] p-4 md:p-3 rounded-[12px] border border-[var(--color-border)] shadow-md">
+    <h3 className="font-display text-sm font-semibold text-[var(--color-text-primary)] mb-3 flex items-center gap-2">
+      <CreditCard size={18} className="text-[var(--color-brand-green)]" /> Select Payment Method
     </h3>
     <div className="space-y-2.5">
       {[
@@ -1060,7 +1060,11 @@ const PaymentMethodSection = React.memo(({ paymentMethod, setPaymentMethod }) =>
       ].map(({ value, Icon, label, sub }) => (
         <label
           key={value}
-          className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${paymentMethod === value ? "border-[#0e540b] bg-green-50" : "border-gray-200 hover:border-green-300"}`}
+          className={`flex items-center gap-3 p-3 rounded-[10px] border-2 cursor-pointer transition ${
+            paymentMethod === value
+              ? "border-[var(--color-brand-green)] bg-[var(--color-tint-green)]"
+              : "border-[var(--color-border)] hover:border-[var(--color-border-strong)] bg-[var(--color-bg-surface)]"
+          }`}
         >
           <input
             type="radio"
@@ -1068,14 +1072,14 @@ const PaymentMethodSection = React.memo(({ paymentMethod, setPaymentMethod }) =>
             value={value}
             checked={paymentMethod === value}
             onChange={(e) => setPaymentMethod(e.target.value)}
-            className="w-4 h-4 text-[#0e540b] focus:ring-[#0e540b]"
+            className="w-4 h-4 text-[var(--color-brand-green)] focus:ring-[var(--color-brand-green)] accent-[var(--color-brand-green)]"
           />
-          <Icon size={22} className="text-gray-600" />
+          <Icon size={22} className="text-[var(--color-text-secondary)]" />
           <div className="flex-1">
-            <p className="font-funnel font-semibold text-gray-800 text-sm">{label}</p>
-            <p className="font-funnel text-xs text-gray-600">{sub}</p>
+            <p className="font-body font-semibold text-[var(--color-text-primary)] text-sm">{label}</p>
+            <p className="font-body text-xs text-[var(--color-text-secondary)]">{sub}</p>
           </div>
-          {paymentMethod === value && <CheckCircle size={18} className="text-[#0e540b]" />}
+          {paymentMethod === value && <CheckCircle size={18} className="text-[var(--color-brand-green)]" />}
         </label>
       ))}
     </div>
@@ -1094,7 +1098,7 @@ const PriceSummary = React.memo((props) => {
 
   return (
     <div className="lg:w-1/3 hidden lg:block">
-      <div className="bg-white p-3 rounded-lg shadow-md lg:sticky lg:top-4 space-y-3">
+      <div className="bg-[var(--color-bg-surface)] p-3 rounded-[12px] border border-[var(--color-border)] shadow-md lg:sticky lg:top-4 space-y-3">
         <CouponCodeSection
           onApplyCoupon={onApplyCoupon}
           appliedCoupon={appliedCoupon}
@@ -1125,8 +1129,8 @@ const PriceSummary = React.memo((props) => {
             isWalletSufficient={isWalletSufficient}
           />
           {isCheckoutDisabled && (
-            <div className="my-3 p-2 bg-amber-50 border border-amber-200 rounded-[8px] font-body">
-              <p className="text-[10px] text-amber-800 font-medium">
+            <div className="my-3 p-2 bg-[var(--color-amber-tint)] border border-[var(--color-amber)]/30 rounded-[8px] font-body">
+              <p className="text-[10px] text-[var(--color-amber-ink)] dark:text-[var(--color-amber)] font-medium">
                 ⚠️ Please select delivery address and payment method to proceed
               </p>
             </div>

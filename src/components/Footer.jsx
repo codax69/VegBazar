@@ -95,9 +95,11 @@ const Footer = () => {
                         </h3>
                         <ul className="space-y-2 mb-6 text-xs font-body">
                             <li><Link to="/" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">Home</Link></li>
-                            <li><Link to="/offers" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">Offers & Baskets</Link></li>
-                            <li><Link to="/support" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">Support & Help</Link></li>
+                            <li><Link to="/offers" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">Offers &amp; Baskets</Link></li>
+                            <li><Link to="/support" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">Support &amp; Help</Link></li>
                             <li><Link to="/wallet" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">My Wallet</Link></li>
+                            <li><Link to="/terms" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">Terms &amp; Conditions</Link></li>
+                            <li><Link to="/privacy-policy" className="text-[var(--color-text-secondary)] hover:text-[var(--color-brand-green)] transition-colors">Privacy Policy</Link></li>
                         </ul>
 
                         <h4 className="text-xs font-display font-semibold text-[var(--color-text-primary)] mb-2.5">Follow Us</h4>
@@ -116,10 +118,19 @@ const Footer = () => {
                 </div>
 
                 {/* Copyright */}
-                <div className="border-t border-[var(--color-border)] pt-5 text-center text-[var(--color-text-muted)] text-xs flex flex-col md:flex-row justify-center items-center gap-2 font-mono">
-                    <p>© {currentYear} VegBazar. All rights reserved.</p>
-                    <span className="hidden md:inline">•</span>
-                    <p className="font-body">Made with 💚 in Valsad</p>
+                <div className="border-t border-[var(--color-border)] pt-5 text-center text-[var(--color-text-muted)] text-xs font-mono">
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-2 mb-3">
+                        <p>© {currentYear} VegBazar. All rights reserved.</p>
+                        <span className="hidden md:inline">•</span>
+                        <p className="font-body">Made with 💚 in Valsad</p>
+                    </div>
+                    <div className="flex flex-wrap justify-center items-center gap-3 font-body">
+                        <Link to="/terms" className="hover:text-[var(--color-brand-green)] transition-colors">Terms &amp; Conditions</Link>
+                        <span>·</span>
+                        <Link to="/privacy-policy" className="hover:text-[var(--color-brand-green)] transition-colors">Privacy Policy</Link>
+                        <span>·</span>
+                        <Link to="/support" className="hover:text-[var(--color-brand-green)] transition-colors">Support</Link>
+                    </div>
                 </div>
             </div>
         </footer>

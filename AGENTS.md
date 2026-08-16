@@ -4,11 +4,11 @@ Guidance for AI coding agents working in this repository. Read this before makin
 
 ## Project Overview
 
-VegBazar is a **production, single-page vegetable e-commerce web app** (online marketplace for fresh vegetables & bundles) built with React 19 + Vite 7 + Tailwind CSS 4. It is deployed to Netlify as a PWA at https://vegbazar.store.
+VegBazar is a **production, single-page vegetable e-commerce web app** (online marketplace for fresh vegetables & bundles) built with React 19 + Vite 7 + Tailwind CSS 4. It is deployed to a VPS as a PWA at https://vegbazar.store.
 
 The frontend talks to a **separate backend API** (Node.js, not in this repo) through a `/api` proxy. All `/api/*` requests are proxied:
 - Dev: `vite.config.js` proxies to `http://localhost:4000/`.
-- Prod: `netlify.toml` rewrites `/api/*` to the backend URL via redirects.
+- Prod: Nginx proxies `/api/*` to the backend Node.js process.
 
 There is no test suite. Verification = `npm run lint` + `npm run build`.
 

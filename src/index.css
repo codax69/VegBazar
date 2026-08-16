@@ -48,6 +48,7 @@
   --color-brand-green: #1B4D2B;
   --color-brand-green-hover: #143A20;
   --color-tint-green: rgba(27,77,43,0.08);
+  --color-on-brand: #ffffff;
   --color-amber: #E2A33B;
   --color-amber-ink: #6B4813;
   --color-amber-tint: rgba(226,163,59,0.15);
@@ -80,6 +81,7 @@
   --color-brand-green: #3FA85C;
   --color-brand-green-hover: #4FBF6E;
   --color-tint-green: rgba(63,168,92,0.16);
+  --color-on-brand: #ffffff;
   --color-amber: #F0B94D;
   --color-amber-ink: #2A1D06;
   --color-amber-tint: rgba(240,185,77,0.18);

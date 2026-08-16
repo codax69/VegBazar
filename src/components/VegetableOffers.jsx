@@ -43,7 +43,7 @@ const VegetableOffers = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-2 sm:py-4 px-3 font-body transition-colors duration-150">
+    <div className="max-w-6xl mx-auto py-5   sm:py-10 px-3 font-body transition-colors duration-150">
       <div className="w-full max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="mb-4 sm:mb-6 text-center">

@@ -37,7 +37,7 @@ const ProgressIndicator = () => {
                       isActive
                         ? "bg-[var(--color-brand-green)] text-white"
                         : "bg-[var(--color-bg-app)] border border-[var(--color-border)] text-[var(--color-text-muted)]"
-                    } ${isCurrent ? "ring-2 ring-[var(--color-brand-green)] ring-offset-2 ring-offset-[var(--color-bg-surface)]" : ""}`}
+                    } ${isCurrent ? "ring-[var(--color-brand-green)] ring-offset-2 ring-offset-[var(--color-bg-surface)]" : ""}`}
                   >
                     <StepIcon size={12} />
                   </div>

@@ -46,6 +46,8 @@ const ProfilePage = lazy(() => import("./components/ProfilePage"));
 const Wallet = lazy(() => import("./components/Wallet"));
 const WalletTransactions = lazy(() => import("./components/WalletTransactions"));
 const VideoPlayer = lazy(() => import("./components/VideoPlayer"));
+const TermsAndConditions = lazy(() => import("./components/LegalTerms"));
+const PrivacyPolicy = lazy(() => import("./components/LegalPrivacy"));
 // Loading component
 const LoadingSpinner = () => (
   <div
@@ -251,7 +253,9 @@ const AppWithOrderContext = () => {
     "/wallet",
     "/wallet/transactions",
     "/video",
-    "/challenge"
+    "/challenge",
+    "/terms",
+    "/privacy-policy"
   ];
 
   return (
@@ -391,6 +395,8 @@ const AppWithOrderContext = () => {
                     }
                   />
                   <Route path="/video" element={<VideoPlayer />} />
+                  <Route path="/terms" element={<TermsAndConditions />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 </Routes>
               </Suspense>
             </div>

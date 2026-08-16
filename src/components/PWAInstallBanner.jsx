@@ -1,3 +1,4 @@
+// src/components/PWAInstallBanner.jsx — Rebuilt with v2 design system tokens, Fraunces title, and Inter typography
 import React, { useState, useEffect } from 'react';
 import { Download, X, Smartphone } from 'lucide-react';
 
@@ -20,7 +21,7 @@ const PWAInstallBanner = () => {
         const dismissedTime = localStorage.getItem('pwaInstallBannerDismissedTime');
 
         // Show banner again after 7 days
-        const sevenDays = 1 * 24 * 60 * 60 * 1000;
+        const sevenDays = 7 * 24 * 60 * 60 * 1000;
         const shouldShowAgain = dismissedTime && (Date.now() - parseInt(dismissedTime)) > sevenDays;
 
         // Don't show if already installed
@@ -68,7 +69,7 @@ const PWAInstallBanner = () => {
         if (isIOS) {
             // Show iOS instructions
             alert(
-                '📱 To install VegeBazar on iOS:\n\n' +
+                '📱 To install VegBazar on iOS:\n\n' +
                 '1. Tap the Share button (box with arrow)\n' +
                 '2. Scroll down and tap "Add to Home Screen"\n' +
                 '3. Tap "Add" to confirm'
@@ -79,8 +80,8 @@ const PWAInstallBanner = () => {
         if (!deferredPrompt) {
             // Fallback instructions for other browsers
             alert(
-                '📱 To install VegeBazar:\n\n' +
-                '• Chrome/Edge: Click menu (⋮) → "Install VegeBazar"\n' +
+                '📱 To install VegBazar:\n\n' +
+                '• Chrome/Edge: Click menu (⋮) → "Install VegBazar"\n' +
                 '• Firefox: Click menu → "Install"\n' +
                 '• Safari: Share → "Add to Home Screen"'
             );
@@ -94,7 +95,6 @@ const PWAInstallBanner = () => {
         const { outcome } = await deferredPrompt.userChoice;
 
         if (outcome === 'accepted') {
-            // // console.log('User accepted the install prompt');
             setShowBanner(false);
         }
 
@@ -115,22 +115,22 @@ const PWAInstallBanner = () => {
     }
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg animate-slide-down border-b-2 border-[#0e540b]">
-            <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between py-2 sm:py-3 gap-2 sm:gap-4">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-bg-surface)] border-b border-[var(--color-border)] shadow-xs font-body transition-colors duration-150">
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between py-2 sm:py-2.5 gap-2 sm:gap-4">
                     {/* Icon */}
                     <div className="flex-shrink-0">
-                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-[#0e540b]/10 rounded-full flex items-center justify-center animate-bounce-slow border border-[#0e540b]/20">
-                            <Smartphone className="w-4 h-4 sm:w-6 sm:h-6 text-[#0e540b]" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[var(--color-tint-green)] border border-[var(--color-border)] rounded-full flex items-center justify-center">
+                            <Smartphone className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-brand-green)]" />
                         </div>
                     </div>
 
                     {/* Text Content */}
-                    <div className="flex-1 min-w-0">
-                        <h3 className="text-[#2d3748] font-funnel font-bold text-xs sm:text-base leading-tight mt-0.5">
-                            Install <span className="text-[#0e540b]">VegBazar</span> App
+                    <div className="flex-1 min-w-0 font-body">
+                        <h3 className="text-[var(--color-text-primary)] font-display font-semibold text-xs sm:text-sm leading-tight">
+                            Install <span className="text-[var(--color-brand-green)] font-display font-semibold">VegBazar</span> App
                         </h3>
-                        <p className="text-[#718096] font-funnel text-[10px] sm:text-sm mt-0 sm:mt-0.5 truncate sm:whitespace-normal">
+                        <p className="text-[var(--color-text-secondary)] text-[10px] sm:text-xs mt-0.5 truncate sm:whitespace-normal">
                             Get existing offers & faster checkout! 🚀
                         </p>
                     </div>
@@ -139,19 +139,19 @@ const PWAInstallBanner = () => {
                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <button
                             onClick={handleInstallClick}
-                            className="bg-[#0e540b] text-white hover:bg-[#0a3d08] px-3 py-1.5 sm:px-5 sm:py-2.5 rounded sm:rounded-lg font-funnel font-semibold text-[11px] sm:text-sm transition-all duration-300 shadow-sm sm:shadow-md hover:shadow-lg flex items-center gap-1 sm:gap-2 transform hover:-translate-y-0.5"
+                            className="bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-[10px] font-body font-medium text-xs transition-colors flex items-center gap-1.5"
                         >
-                            <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <Download className="w-3.5 h-3.5" />
                             <span className="hidden sm:inline">Install App</span>
                             <span className="sm:hidden">Install</span>
                         </button>
 
                         <button
                             onClick={handleDismiss}
-                            className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-[#718096] transition-all duration-300 flex items-center justify-center"
+                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--color-bg-app)] hover:bg-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors flex items-center justify-center"
                             aria-label="Dismiss"
                         >
-                            <X className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                            <X className="w-4 h-4" />
                         </button>
                     </div>
                 </div>

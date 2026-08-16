@@ -20,7 +20,7 @@ const IC = {
 };
 
 /* ─── veg card ──────────────────────────────────────────────────────── */
-function VegCard({ emoji, image, name, price }) {
+function VegCard({ image, name, price }) {
   return (
     <div style={{
       width: "clamp(64px, 18vw, 88px)",
@@ -33,7 +33,7 @@ function VegCard({ emoji, image, name, price }) {
     }}>
       {image
         ? <img src={image} alt={name} style={{ width: "clamp(28px,7vw,38px)", height: "clamp(28px,7vw,38px)", objectFit: "cover", borderRadius: 8, margin: "0 auto", display: "block" }} />
-        : <div style={{ fontSize: "clamp(20px,5vw,28px)", lineHeight: 1 }}>{emoji}</div>
+        : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "clamp(28px,7vw,38px)", height: "clamp(28px,7vw,38px)", margin: "0 auto", borderRadius: 8, background: "var(--color-tint-green)" }}><IC.Leaf c="var(--color-brand-green)" s={18} /></div>
       }
       <div style={{ fontSize: "clamp(8px,2vw,10px)", fontWeight: 500, color: "var(--color-text-primary)", marginTop: 5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "var(--font-body)" }}>{name}</div>
       <div style={{ fontSize: "clamp(9px,2.2vw,11px)", fontWeight: 600, color: "var(--color-brand-green)", marginTop: 2, fontFamily: "var(--font-mono)" }}>{price}</div>
@@ -53,10 +53,10 @@ function Chip({ Icon, label }) {
 /* ─── main ──────────────────────────────────────────────────────────── */
 export default function VegBazarBanner({
   vegetables = [
-    { emoji: "🥕", name: "Carrot",   price: "₹28/kg" },
-    { emoji: "🧅", name: "Onion",    price: "₹22/kg" },
-    { emoji: "🥦", name: "Broccoli", price: "₹45/kg" },
-    { emoji: "🍅", name: "Tomato",   price: "₹18/kg" },
+    { name: "Carrot",   price: "₹28/kg" },
+    { name: "Onion",    price: "₹22/kg" },
+    { name: "Broccoli", price: "₹45/kg" },
+    { name: "Tomato",   price: "₹18/kg" },
   ],
   tags = ["Seasonal", "No Pesticides", "Daily Fresh"],
 }) {
@@ -92,7 +92,7 @@ export default function VegBazarBanner({
           const price  = isBase
             ? v.setPricing?.sets?.price || v.prices?.base || 0
             : v.prices?.weight250g || v.prices?.weight1kg || v.originalPrice || 0;
-          return { image: v.image || null, emoji: "🍃", name: v.name || "Vegetable", price: price ? `₹${price}${isBase ? "/set" : "/250g"}` : "₹0" };
+          return { image: v.image || null, name: v.name || "Vegetable", price: price ? `₹${price}${isBase ? "/set" : "/250g"}` : "₹0" };
         }));
       })
       .catch(() => {});
@@ -128,12 +128,12 @@ export default function VegBazarBanner({
         padding: "8px 18px", borderRadius: 10, border: "none", cursor: "pointer",
         fontSize: "clamp(10px,2.5vw,12px)", fontWeight: 500,
         background: light ? "var(--color-bg-surface)" : "var(--color-brand-green)",
-        color: light ? "var(--color-brand-green)" : "#ffffff",
+        color: light ? "var(--color-brand-green)" : "var(--color-on-brand)",
         fontFamily: "var(--font-body)",
         marginTop: "clamp(10px,2.5vw,18px)",
       }}
     >
-      {children} <IC.Arrow c={light ? "var(--color-brand-green)" : "#ffffff"} s={12} />
+      {children} <IC.Arrow c={light ? "var(--color-brand-green)" : "var(--color-on-brand)"} s={12} />
     </motion.button>
   );
 
@@ -175,7 +175,7 @@ export default function VegBazarBanner({
   /* fluid heading */
   const H = ({ children, color }) => (
     <h2 style={{
-      margin: 0, lineHeight: 1.1, color: color || "#ffffff",
+      margin: 0, lineHeight: 1.1, color: color || "var(--color-on-brand)",
       fontFamily: "var(--font-display)",
       fontSize: "clamp(18px, 4.5vw, 30px)",
       fontWeight: 600,
@@ -185,8 +185,8 @@ export default function VegBazarBanner({
   /* label row */
   const Label = ({ icon: Icon, text, color }) => (
     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "clamp(6px,1.5vw,12px)" }}>
-      <Icon c={color || "#ffffff"} s={11} />
-      <span style={{ color: color || "#ffffff", fontSize: "clamp(8px,2vw,10px)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "var(--font-mono)" }}>
+      <Icon c={color || "var(--color-on-brand)"} s={11} />
+      <span style={{ color: color || "var(--color-on-brand)", fontSize: "clamp(8px,2vw,10px)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "var(--font-mono)" }}>
         {text}
       </span>
     </div>
@@ -229,7 +229,7 @@ export default function VegBazarBanner({
             <LP bg="var(--color-brand-green)">
               <Label icon={IC.Shield} text="Important Notice" color="var(--color-amber)" />
               <H>Service<br /><span style={{ color: "var(--color-amber)" }}>Temporarily Closed</span></H>
-              <p style={{ margin: "clamp(8px,2vw,14px) 0 0", fontSize: "clamp(9px,2.2vw,11px)", color: "rgba(255,255,255,0.85)", lineHeight: 1.6, maxWidth: 250, fontFamily: "var(--font-body)" }}>
+              <p style={{ margin: "clamp(8px,2vw,14px) 0 0", fontSize: "clamp(9px,2.2vw,11px)", color: "color-mix(in srgb, var(--color-on-brand) 85%, transparent)", lineHeight: 1.6, maxWidth: 250, fontFamily: "var(--font-body)" }}>
                 We are currently closed for maintenance. Thank you for your patience. We'll be back soon!
               </p>
               <div style={{ marginTop: "clamp(8px,2vw,12px)", display: "inline-flex", items: "center", gap: 7, padding: "4px 8px", borderRadius: 6, border: "1px solid var(--color-amber)", background: "var(--color-amber-tint)" }}>
@@ -240,7 +240,11 @@ export default function VegBazarBanner({
 
             <RP bg="var(--color-amber-tint)">
               <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
-                <div style={{ fontSize: "clamp(50px,12vw,80px)", marginBottom: 8 }}>🔧</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>
+                  <svg width="clamp(50px,12vw,80px)" height="clamp(50px,12vw,80px)" viewBox="0 0 24 24" fill="none" stroke="var(--color-amber-ink)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                  </svg>
+                </div>
                 <p style={{ fontSize: "clamp(12px,3vw,14px)", color: "var(--color-amber-ink)", fontWeight: 600, fontFamily: "var(--font-display)" }}>
                   Under Maintenance
                 </p>
@@ -259,7 +263,7 @@ export default function VegBazarBanner({
               <H>VegBazar<br /><span style={{ color: "var(--color-amber)" }}>Fresh Challenge</span></H>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: "clamp(8px,2vw,14px)", alignItems: "center" }}>
                 <Pill bg="var(--color-bg-surface)" color="var(--color-brand-green)">5 orders</Pill>
-                <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "clamp(9px,2vw,11px)", fontFamily: "var(--font-mono)" }}>in just</span>
+                <span style={{ color: "color-mix(in srgb, var(--color-on-brand) 70%, transparent)", fontSize: "clamp(9px,2vw,11px)", fontFamily: "var(--font-mono)" }}>in just</span>
                 <Pill bg="var(--color-amber)" color="var(--color-amber-ink)">20 days</Pill>
               </div>
               <Btn onClick={() => navigate("/challenge")} light>Join Now</Btn>
@@ -307,10 +311,10 @@ export default function VegBazarBanner({
           >
             <LP bg="var(--color-brand-green)">
               <Label icon={IC.Pulse} text="Today's Picks" />
-              <H>Farm-fresh<br /><span style={{ color: "rgba(255,255,255,0.9)" }}>every order.</span></H>
+              <H>Farm-fresh<br /><span style={{ color: "color-mix(in srgb, var(--color-on-brand) 90%, transparent)" }}>every order.</span></H>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: "clamp(8px,2vw,12px)" }}>
                 {tags.map(t => (
-                  <span key={t} style={{ fontSize: "clamp(8px,2vw,10px)", fontWeight: 500, padding: "2px 6px", borderRadius: 4, background: "rgba(255,255,255,0.15)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)", fontFamily: "var(--font-mono)" }}>{t}</span>
+                  <span key={t} style={{ fontSize: "clamp(8px,2vw,10px)", fontWeight: 500, padding: "2px 6px", borderRadius: 4, background: "color-mix(in srgb, var(--color-on-brand) 15%, transparent)", color: "var(--color-on-brand)", border: "1px solid color-mix(in srgb, var(--color-on-brand) 20%, transparent)", fontFamily: "var(--font-mono)" }}>{t}</span>
                 ))}
               </div>
               <Btn onClick={() => navigate("/vegetables")} light>Browse Veggies</Btn>

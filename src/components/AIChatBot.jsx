@@ -7,47 +7,17 @@ import {
   ChevronRight,
   RefreshCw,
   ShoppingBag,
-  Package,
-  Wallet,
-  HelpCircle,
+  ShoppingCart,
+  CheckCircle,
 } from "lucide-react";
 import { useOrderContext } from "../Context/OrderContext";
 import { useAuth } from "../Context/AuthContext.jsx";
 
 const INITIAL_SUGGESTIONS = [
-  { label: "🥦 Fresh veggies today?", query: "What fresh vegetables do you recommend today?" },
-  { label: "🧺 Family basket deal?", query: "Recommend a vegetable basket for a family of 4" },
-  { label: "🚚 Delivery hours in Valsad?", query: "How does delivery work and what are the timings?" },
-  { label: "💰 Wallet cashback & offers?", query: "How can I earn cashback using VegBazar wallet?" },
-  { label: "🥗 Low calorie green veggies?", query: "Which vegetables are low calorie and best for weight loss?" },
-];
-
-const BOT_KNOWLEDGE = [
-  {
-    keywords: ["fresh", "today", "recommend", "veggie", "vegetables"],
-    text: "Here are our top recommended fresh vegetables today! Farm-fresh and delivered directly to your doorstep in Valsad:",
-    action: { label: "Browse Vegetables", path: "/vegetables", icon: ShoppingBag },
-  },
-  {
-    keywords: ["basket", "family", "package", "offer", "combo"],
-    text: "Our curated Vegetable Baskets save you up to 25%! We offer daily essential bundles, mini baskets, and mega family baskets.",
-    action: { label: "View Baskets & Offers", path: "/offers", icon: Package },
-  },
-  {
-    keywords: ["delivery", "time", "hours", "valsad", "shipping", "charge"],
-    text: "We deliver across Valsad, Abrama, Tithal Road, and Halar between 7:00 AM - 11:00 AM daily. Orders above ₹269 get FREE Delivery!",
-    action: { label: "Support & Delivery Info", path: "/support", icon: HelpCircle },
-  },
-  {
-    keywords: ["wallet", "cashback", "money", "pay", "discount"],
-    text: "Use VegBazar Wallet for instant 1-click checkout! Top up your wallet to unlock exclusive cashback rewards and instant refunds.",
-    action: { label: "Open My Wallet", path: "/wallet", icon: Wallet },
-  },
-  {
-    keywords: ["calorie", "weight", "diet", "green", "soup", "salad"],
-    text: "Great choices for a healthy diet include Spinach, Broccoli, Cucumber, Lauki (Bottle Gourd), and Capsicum. High in fiber & low in calories!",
-    action: { label: "Shop Healthy Greens", path: "/vegetables", icon: ShoppingBag },
-  },
+  { label: "Healthy diabetic recipe?", query: "Suggest a healthy recipe for a diabetic person with ingredients in stock" },
+  { label: "Fresh green veggies?", query: "What fresh green vegetables do you recommend today?" },
+  { label: "Quick dinner meal?", query: "Suggest a quick 15-minute healthy dinner using fresh vegetables" },
+  { label: "Wallet & cashback?", query: "How can I earn cashback using VegBazar wallet?" },
 ];
 
 const AIChatBot = () => {
@@ -88,7 +58,7 @@ const AIChatBot = () => {
     {
       id: 1,
       sender: "bot",
-      text: "Hello! 👋 I'm **VeggieBot**, your fresh assistant. How can I help you shop for quality vegetables today?",
+      text: "Hello! I'm **VegBazar AI Assistant**. Describe your health goal or cooking idea, and I will recommend recipes, manage your cart, or help place an order!",
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -107,25 +77,10 @@ const AIChatBot = () => {
     }
   }, [messages, isOpen]);
 
-  const getBotResponse = (userText) => {
-    const lower = userText.toLowerCase();
-
-    for (const item of BOT_KNOWLEDGE) {
-      if (item.keywords.some((kw) => lower.includes(kw))) {
-        return { text: item.text, action: item.action };
-      }
-    }
-
-    return {
-      text: "Thanks for asking! I can help you find fresh vegetables, basket deals, delivery schedules in Valsad, and wallet cashback offers.",
-      action: { label: "Browse Catalog", path: "/vegetables", icon: ShoppingBag },
-    };
-  };
-
   const handleSend = useCallback(
-    (textToSend) => {
+    async (textToSend) => {
       const queryText = textToSend || inputMessage;
-      if (!queryText.trim()) return;
+      if (!queryText.trim() || isTyping) return;
 
       const userMsg = {
         id: Date.now(),
@@ -134,30 +89,172 @@ const AIChatBot = () => {
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
-      setMessages((prev) => [...prev, userMsg]);
+      const updatedMessages = [...messages, userMsg];
+      setMessages(updatedMessages);
       setInputMessage("");
       setIsTyping(true);
 
-      setTimeout(() => {
-        const reply = getBotResponse(queryText);
+      try {
+        const payloadMessages = updatedMessages.map((m) => ({
+          role: m.sender === "user" ? "user" : "assistant",
+          content: m.text,
+        }));
+
+        let token = localStorage.getItem("accessToken");
+        const headers = { "Content-Type": "application/json" };
+        if (token) {
+          headers["Authorization"] = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+        }
+
+        let response = await fetch("/api/ai/chat", {
+          method: "POST",
+          headers,
+          credentials: "include",
+          body: JSON.stringify({ messages: payloadMessages }),
+        });
+
+        // If 401 (token expired), attempt auto refresh once
+        if (response.status === 401) {
+          try {
+            const refreshRes = await fetch("/api/auth/refresh-token", {
+              method: "POST",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+            });
+            const refreshData = await refreshRes.json();
+
+            if (refreshRes.ok && refreshData.data?.accessToken) {
+              token = refreshData.data.accessToken;
+              localStorage.setItem("accessToken", token);
+              headers["Authorization"] = `Bearer ${token}`;
+
+              // Retry AI request with fresh token
+              response = await fetch("/api/ai/chat", {
+                method: "POST",
+                headers,
+                credentials: "include",
+                body: JSON.stringify({ messages: payloadMessages }),
+              });
+            }
+          } catch (refreshErr) {
+            console.error("Auto token refresh failed:", refreshErr);
+          }
+        }
+
+        const data = await response.json();
+
+        if (response.status === 401) {
+          throw new Error("Please log in to chat with VegBazar AI Assistant.");
+        }
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to communicate with AI endpoint.");
+        }
+
         const botMsg = {
           id: Date.now() + 1,
           sender: "bot",
-          text: reply.text,
-          action: reply.action,
+          text: data.reply || "Here is what I found for you:",
+          actions: data.actions || [],
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };
+
         setMessages((prev) => [...prev, botMsg]);
+      } catch (error) {
+        console.error("AI Assistant API error:", error);
+        const errorMsg = {
+          id: Date.now() + 1,
+          sender: "bot",
+          text: error.message || "Sorry, I couldn't reach the AI assistant. Please try again.",
+          isError: true,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
+        setMessages((prev) => [...prev, errorMsg]);
+      } finally {
         setIsTyping(false);
-      }, 700);
+      }
     },
-    [inputMessage]
+    [inputMessage, messages, isTyping]
   );
 
   const handleActionClick = (path) => {
     setIsOpen(false);
     window.scrollTo({ top: 0, behavior: "instant" });
     navigate(path);
+  };
+
+  const renderActions = (actions) => {
+    if (!Array.isArray(actions) || actions.length === 0) return null;
+
+    return actions.map((action, idx) => {
+      if (action.type === "products" && Array.isArray(action.items)) {
+        return (
+          <div key={idx} className="mt-2.5 p-2 bg-[var(--color-bg-app)] border border-[var(--color-border)] rounded-[8px]">
+            <div className="text-[11px] font-semibold text-[var(--color-brand-green)] flex items-center gap-1 mb-1.5 uppercase tracking-wider">
+              <ShoppingBag className="w-3.5 h-3.5" /> Recommended Vegetables
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {action.items.map((prod, pIdx) => (
+                <div key={pIdx} className="bg-[var(--color-bg-surface)] p-2 rounded-[6px] border border-[var(--color-border)] text-left">
+                  <p className="font-semibold text-[11px] text-[var(--color-text-primary)] truncate">{prod.name}</p>
+                  <p className="text-[11px] font-bold text-[var(--color-brand-green)]">₹{prod.price}/{prod.unit || "kg"}</p>
+                  <p className="text-[9px] text-[var(--color-text-muted)]">Stock: {prod.stock}kg</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      if (action.type === "cart" && action.cart) {
+        const { items = [], total = 0, deliveryCharges = 0 } = action.cart;
+        return (
+          <div key={idx} className="mt-2.5 p-2.5 bg-[var(--color-bg-app)] border border-[var(--color-border)] rounded-[8px] text-left">
+            <div className="text-[11px] font-semibold text-[var(--color-brand-green)] flex items-center gap-1 mb-1.5 uppercase tracking-wider">
+              <ShoppingCart className="w-3.5 h-3.5" /> Updated Cart
+            </div>
+            {items.map((item, iIdx) => (
+              <div key={iIdx} className="flex justify-between items-center text-[11px] py-0.5 border-b border-dashed border-[var(--color-border)]">
+                <span>{item.name} ({item.weight || "1kg"}) × {item.quantity}</span>
+                <span className="font-semibold">₹{item.totalPrice}</span>
+              </div>
+            ))}
+            <div className="flex justify-between items-center text-[11px] font-bold text-[var(--color-brand-green)] mt-1.5 pt-1">
+              <span>Delivery: ₹{deliveryCharges}</span>
+              <span>Total: ₹{total}</span>
+            </div>
+            <button
+              onClick={() => handleActionClick("/cart")}
+              className="mt-2 w-full flex items-center justify-center gap-1 py-1 bg-[var(--color-brand-green)] text-white text-[11px] font-medium rounded-[6px]"
+            >
+              View Full Cart <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        );
+      }
+
+      if (action.type === "order_confirmation" && action.order) {
+        const { orderId, totalAmount, paymentMethod, deliveryEstimate } = action.order;
+        return (
+          <div key={idx} className="mt-2.5 p-2.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700 rounded-[8px] text-left text-emerald-900 dark:text-emerald-200">
+            <div className="text-[11px] font-bold flex items-center gap-1 mb-1 text-emerald-700 dark:text-emerald-400">
+              <CheckCircle className="w-4 h-4 text-emerald-600" /> Order Placed!
+            </div>
+            <p className="text-[11px]">ID: <strong>{orderId}</strong></p>
+            <p className="text-[11px]">Amount: <strong>₹{totalAmount}</strong> ({paymentMethod})</p>
+            <p className="text-[11px]">Delivery: <strong>{deliveryEstimate}</strong></p>
+            <button
+              onClick={() => handleActionClick("/orders")}
+              className="mt-2 w-full py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-medium rounded-[6px]"
+            >
+              Track Order Status
+            </button>
+          </div>
+        );
+      }
+
+      return null;
+    });
   };
 
   return (
@@ -207,19 +304,18 @@ const AIChatBot = () => {
 
       {/* Chat Drawer / Modal */}
       {isOpen && (
-        <div className="fixed bottom-36 md:bottom-24 right-4 md:right-6 z-40 w-[calc(100vw-32px)] sm:w-96 h-[480px] max-h-[75vh] bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[12px] shadow-xl flex flex-col overflow-hidden transition-colors duration-150">
+        <div className="fixed bottom-36 md:bottom-24 right-4 md:right-6 z-40 w-[calc(100vw-32px)] sm:w-[480px] md:w-[520px] h-[620px] max-h-[85vh] bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-[16px] shadow-2xl flex flex-col overflow-hidden transition-all duration-200">
           {/* Header */}
           <div className="bg-[var(--color-brand-green)] p-3.5 text-white flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="relative w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                 <Bot className="w-4 h-4 text-white" />
-                <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-400 rounded-full" />
               </div>
               <div>
                 <h3 className="font-display font-semibold text-sm flex items-center gap-1">
-                  VeggieBot
+                  VegBazar AI Assistant
                 </h3>
-                <p className="text-[10px] text-white/80 font-body">Always active to assist you</p>
+                <p className="text-[10px] text-white/80 font-body">Real-time product & order assistance</p>
               </div>
             </div>
             <button
@@ -252,27 +348,18 @@ const AIChatBot = () => {
                 className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}
               >
                 <div
-                  className={`max-w-[82%] px-3.5 py-2.5 rounded-[12px] text-xs leading-relaxed ${
+                  className={`max-w-[85%] px-4 py-3 rounded-[14px] text-xs sm:text-sm leading-relaxed ${
                     msg.sender === "user"
                       ? "bg-[var(--color-brand-green)] text-white rounded-br-none"
+                      : msg.isError
+                      ? "bg-red-50 text-red-700 border border-red-200 rounded-bl-none"
                       : "bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] border border-[var(--color-border)] rounded-bl-none"
                   }`}
                 >
                   <p>{msg.text}</p>
 
-                  {/* Action Link inside Bot Message */}
-                  {msg.action && (
-                    <button
-                      onClick={() => handleActionClick(msg.action.path)}
-                      className="mt-2 w-full flex items-center justify-between px-3 py-1.5 bg-[var(--color-tint-green)] hover:bg-[var(--color-brand-green)] hover:text-white text-[var(--color-brand-green)] rounded-[6px] text-[11px] font-medium border border-[var(--color-border)] transition-colors"
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <msg.action.icon className="w-3.5 h-3.5" />
-                        {msg.action.label}
-                      </span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+                  {/* Render structured action cards */}
+                  {msg.actions && renderActions(msg.actions)}
                 </div>
                 <span className="text-[9px] text-[var(--color-text-muted)] font-mono mt-1 px-1">
                   {msg.time}
@@ -283,7 +370,7 @@ const AIChatBot = () => {
             {isTyping && (
               <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] p-2 font-body">
                 <RefreshCw className="w-3.5 h-3.5 animate-spin text-[var(--color-brand-green)]" />
-                <span>VeggieBot is thinking...</span>
+                <span>VegBazar AI is searching catalog & thinking...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -301,12 +388,12 @@ const AIChatBot = () => {
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask VeggieBot anything..."
+              placeholder="Ask recipes, products, or order items..."
               className="flex-1 px-3 py-2 bg-[var(--color-bg-app)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-xs rounded-[8px] focus:outline-none focus:border-[var(--color-brand-green)] font-body"
             />
             <button
               type="submit"
-              disabled={!inputMessage.trim()}
+              disabled={!inputMessage.trim() || isTyping}
               className="p-2 rounded-[8px] bg-[var(--color-brand-green)] hover:bg-[var(--color-brand-green-hover)] text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               aria-label="Send Message"
             >
