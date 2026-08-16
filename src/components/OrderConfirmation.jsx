@@ -110,7 +110,7 @@ const OrderConfirmation = () => {
       return {
         orderId,
         orderType: "custom",
-        customerInfo: { name: user?.username || "", email: user?.email || "", mobile: user?.phone || "" } || {},
+        customerInfo: { name: user?.username || "", email: user?.email || "", mobile: user?.phone || "" },
         selectedVegetables: items.map((item) => ({
           vegetable: item.id || item.vegetableId,
           name: item.name,
