@@ -11,19 +11,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  packages: write
-
 env:
   NODE_VERSION: "20"
 
 jobs:
   # ─────────────────────────────────────────────────────────────
-  # JOB 1 — Test, Lint, Build & Push Docker Image
+  # JOB 1 — Test, Lint & Verify Build
   # ─────────────────────────────────────────────────────────────
   ci:
-    name: Build & Verify
+    name: Test & Verify Build
     runs-on: ubuntu-latest
 
     steps:
@@ -45,27 +41,11 @@ jobs:
       - name: Build production bundle (Verification)
         run: npm run build
 
-      - name: Log in to GitHub Container Registry
-        if: github.ref == 'refs/heads/main'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and Push Docker Image (React Code + Dist + Nginx)
-        if: github.ref == 'refs/heads/main'
-        run: |
-          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/vegbazar-frontend:latest" | tr '[:upper:]' '[:lower:]')
-          docker build -t "$IMAGE_NAME" .
-          docker push "$IMAGE_NAME"
-
-      - name: Build Docker Image (Verify PR build)
-        if: github.ref != 'refs/heads/main'
+      - name: Build Docker Image (Verify build)
         run: docker build -t vegbazar-frontend:ci .
 
   # ─────────────────────────────────────────────────────────────
-  # JOB 2 — Pull & Deploy on Production VPS
+  # JOB 2 — Deploy to Production VPS (Git Clone & Build on Server)
   # ─────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to Production VPS
@@ -83,29 +63,41 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
-      - name: Pull and Run Container on VPS over SSH
+      - name: Git Pull / Clone & Build on VPS over SSH
         env:
           RAW_HOST: ${{ secrets.VPS_HOST }}
           RAW_USER: ${{ secrets.VPS_USERNAME }}
-          GH_ACTOR: ${{ github.actor }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RAW_TARGET: ${{ secrets.VPS_FRONTEND_TARGET_DIR || secrets.VPS_TARGET_DIR }}
+          REPO_URL: "https://github.com/${{ github.repository }}.git"
         run: |
           # Sanitize inputs (strip trailing spaces, newlines, and http(s):// prefixes)
           HOST=$(echo "$RAW_HOST" | tr -d '\r\n\t ' | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||')
           USER=$(echo "$RAW_USER" | tr -d '\r\n\t ')
-          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/vegbazar-frontend:latest" | tr '[:upper:]' '[:lower:]')
+          TARGET=$(echo "$RAW_TARGET" | tr -d '\r\n\t ')
 
-          echo "Deploying $IMAGE_NAME to $USER@$HOST ..."
+          echo "Deploying frontend to $USER@$HOST:$TARGET ..."
 
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" bash -s << EOF
             set -e
 
-            if command -v docker >/dev/null 2>&1; then
-              echo "=== Step 1: Login to GitHub Container Registry ==="
-              echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
+            # Ensure target directory exists
+            mkdir -p "$TARGET"
+            cd "$TARGET"
 
-              echo "=== Step 2: Pull Latest Frontend Image ==="
-              docker pull "$IMAGE_NAME"
+            # Step 1: Git Clone or Fetch/Reset on server
+            if [ -d ".git" ]; then
+              echo "=== Step 1: Fetch & Reset to latest origin/main ==="
+              git fetch origin main
+              git reset --hard origin/main
+            else
+              echo "=== Step 1: Clone repository ==="
+              git clone "$REPO_URL" .
+            fi
+
+            # Step 2: Build Docker Image on Server
+            if command -v docker >/dev/null 2>&1; then
+              echo "=== Step 2: Build Docker Image on Server ==="
+              docker build -t vegbazar-frontend:latest .
 
               echo "=== Step 3: Run Frontend Container on Port 8085 ==="
               docker stop vegbazar-frontend 2>/dev/null || true
@@ -116,7 +108,7 @@ jobs:
                 --name vegbazar-frontend \
                 --restart unless-stopped \
                 -p \${PORT}:80 \
-                "$IMAGE_NAME"
+                vegbazar-frontend:latest
 
               docker image prune -f
 
