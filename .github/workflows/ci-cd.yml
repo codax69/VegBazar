@@ -11,12 +11,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   NODE_VERSION: "20"
 
 jobs:
   # ─────────────────────────────────────────────────────────────
-  # JOB 1 — Test, Lint & Build
+  # JOB 1 — Test, Lint, Build & Push Docker Image
   # ─────────────────────────────────────────────────────────────
   ci:
     name: Build & Verify
@@ -38,24 +42,30 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-      - name: Build production bundle
+      - name: Build production bundle (Verification)
         run: npm run build
 
-      - name: Build Docker Image (Verify build)
-        run: docker build -f Dockerfile.dist -t vegbazar-frontend:ci .
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Log in to GitHub Container Registry
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
         with:
-          name: dist-${{ github.sha }}
-          path: |
-            dist
-            Dockerfile.dist
-            nginx.conf
-          retention-days: 7
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image (React Code + Dist + Nginx)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/vegbazar-frontend:latest" | tr '[:upper:]' '[:lower:]')
+          docker build -t "$IMAGE_NAME" .
+          docker push "$IMAGE_NAME"
+
+      - name: Build Docker Image (Verify PR build)
+        if: github.ref != 'refs/heads/main'
+        run: docker build -t vegbazar-frontend:ci .
 
   # ─────────────────────────────────────────────────────────────
-  # JOB 2 — Deploy to Production VPS
+  # JOB 2 — Pull & Deploy on Production VPS
   # ─────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to Production VPS
@@ -68,59 +78,53 @@ jobs:
       url: https://vegbazar.pritesh.site
 
     steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-${{ github.sha }}
-          path: deploy-pkg/
-
       - name: Setup SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
-      - name: Deploy to VPS over SSH
+      - name: Pull and Run Container on VPS over SSH
         env:
           RAW_HOST: ${{ secrets.VPS_HOST }}
           RAW_USER: ${{ secrets.VPS_USERNAME }}
-          RAW_TARGET: ${{ secrets.VPS_TARGET_DIR }}
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Sanitize inputs (strip trailing spaces, newlines, and http(s):// prefixes)
           HOST=$(echo "$RAW_HOST" | tr -d '\r\n\t ' | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||')
           USER=$(echo "$RAW_USER" | tr -d '\r\n\t ')
-          TARGET=$(echo "$RAW_TARGET" | tr -d '\r\n\t ')
+          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/vegbazar-frontend:latest" | tr '[:upper:]' '[:lower:]')
 
-          echo "Deploying to $USER@$HOST:$TARGET ..."
+          echo "Deploying $IMAGE_NAME to $USER@$HOST ..."
 
-          # Sync dist and container files to VPS
-          rsync -avz --delete \
-            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
-            deploy-pkg/ "$USER@$HOST:$TARGET"
-
-          # Deploy container or reload native nginx / PM2
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" bash -s << EOF
             set -e
-            cd "$TARGET"
 
             if command -v docker >/dev/null 2>&1; then
-              echo "=== Stage 1: Build Frontend Docker Image ==="
-              docker build -f Dockerfile.dist -t vegbazar-frontend:latest .
+              echo "=== Step 1: Login to GitHub Container Registry ==="
+              echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
 
-              echo "=== Stage 2: Run Frontend Docker Container ==="
+              echo "=== Step 2: Pull Latest Frontend Image ==="
+              docker pull "$IMAGE_NAME"
+
+              echo "=== Step 3: Run Frontend Container on Port 8085 ==="
               docker stop vegbazar-frontend 2>/dev/null || true
               docker rm vegbazar-frontend 2>/dev/null || true
+
               PORT=\${FRONTEND_PORT:-8085}
-              docker run -d --name vegbazar-frontend --restart unless-stopped -p \${PORT}:80 vegbazar-frontend:latest
+              docker run -d \
+                --name vegbazar-frontend \
+                --restart unless-stopped \
+                -p \${PORT}:80 \
+                "$IMAGE_NAME"
+
               docker image prune -f
-              echo "=== Frontend Container Status ==="
+
+              echo "=== Step 4: Verify Container Status ==="
               docker ps --filter "name=vegbazar-frontend"
-            elif command -v pm2 >/dev/null 2>&1; then
-              echo "=== Stage: Run Frontend via PM2 ==="
-              pm2 delete vegbazar-frontend 2>/dev/null || true
-              pm2 serve dist 3000 --spa --name vegbazar-frontend
-              pm2 save
-              echo "=== PM2 Process Status ==="
-              pm2 list
+            else
+              echo "ERROR: Docker not installed on server!"
+              exit 1
             fi
 
             sudo systemctl reload nginx 2>/dev/null || true
