@@ -65,7 +65,7 @@ jobs:
 
     environment:
       name: production
-      url: https://vegbazar.store
+      url: https://vegbazar.pritesh.site
 
     steps:
       - name: Download build artifact
@@ -109,7 +109,7 @@ jobs:
               echo "=== Stage 2: Run Frontend Docker Container ==="
               docker stop vegbazar-frontend 2>/dev/null || true
               docker rm vegbazar-frontend 2>/dev/null || true
-              PORT=\${FRONTEND_PORT:-8080}
+              PORT=\${FRONTEND_PORT:-8085}
               docker run -d --name vegbazar-frontend --restart unless-stopped -p \${PORT}:80 vegbazar-frontend:latest
               docker image prune -f
               echo "=== Frontend Container Status ==="
