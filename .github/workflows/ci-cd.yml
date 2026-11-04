@@ -41,6 +41,9 @@ jobs:
       - name: Build production bundle
         run: npm run build
 
+      - name: Build Docker Image (Verify build)
+        run: docker build -f Dockerfile.dist -t vegbazar-frontend:ci .
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -94,17 +97,31 @@ jobs:
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             deploy-pkg/ "$USER@$HOST:$TARGET"
 
-          # Deploy container or reload native nginx
+          # Deploy container or reload native nginx / PM2
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" bash -s << EOF
             set -e
             cd "$TARGET"
+
             if command -v docker >/dev/null 2>&1; then
-              echo "Building & running lightweight frontend container..."
+              echo "=== Stage 1: Build Frontend Docker Image ==="
               docker build -f Dockerfile.dist -t vegbazar-frontend:latest .
+
+              echo "=== Stage 2: Run Frontend Docker Container ==="
               docker stop vegbazar-frontend 2>/dev/null || true
               docker rm vegbazar-frontend 2>/dev/null || true
-              docker run -d --name vegbazar-frontend --restart unless-stopped -p 80:80 vegbazar-frontend:latest || true
+              PORT=\${FRONTEND_PORT:-8080}
+              docker run -d --name vegbazar-frontend --restart unless-stopped -p \${PORT}:80 vegbazar-frontend:latest
               docker image prune -f
+              echo "=== Frontend Container Status ==="
+              docker ps --filter "name=vegbazar-frontend"
+            elif command -v pm2 >/dev/null 2>&1; then
+              echo "=== Stage: Run Frontend via PM2 ==="
+              pm2 delete vegbazar-frontend 2>/dev/null || true
+              pm2 serve dist 3000 --spa --name vegbazar-frontend
+              pm2 save
+              echo "=== PM2 Process Status ==="
+              pm2 list
             fi
+
             sudo systemctl reload nginx 2>/dev/null || true
           EOF
