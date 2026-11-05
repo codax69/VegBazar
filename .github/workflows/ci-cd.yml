@@ -81,7 +81,7 @@ jobs:
             set -e
 
             # Ensure target directory exists
-            mkdir -p "$TARGET"
+            sudo mkdir -p "$TARGET"
             cd "$TARGET"
 
             # Step 1: Git Clone or Fetch/Reset on server
