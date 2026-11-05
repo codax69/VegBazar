@@ -80,19 +80,28 @@ jobs:
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" bash -s << EOF
             set -e
 
-            # Ensure target directory exists
+            # Ensure target directory exists and is owned by SSH user
             sudo mkdir -p "$TARGET"
+            sudo chown -R "$USER:$USER" "$TARGET"
+            sudo chmod -R u+rwX "$TARGET"
             cd "$TARGET"
 
-            # Step 1: Git Clone or Fetch/Reset on server
-            if [ -d ".git" ]; then
-              echo "=== Step 1: Fetch & Reset to latest origin/main ==="
-              git fetch origin main
-              git reset --hard origin/main
+            git config --global --add safe.directory "$TARGET" 2>/dev/null || true
+
+            # Step 1: Git Init / Clone / Reset
+            if [ ! -d ".git" ]; then
+              echo "=== Step 1: Initializing git repository ==="
+              git init
+              git remote add origin "$REPO_URL" || git remote set-url origin "$REPO_URL"
             else
-              echo "=== Step 1: Clone repository ==="
-              git clone "$REPO_URL" .
+              echo "=== Step 1: Updating git remote ==="
+              git remote set-url origin "$REPO_URL"
             fi
+
+            echo "=== Fetching and syncing to latest origin/main ==="
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
 
             # Step 2: Build Docker Image on Server
             if command -v docker >/dev/null 2>&1; then
