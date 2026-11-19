@@ -29,7 +29,12 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - name: Verify production Docker image
-        run: docker build --tag vegbazar-frontend:ci .
+        run: |
+          docker build --tag vegbazar-frontend:ci .
+          docker run --rm -d --name fe-ci-check -p 8085:80 vegbazar-frontend:ci
+          sleep 2
+          curl --fail --retry 5 --retry-delay 2 http://127.0.0.1:8085/healthz
+          docker kill fe-ci-check
 
   publish-and-deploy:
     name: Publish and deploy frontend
@@ -61,9 +66,12 @@ jobs:
             ghcr.io/codax69/vegbazar-frontend:latest
           build-args: |
             VITE_RAZORPAY_KEY_ID=${{ vars.VITE_RAZORPAY_KEY_ID }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Deploy exact image tag to VPS
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
           VPS_USER: ${{ secrets.VPS_USER || secrets.VPS_USERNAME }}
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
           VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
@@ -95,11 +103,23 @@ jobs:
           if [ -n "$VPS_KNOWN_HOSTS" ]; then
             printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           else
-            ssh-keyscan -H -T 10 "$VPS_HOST" >> "$HOME/.ssh/known_hosts"
+            ssh-keyscan -p "${VPS_PORT:-22}" -H -T 10 "$VPS_HOST" >> "$HOME/.ssh/known_hosts"
+          fi
+          if [ ! -s "$HOME/.ssh/known_hosts" ]; then
+            echo "::error::Could not obtain VPS host key via ssh-keyscan and VPS_KNOWN_HOSTS is not provided."
+            exit 1
           fi
           chmod 600 "$HOME/.ssh/known_hosts"
           ssh_options=(
             -i "$key_file"
+            -p "${VPS_PORT:-22}"
+            -o IdentitiesOnly=yes
+            -o BatchMode=yes
+            -o StrictHostKeyChecking=yes
+          )
+          scp_options=(
+            -i "$key_file"
+            -P "${VPS_PORT:-22}"
             -o IdentitiesOnly=yes
             -o BatchMode=yes
             -o StrictHostKeyChecking=yes
@@ -107,7 +127,7 @@ jobs:
           destination="$VPS_USER@$VPS_HOST"
           ssh "${ssh_options[@]}" "$destination" \
             "test -d /opt/apps/vegbazar || { echo 'Missing /opt/apps/vegbazar; run the documented VPS setup first.' >&2; exit 1; }; test -w /opt/apps/vegbazar || { echo 'The SSH user cannot write /opt/apps/vegbazar.' >&2; exit 1; }"
-          scp "${ssh_options[@]}" docker-compose.yml deploy.sh \
+          scp "${scp_options[@]}" docker-compose.yml deploy.sh \
             "$destination:/opt/apps/vegbazar/"
           ssh "${ssh_options[@]}" "$destination" \
             "chmod 750 /opt/apps/vegbazar/deploy.sh && bash /opt/apps/vegbazar/deploy.sh deploy frontend $GITHUB_SHA"

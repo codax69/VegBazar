@@ -138,6 +138,8 @@ deploy_component() {
   cp "$RELEASE_FILE" "$backup"
   write_release_tag "$RELEASE_FILE" "$TAG_KEY" "$new_tag"
 
+  mkdir -p "$APP_DIR/data/invoices" "$APP_DIR/data/uploads" "$APP_DIR/data/reports"
+
   echo "Pulling $SERVICE image for commit $new_tag."
   if ! validate_release ||
     ! compose pull "$SERVICE" ||
@@ -185,6 +187,10 @@ rollback_component() {
   current_tag="$(read_release_value "$TAG_KEY")"
   if [[ "$previous_tag" == "$current_tag" ]]; then
     echo "No earlier $COMPONENT image tag is available for rollback." >&2
+    return 1
+  fi
+  if [[ "$previous_tag" == "0000000000000000000000000000000000000000" ]]; then
+    echo "Previous $COMPONENT release tag is initial placeholder; cannot rollback." >&2
     return 1
   fi
 
