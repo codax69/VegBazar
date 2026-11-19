@@ -51,16 +51,16 @@ sudo install -d -o 1000 -g 1000 -m 0750 \
   /opt/apps/vegbazar/data/reports
 ```
 
-Copy only the Compose file, deployment script, and Nginx template from the frontend repository. Do not copy application source or Docker build dependencies:
+The workflows automatically copy the current Compose file and deployment script from the frontend repository to this directory before each deployment. The backend workflow checks out only those two deployment files; if the frontend repository is private, add a fine-grained `DEPLOYMENT_REPO_TOKEN` secret to the backend repository with read-only Contents access to `codax69/VegBazar`. Do not copy application source or Docker build dependencies to the VPS.
+
+Install the Nginx template manually:
 
 ```bash
 # Run locally from the VegBazar frontend repository.
-scp docker-compose.yml deploy.sh "$VPS_USER@$VPS_HOST:/opt/apps/vegbazar/"
 scp deploy/nginx/vegbazar.conf "$VPS_USER@$VPS_HOST:/tmp/vegbazar.conf"
 
 # Run on the VPS.
 chmod 750 /opt/apps/vegbazar
-chmod 750 /opt/apps/vegbazar/deploy.sh
 sudo install -m 0644 /tmp/vegbazar.conf /etc/nginx/sites-available/vegbazar.conf
 sudo ln -s /etc/nginx/sites-available/vegbazar.conf /etc/nginx/sites-enabled/vegbazar.conf
 sudo nginx -t
@@ -96,6 +96,8 @@ Add these **repository secrets to both repositories**, because each has its own 
 | `VPS_SSH_KEY` | Private SSH key authorized for that account                  |
 
 The workflow enforces SSH host-key checking. `VPS_KNOWN_HOSTS` is an optional additional secret containing the independently verified host key entry (recommended); if it is absent, the workflow uses `ssh-keyscan` for that run. Never disable host-key checking.
+
+The backend workflow also checks out the two deployment files from the frontend repository. If that repository is private, add `DEPLOYMENT_REPO_TOKEN` to the backend repository as a fine-grained token with read-only Contents access to `codax69/VegBazar`.
 
 The frontend build reads the existing `VITE_RAZORPAY_KEY_ID` Vite variable. If live payments are configured, set it as a GitHub repository **variable** named `VITE_RAZORPAY_KEY_ID`; otherwise the existing application fallback remains in effect. This is a publishable key identifier, not the Razorpay secret.
 
@@ -237,3 +239,4 @@ The script serializes the operation, pulls the previous pinned image, waits for 
 - **HTTPS issuance fails:** verify both DNS records resolve to the VPS and ports 80/443 are reachable before running Certbot.
 - **Uploads or generated files fail with permissions errors:** check that `data/invoices`, `data/uploads`, and `data/reports` are writable by UID/GID 1000; do not solve this by running the backend as root.
 - **Workflow cannot SSH:** verify the three GitHub secrets, authorized public key, host-key fingerprint, and that the deployment user can run Docker and access `/opt/apps/vegbazar`.
+- **SSH prints a post-quantum key-exchange warning:** this is informational and does not itself fail deployment; update the VPS OpenSSH server when a compatible update is available.
