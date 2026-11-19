@@ -27,7 +27,7 @@
 | JavaScript (ES6+) | Core language |
 | HTML5 & CSS3 | Markup & styling |
 | [ESLint](https://eslint.org/) | Code linting |
-| [Netlify](https://www.netlify.com/) | Deployment & hosting |
+| Docker, Docker Compose, GitHub Actions, GHCR, Nginx | Production deployment |
 
 ---
 
@@ -99,12 +99,7 @@ Make sure you have the following installed:
 
 ## 🌐 Deployment
 
-This project is configured for deployment on **Netlify** using `netlify.toml`.
-
-To deploy manually:
-
-1. Run `npm run build` to generate the `dist/` folder
-2. Upload the `dist/` folder to Netlify, **or** connect your GitHub repo to Netlify for automatic deployments on every push to `main`
+Production deployment uses separate frontend and backend images in GHCR, deployed to an Ubuntu VPS with Docker Compose and host-level Nginx. Each repository has its own CI/CD workflow. See [DEPLOYMENT.md](./DEPLOYMENT.md) for VPS setup, secrets, environment variables, HTTPS, health checks, and rollback instructions.
 
 ---
 

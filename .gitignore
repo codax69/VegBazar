@@ -12,7 +12,12 @@ dist
 dist-ssr
 *.local
 .env
-vite.config.js
+.env.*
+!.env.example
+/.previous-release.env
+/.deploy.lock
+/data/
+release.env
 
 # Editor directories and files
 .vscode/*
@@ -24,3 +29,6 @@ vite.config.js
 *.njsproj
 *.sln
 *.sw?
+
+# GSD (Get Shit Done)
+.gsd/
