@@ -6,10 +6,10 @@ The frontend (`codax69/VegBazar`) and backend (`codax69/VegBazar_Backend`) are s
 
 The Ubuntu host runs Nginx and Docker Compose. Compose runs only the static frontend and Node.js API. Host Nginx routes `vegbazar.store` to the frontend, forwards its existing relative `/api/*` requests to the backend, and routes `api.vegbazar.pritesh.site` directly to the backend. The backend connects to the configured MongoDB service (the supplied example uses Atlas); there is no MongoDB container.
 
-| Service | Image | Container port | VPS binding |
-|---|---|---:|---|
-| Frontend | `ghcr.io/codax69/vegbazar-frontend:<commit-sha>` | 80 | `127.0.0.1:8085` |
-| Backend | `ghcr.io/codax69/vegbazar-backend:<commit-sha>` | 4000 | `127.0.0.1:4041` |
+| Service  | Image                                            | Container port | VPS binding      |
+| -------- | ------------------------------------------------ | -------------: | ---------------- |
+| Frontend | `ghcr.io/codax69/vegbazar-frontend:<commit-sha>` |             80 | `127.0.0.1:8085` |
+| Backend  | `ghcr.io/codax69/vegbazar-backend:<commit-sha>`  |           4000 | `127.0.0.1:4041` |
 
 `latest` is published for convenience, but Compose deploys the explicit full commit SHA from `release.env`.
 
@@ -89,11 +89,11 @@ The Docker credential file is sensitive and should remain readable only by the d
 
 Add these **repository secrets to both repositories**, because each has its own deploy workflow:
 
-| Secret | Value |
-|---|---|
-| `VPS_HOST` | VPS hostname or IP address (not a URL) |
-| `VPS_USER` | Non-root SSH deployment account |
-| `VPS_SSH_KEY` | Private SSH key authorized for that account |
+| Secret        | Value                                                        |
+| ------------- | ------------------------------------------------------------ |
+| `VPS_HOST`    | VPS hostname or IP address (not a URL)                       |
+| `VPS_USER`    | Non-root SSH account; legacy `VPS_USERNAME` is also accepted |
+| `VPS_SSH_KEY` | Private SSH key authorized for that account                  |
 
 The workflow enforces SSH host-key checking. `VPS_KNOWN_HOSTS` is an optional additional secret containing the independently verified host key entry (recommended); if it is absent, the workflow uses `ssh-keyscan` for that run. Never disable host-key checking.
 
@@ -112,22 +112,22 @@ sudo -u vegbazar-deploy editor /opt/apps/vegbazar/.env
 
 Set values from the actual backend integrations; do not copy credentials into this document or source control. The backend reads these variable names:
 
-| Variable(s) | Use |
-|---|---|
-| `DB_URI` | Required MongoDB connection string; use the existing Atlas URI if that is the configured database |
-| `DB_NAME` | Optional database-name override |
-| `JWT_SECRET`, `JWT_REFRESH_SECRET` | Authentication signing secrets |
-| `FRONTEND_URL` | Frontend origin used in email/reset links; set to `https://vegbazar.store` |
-| `RAZORPAY_KEY_ID`, `RAZORPAY_SECRET` | Razorpay integration |
-| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Cloudinary integration |
-| `EMAIL_USER`, `EMAIL_PASS`, `ADMIN_EMAIL` | Email and administrative notifications |
-| `SMTP_HOST`, `SMTP_PORT` | SMTP settings; code has a host/port fallback |
-| `MAILER_MAIL`, `MAILER_PASSWORD` | OTP mailer integration |
-| `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `GOOGLE_CLIENT_ID` | Existing Auth0/Google authentication configuration |
-| `GROQ_API_KEY`, `GROQ_MODEL` | AI assistant; the model has an application fallback |
-| `RECAPTCHA_SECRET_KEY` | CAPTCHA verification |
-| `REDIS_URL` | Optional Redis integration |
-| `USER_DOMAIN`, `ADMIN_DOMAIN`, `ADMIN_SECRET_KEY` | Existing account-domain/admin options; the domains have application fallbacks |
+| Variable(s)                                                            | Use                                                                                               |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `DB_URI`                                                               | Required MongoDB connection string; use the existing Atlas URI if that is the configured database |
+| `DB_NAME`                                                              | Optional database-name override                                                                   |
+| `JWT_SECRET`, `JWT_REFRESH_SECRET`                                     | Authentication signing secrets                                                                    |
+| `FRONTEND_URL`                                                         | Frontend origin used in email/reset links; set to `https://vegbazar.store`                        |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_SECRET`                                   | Razorpay integration                                                                              |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Cloudinary integration                                                                            |
+| `EMAIL_USER`, `EMAIL_PASS`, `ADMIN_EMAIL`                              | Email and administrative notifications                                                            |
+| `SMTP_HOST`, `SMTP_PORT`                                               | SMTP settings; code has a host/port fallback                                                      |
+| `MAILER_MAIL`, `MAILER_PASSWORD`                                       | OTP mailer integration                                                                            |
+| `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `GOOGLE_CLIENT_ID`                   | Existing Auth0/Google authentication configuration                                                |
+| `GROQ_API_KEY`, `GROQ_MODEL`                                           | AI assistant; the model has an application fallback                                               |
+| `RECAPTCHA_SECRET_KEY`                                                 | CAPTCHA verification                                                                              |
+| `REDIS_URL`                                                            | Optional Redis integration                                                                        |
+| `USER_DOMAIN`, `ADMIN_DOMAIN`, `ADMIN_SECRET_KEY`                      | Existing account-domain/admin options; the domains have application fallbacks                     |
 
 Only the variables required by the enabled application features need values. Compose sets `NODE_ENV=production` and `PORT=4000`; do not rely on a differing `PORT` from the external file. Use valid Compose env-file quoting if a value contains whitespace, `#`, or `$`, and verify it is parsed as intended. Ensure the final file is owned by the deployment user and mode `0600`.
 
