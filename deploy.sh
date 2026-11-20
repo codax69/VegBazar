@@ -134,6 +134,8 @@ deploy_component() {
     ! compose pull "$SERVICE" ||
     ! compose up -d --wait --wait-timeout 90 "$SERVICE" ||
     ! wait_for_health; then
+    echo "=== Recent $SERVICE container logs ===" >&2
+    compose logs --tail 50 "$SERVICE" >&2 || true
     echo "Deployment failed; restoring the previous $SERVICE image tag." >&2
     if [[ "$old_tag" == "0000000000000000000000000000000000000000" ]]; then
       echo "No previous release exists to restore (initial deployment failed)." >&2

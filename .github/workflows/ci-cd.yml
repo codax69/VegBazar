@@ -133,7 +133,12 @@ jobs:
           )
           destination="$VPS_USER@$VPS_HOST"
           ssh "${ssh_options[@]}" "$destination" \
-            "mkdir -p /opt/apps/vegbazar/frontend"
+            "mkdir -p /opt/apps/vegbazar/frontend 2>/dev/null || true
+             if [ ! -w /opt/apps/vegbazar/frontend ]; then
+               echo '::error::Permission denied: $VPS_USER cannot write to /opt/apps/vegbazar/frontend. Fix on VPS by running: sudo chown -R $VPS_USER:$VPS_USER /opt/apps/vegbazar' >&2
+               exit 1
+             fi
+             rm -f /opt/apps/vegbazar/frontend/docker-compose.yml /opt/apps/vegbazar/frontend/deploy.sh 2>/dev/null || true"
           scp "${scp_options[@]}" docker-compose.yml deploy.sh \
             "$destination:/opt/apps/vegbazar/frontend/"
           ssh "${ssh_options[@]}" "$destination" \
