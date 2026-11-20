@@ -45,24 +45,30 @@ Create the deployment directory and persistent writable paths. The Node image ru
 
 ```bash
 sudo install -d -o vegbazar-deploy -g vegbazar-deploy -m 0750 /opt/apps/vegbazar
+sudo install -d -o vegbazar-deploy -g vegbazar-deploy -m 0750 /opt/apps/vegbazar/frontend
+sudo install -d -o vegbazar-deploy -g vegbazar-deploy -m 0750 /opt/apps/vegbazar/backend
 sudo install -d -o 1000 -g 1000 -m 0750 \
-  /opt/apps/vegbazar/data/invoices \
-  /opt/apps/vegbazar/data/uploads \
-  /opt/apps/vegbazar/data/reports
+  /opt/apps/vegbazar/backend/data/invoices \
+  /opt/apps/vegbazar/backend/data/uploads \
+  /opt/apps/vegbazar/backend/data/reports
 ```
 
-The workflows automatically copy the current Compose file and deployment script from the frontend repository to this directory before each deployment. The backend workflow checks out only those two deployment files; if the frontend repository is private, add a fine-grained `DEPLOYMENT_REPO_TOKEN` secret to the backend repository with read-only Contents access to `codax69/VegBazar`. Do not copy application source or Docker build dependencies to the VPS.
+Each repository now deploys completely independently:
+- Frontend (`VegBazar`) deploys to `/opt/apps/vegbazar/frontend/` (port `8085`)
+- Backend (`VegBazar_Backend`) deploys to `/opt/apps/vegbazar/backend/` (port `4041`)
 
-Install the Nginx template manually:
+Install the separate Nginx templates manually:
 
 ```bash
 # Run locally from the VegBazar frontend repository.
-scp deploy/nginx/vegbazar.conf "$VPS_USER@$VPS_HOST:/tmp/vegbazar.conf"
+scp deploy/nginx/vegbazar-frontend.conf "$VPS_USER@$VPS_HOST:/tmp/vegbazar-frontend.conf"
+scp deploy/nginx/vegbazar-backend.conf "$VPS_USER@$VPS_HOST:/tmp/vegbazar-backend.conf"
 
 # Run on the VPS.
-chmod 750 /opt/apps/vegbazar
-sudo install -m 0644 /tmp/vegbazar.conf /etc/nginx/sites-available/vegbazar.conf
-sudo ln -s /etc/nginx/sites-available/vegbazar.conf /etc/nginx/sites-enabled/vegbazar.conf
+sudo install -m 0644 /tmp/vegbazar-frontend.conf /etc/nginx/sites-available/vegbazar-frontend.conf
+sudo install -m 0644 /tmp/vegbazar-backend.conf /etc/nginx/sites-available/vegbazar-backend.conf
+sudo ln -sf /etc/nginx/sites-available/vegbazar-frontend.conf /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/vegbazar-backend.conf /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```

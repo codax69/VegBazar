@@ -11,7 +11,9 @@ COPY public ./public
 COPY src ./src
 
 ARG VITE_RAZORPAY_KEY_ID
+ARG VITE_API_URL
 ENV VITE_RAZORPAY_KEY_ID=${VITE_RAZORPAY_KEY_ID}
+ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
 FROM nginx:alpine AS runtime
